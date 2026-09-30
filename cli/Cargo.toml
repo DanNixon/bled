@@ -1,0 +1,24 @@
+[package]
+name = "bled-cli"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lints.rust]
+unused_crate_dependencies = "deny"
+
+[[bin]]
+name = "bled-cli"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+bled-api = { path = "../api" }
+btleplug = "0.13"
+clap = { version = "4", features = ["derive"] }
+env_logger = "0.11"
+futures = "0.3"
+log = "0.4"
+rustyline = { version = "18.0.1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+uuid = { version = "1", features = ["v4"] }

@@ -1,0 +1,11 @@
+Comment,Designator,Footprint,LCSC
+TestPoint,"TP1,TP2,TP3,TP4,TP5,TP6,TP7,TP8,TP9,TP10",TestPoint:TestPoint_Pad_2.5x2.5mm,
+100nF,"C1,C2,C3,C4,C5",Capacitor_SMD:C_0201_0603Metric,C49062
+TestPoint,"TP11,TP12,TP13,TP14",TestPoint:TestPoint_Pad_D2.0mm,
+SW_Push,"SW1,SW2,SW3,SW4",bled:TVAU10-025B-R,C19271014
+D_Schottky,"D1,D2",Diode_SMD:D_SMA,C8678
+47k,"R1,R2,R3,R4",Resistor_SMD:R_0201_0603Metric,C304547
+XL-1615RGBC-WS2812B,"D3,D4,D5,D6",bled:XL-1615RGBC-2812B,C5349954
+10uF,C6,Capacitor_SMD:C_0402_1005Metric,C15525
+RaspberryPi_Pico_W,A1,Module:RaspberryPi_Pico_Common_SMD,
+TF-15X15,J1,TF15X15,C111196

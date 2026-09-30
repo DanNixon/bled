@@ -1,0 +1,66 @@
+[package]
+name = "bled"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lints.rust]
+unused_crate_dependencies = "deny"
+
+[[bin]]
+name = "bled"
+test = false
+bench = false
+
+[features]
+default = ["picow"]
+picow = ["embassy-rp/rp2040"]
+pico2w = ["embassy-rp/rp235xa"]
+
+[dependencies]
+aligned = "0.4.2"
+assign-resources = "0.5.0"
+bled-api = { path = "../api", features = ["defmt"] }
+bt-hci = "0.10.1"
+cortex-m-rt = "0.7.3"
+cyw43 = { version = "0.7.0", features = ["defmt", "firmware-logs", "bluetooth"] }
+cyw43-pio = { version = "0.10.0", features = ["defmt"] }
+defmt = "1.0.1"
+defmt-rtt = "1.0.0"
+embassy-executor = { version = "0.10.0", features = ["platform-cortex-m", "executor-thread", "defmt"] }
+embassy-futures = "0.1.2"
+embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl"] }
+embassy-sync = "0.8.0"
+embassy-time = { version = "0.5.0", features = ["defmt"] }
+embedded-hal-bus = "0.3.0"
+embedded-sdmmc = { version = "0.10.0", default-features = false, features = ["defmt-log"] }
+exfat-slim = { version = "0.7.0", default-features = false, features = ["defmt"] }
+exfat-embedded = "0.1.3"
+getset = "0.1.7"
+git-version = "0.3.9"
+heapless = "0.9.3"
+mbr-nostd = "0.1"
+panic-probe = { version = "1.0.0", features = ["print-defmt"] }
+portable-atomic = { version = "1.10.0", default-features = false, features = ["critical-section"] }
+smart-leds = "0.4.0"
+static_cell = "2.1.0"
+trouble-host = { version = "0.8.0", features = ["defmt", "scan", "gatt", "derive", "security"] }
+
+[patch.crates-io]
+cyw43 = { version = "0.7.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+cyw43-pio = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+embassy-rp = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+embassy-sync = { version = "0.8.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+embassy-executor = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+embassy-time = { version = "0.5.1", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+trouble-host = { git = "https://github.com/embassy-rs/trouble.git", rev = "2e4432b0fa4ec66a02c0e767145e2757c1bcd243"}
+
+[profile.release]
+debug = 2
+lto = true
+opt-level = "s"
+
+[profile.dev]
+debug = 2
+lto = true
+opt-level = "s"

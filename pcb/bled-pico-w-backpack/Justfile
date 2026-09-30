@@ -1,0 +1,9 @@
+default: fab
+
+fab:
+    kikit fab \
+        jlcpcb \
+        --assembly \
+        --schematic ./bled-pico-w-backpack.kicad_sch \
+        ./bled-pico-w-backpack.kicad_pcb \
+        ./fab

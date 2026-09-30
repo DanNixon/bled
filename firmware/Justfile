@@ -1,0 +1,27 @@
+default: build-picow build-pico2w
+
+build-picow:
+    cargo build --release --target thumbv6m-none-eabi --no-default-features --features picow
+    elf2uf2-rs ./target/thumbv6m-none-eabi/release/bled ./target/thumbv6m-none-eabi/release/bled.uf2
+    size ./target/thumbv6m-none-eabi/release/bled
+
+build-pico2w:
+    cargo build --release --target thumbv8m.main-none-eabihf --no-default-features --features pico2w
+    elf2uf2-rs ./target/thumbv8m.main-none-eabihf/release/bled ./target/thumbv8m.main-none-eabihf/release/bled.uf2
+    size ./target/thumbv8m.main-none-eabihf/release/bled
+
+run-picow: build-picow
+    probe-rs run --chip RP2040 ./target/thumbv6m-none-eabi/release/bled
+
+run-pico2w: build-pico2w
+    probe-rs run --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+
+attach-picow:
+    probe-rs attach --chip RP2040 ./target/thumbv6m-none-eabi/release/bled
+
+attach-pico2w:
+    probe-rs attach --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+
+clippy:
+    cargo clippy --release --target thumbv6m-none-eabi --no-default-features --features picow
+    cargo clippy --release --target thumbv8m.main-none-eabihf --no-default-features --features pico2w
