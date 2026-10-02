@@ -12,6 +12,11 @@ pub const DEVICE_INFO_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000120")
 /// Reset device GATT characteristic UUID (write-only).
 pub const RESET_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000121");
 
+/// Config control GATT characteristic UUID (write-only).
+pub const CONFIG_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000122");
+/// Config data GATT characteristic UUID (read).
+pub const CONFIG_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000123");
+
 /// File IO control GATT characteristic UUID (write-only).
 pub const FILE_IO_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000130");
 /// File IO data GATT characteristic UUID (read/write).

@@ -1,6 +1,6 @@
 //! LED raw buffer API
 //!
-//! Allows reading and writing of LED raw buffer data over BLE GATT.
+//! Allows reading and writing of LED raw buffer data.
 //!
 //! ## Reading
 //!

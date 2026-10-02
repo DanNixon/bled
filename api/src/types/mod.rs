@@ -3,6 +3,7 @@
 mod channel_mask;
 mod channel_range;
 mod config;
+mod config_control;
 mod device_info;
 mod file_io_control;
 mod led_buffer_control;
@@ -11,6 +12,7 @@ mod pixel;
 pub use channel_mask::*;
 pub use channel_range::*;
 pub use config::*;
+pub use config_control::*;
 pub use device_info::*;
 pub use file_io_control::*;
 pub use led_buffer_control::*;

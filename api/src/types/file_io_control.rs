@@ -1,6 +1,6 @@
 //! File IO API
 //!
-//! Allows basic filesystem operations over BLE GATT.
+//! Allows basic filesystem operations.
 //!
 //! ## Stat a file
 //!

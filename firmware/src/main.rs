@@ -107,7 +107,7 @@ async fn main(spawner: Spawner) {
     spawner.spawn(unwrap!(wireless::ble::task(
         bt,
         bt_address,
-        config.name,
+        config.clone(),
         sd.clone()
     )));
 
