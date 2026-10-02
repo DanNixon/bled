@@ -118,3 +118,42 @@ jobs:
           set -x
           cd ./web
           nix develop --command just
+
+  web-deploy:
+    name: Deploy web UI
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs:
+      - web
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: DeterminateSystems/nix-installer-action@v23
+
+      - name: Build
+        run: |
+          set -x
+          cd ./web
+          nix develop --command just
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./web/app
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
