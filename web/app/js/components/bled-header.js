@@ -10,7 +10,7 @@ export class BledHeader extends HTMLElement {
       <header>
         <div class="title-group">
           <h1>BLED</h1>
-          <p>Configuration and control of BLED Bluetooth LED controllers [<a href="https://github.com/DanNixon/bled">GitHub</a>]</p>
+          <p>Configuration and control of BLED Bluetooth LED controllers [<a href="https://github.com/DanNixon/bled">GitHub</a>]<span id="gitRevContainer"></span></p>
         </div>
         <div class="conn-group">
           <button id="btnConnect" class="btn btn-primary">Connect device</button>
@@ -26,6 +26,11 @@ export class BledHeader extends HTMLElement {
     this.btnConnect = this.querySelector('#btnConnect');
     this.btnMock = this.querySelector('#btnMock');
     this.noBleAlert = this.querySelector('#noBleAlert');
+    this.gitRevContainer = this.querySelector('#gitRevContainer');
+
+    if (this._revision) {
+      this._renderRevision();
+    }
 
     if (!devices.isSupported) {
       this.noBleAlert.style.display = 'block';
@@ -54,6 +59,19 @@ export class BledHeader extends HTMLElement {
         }
       };
     }
+  }
+
+  setGitRevision(revision) {
+    this._revision = revision;
+    if (this.gitRevContainer) {
+      this._renderRevision();
+    }
+  }
+
+  _renderRevision() {
+    if (!this.gitRevContainer || !this._revision) return;
+    const cleanRev = this._revision.replace(/-modified$/, '');
+    this.gitRevContainer.innerHTML = ` [<a href="https://github.com/DanNixon/bled/tree/${encodeURIComponent(cleanRev)}">${this._revision}</a>]`;
   }
 }
 

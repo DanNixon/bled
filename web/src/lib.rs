@@ -132,6 +132,12 @@ pub fn max_path_len() -> usize {
     bled_api::MAX_PATH_LEN
 }
 
+/// Git revision of the build.
+#[wasm_bindgen]
+pub fn git_revision() -> String {
+    git_version::git_version!().to_string()
+}
+
 // ---------------------------------------------------------------------------
 // Pure Rust Core Logic
 // ---------------------------------------------------------------------------
@@ -645,6 +651,7 @@ mod tests {
             bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN
         );
         assert_eq!(max_path_len(), bled_api::MAX_PATH_LEN);
+        assert!(!git_revision().is_empty());
     }
 
     #[test]

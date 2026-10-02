@@ -12,6 +12,7 @@ try {
   await init();
   log("WebAssembly protocol runtime loaded successfully.", 'success');
   log(`Service UUID: ${bled.service_uuid()}`);
+  document.querySelector('bled-header')?.setGitRevision(bled.git_revision());
 } catch (e) {
   log(`Failed to initialize WebAssembly: ${e}`, 'error');
 }
