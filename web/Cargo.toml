@@ -12,6 +12,7 @@ unused_crate_dependencies = "deny"
 
 [dependencies]
 bled-api = { path = "../api" }
+git-version = "0.3.9"
 heapless = { version = "0.9", features = ["serde"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_bytes = "0.11"
