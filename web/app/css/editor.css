@@ -1,0 +1,53 @@
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.editor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: var(--code-bg);
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+
+.editor-meta-tags {
+  display: flex;
+  gap: 0.75rem;
+}
+
+textarea.code-editor {
+  width: 100%;
+  height: 260px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  background: var(--code-bg);
+  color: #38bdf8;
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+pre.hex-editor {
+  width: 100%;
+  height: 260px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  background: var(--code-bg);
+  color: #a5f3fc;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  overflow: auto;
+  white-space: pre;
+}
