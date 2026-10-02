@@ -1,5 +1,6 @@
 use crate::{
     api_transport::{
+        config::{ConfigMode, ConfigSession},
         file_io::{FileIoMode, FileIoSession},
         led_buffer::{LedBufferMode, LedBufferSession},
     },
@@ -7,11 +8,12 @@ use crate::{
     sdcard::SdCardStorage,
 };
 use bled_api::{
-    ChannelMask, ChannelRanges, FileIoControl, LedBufferControl, PixelRanges, RGB8, Rgb8Ranges,
+    ChannelMask, ChannelRanges, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
+    PixelRanges, RGB8, Rgb8Ranges,
     ble::{
-        COMMIT_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID, FILE_IO_DATA_UUID,
-        LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, LED_RANGE_UUID, MAX_ATTRIBUTE_VALUE_LEN,
-        RESET_UUID, SERVICE_UUID,
+        COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
+        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, LED_RANGE_UUID,
+        MAX_ATTRIBUTE_VALUE_LEN, RESET_UUID, SERVICE_UUID,
     },
 };
 use defmt::{debug, error, info, warn};
@@ -34,6 +36,12 @@ pub(super) struct LedService {
 
     #[characteristic(uuid = RESET_UUID.as_u128(), write)]
     reset: (),
+
+    #[characteristic(uuid = CONFIG_CONTROL_UUID.as_u128(), write)]
+    config_control: (),
+
+    #[characteristic(uuid = CONFIG_DATA_UUID.as_u128(), read)]
+    config_data: (),
 
     #[characteristic(uuid = FILE_IO_CONTROL_UUID.as_u128(), write)]
     file_io_control: (),
@@ -62,9 +70,11 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
     sd: SdCardStorage,
+    config: &DeviceConfig,
 ) {
     let mut file_io = FileIoSession::new(sd);
     let mut led_buffer = LedBufferSession::new();
+    let mut config = ConfigSession::new(config);
 
     let reason = loop {
         match conn.next().await {
@@ -74,6 +84,8 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                     GattEvent::Read(event) => {
                         if event.handle() == server.led_service.device_info.handle {
                             process_device_info(event).await
+                        } else if event.handle() == server.led_service.config_data.handle {
+                            process_config_data_read(event, &mut config).await
                         } else if event.handle() == server.led_service.file_io_data.handle {
                             process_file_io_data_read(event, &mut file_io).await
                         } else if event.handle() == server.led_service.led_buffer_data.handle {
@@ -85,6 +97,8 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                     GattEvent::Write(event) => {
                         if event.handle() == server.led_service.reset.handle {
                             process_reset(event).await
+                        } else if event.handle() == server.led_service.config_control.handle {
+                            process_config_control_write(event, &mut config).await
                         } else if event.handle() == server.led_service.file_io_control.handle {
                             process_file_io_control_write(event, &mut file_io).await
                         } else if event.handle() == server.led_service.file_io_data.handle {
@@ -114,7 +128,81 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     };
 
     file_io.reset().await;
+    config.reset();
     info!("Disconnected: {:?}", reason);
+}
+
+async fn process_config_data_read<'config, 'stack, P: PacketPool>(
+    event: ReadEvent<'stack, '_, P>,
+    config: &mut ConfigSession<'config>,
+) -> Result<Reply<'stack, P>, Error> {
+    match config.mode() {
+        ConfigMode::Stat { response } => {
+            let mut buf = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
+            let n = bled_api::io::encode_cbor(response, &mut buf)
+                .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
+            event.accept_unprocessed(&buf[..n])
+        }
+        ConfigMode::Reading { .. } => {
+            let mut chunk = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
+            match config.read_chunk(&mut chunk) {
+                Ok(n) => event.accept_unprocessed(&chunk[..n]),
+                Err(e) => {
+                    warn!("Failed to read config chunk: {:?}", e);
+                    event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
+                }
+            }
+        }
+        _ => {
+            error!("not in correct state");
+            event.reject(AttErrorCode::READ_NOT_PERMITTED)
+        }
+    }
+}
+
+async fn process_config_control_write<'config, 'stack, P: PacketPool>(
+    event: WriteEvent<'stack, '_, P>,
+    config: &mut ConfigSession<'config>,
+) -> Result<Reply<'stack, P>, Error> {
+    let control: ConfigControl = match event.with_data(|offset, data| {
+        if offset != 0 {
+            return Err(AttErrorCode::INVALID_OFFSET);
+        }
+        bled_api::io::decode_cbor::<ConfigControl>(data)
+            .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
+    }) {
+        Ok(cmd) => cmd,
+        Err(err) => return event.reject(err),
+    };
+    info!("Config control message: {:?}", control);
+
+    match control {
+        ConfigControl::Stat => match config.prepare_stat() {
+            Ok(()) => {
+                debug!("Prepared to stat config");
+                event.accept_unprocessed()
+            }
+            Err(e) => {
+                warn!("Failed to prepare stat config: {}", e);
+                event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
+            }
+        },
+        ConfigControl::Read { offset } => match config.prepare_read(offset as usize) {
+            Ok(()) => {
+                debug!("Prepared to read config");
+                event.accept_unprocessed()
+            }
+            Err(e) => {
+                warn!("Failed to prepare reading config: {}", e);
+                event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
+            }
+        },
+        ConfigControl::Reset => {
+            config.reset();
+            debug!("Reset config state machine");
+            event.accept_unprocessed()
+        }
+    }
 }
 
 async fn process_device_info<'stack, P: PacketPool>(

@@ -21,8 +21,9 @@ export class MockBleDevice extends BleDevice {
     this.bootTime = Date.now();
     this.buffer = new Uint8Array(0);
     this.files = new Map();
+    this.activeConfig = null;
     if (raw.mockIndex % 2 === 1) {
-      this.files.set('/config.json', configJson(`Mock ${raw.mockIndex}`, [
+      const cfg = configJson(`Mock ${raw.mockIndex}`, [
         { name: 'Roof', sections: [
           section('Left', 0, linear(10)),
           section('Right', 10, linear(14)),
@@ -33,7 +34,9 @@ export class MockBleDevice extends BleDevice {
           section('Spare', 31, { Inop: { length: 4 } }),
         ]},
         { name: 'Empty', sections: [] },
-      ]));
+      ]);
+      this.files.set('/config.json', cfg);
+      this.activeConfig = cfg;
     }
   }
 
@@ -54,6 +57,17 @@ export class MockBleDevice extends BleDevice {
   async rebootDevice() {
     this._log('Mock reboot.', 'success');
     this._handleDisconnected();
+  }
+
+  async statConfig() {
+    if (!this.activeConfig) throw new Error("config not found");
+    return { size: this.activeConfig.length };
+  }
+
+  async readConfig(onProgress = null) {
+    if (!this.activeConfig) throw new Error("config not found");
+    onProgress?.(100);
+    return this.activeConfig.slice();
   }
 
   async statFile(path) {

@@ -1,4 +1,3 @@
-import { CONFIG_PATH } from '../services/ble.js';
 import { log } from '../services/logger.js';
 import { formatUptime } from '../utils/formatters.js';
 
@@ -62,7 +61,7 @@ export class BledDeviceInfo extends HTMLElement {
     if (device.configError) {
       this.configWarning.style.display = 'block';
       this.configWarning.textContent =
-        `Could not read ${CONFIG_PATH}: ${device.configError}. No channels are available until it can be read.`;
+        `Could not read active config: ${device.configError}. No channels are available until it can be read.`;
     } else {
       this.configWarning.style.display = 'none';
     }

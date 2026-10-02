@@ -115,6 +115,8 @@ export class BleDevice extends EventTarget {
 
       this.chars.info          = await service.getCharacteristic(bled.device_info_uuid());
       this.chars.reset         = await service.getCharacteristic(bled.reset_uuid());
+      this.chars.configControl = await service.getCharacteristic(bled.config_control_uuid());
+      this.chars.configData    = await service.getCharacteristic(bled.config_data_uuid());
       this.chars.commit        = await service.getCharacteristic(bled.commit_uuid());
       this.chars.range         = await service.getCharacteristic(bled.led_range_uuid());
       this.chars.bufferControl = await service.getCharacteristic(bled.led_buffer_control_uuid());
@@ -160,7 +162,7 @@ export class BleDevice extends EventTarget {
     this.config = null;
     this.configError = null;
     try {
-      const bytes = await this.readFile(CONFIG_PATH);
+      const bytes = await this.readConfig();
       this.config = normaliseConfig(bled.decode_device_config(bytes));
       this._log(
         `Loaded config "${this.config.name}" with ${this.config.channels.length} channel(s).`,
@@ -169,7 +171,7 @@ export class BleDevice extends EventTarget {
     } catch (err) {
       this.config = null;
       this.configError = err?.message ?? String(err);
-      this._log(`Could not read ${CONFIG_PATH}: ${this.configError}`, 'error');
+      this._log(`Could not read active config: ${this.configError}`, 'error');
     }
     this.dispatchEvent(new CustomEvent('config'));
   }
@@ -190,6 +192,65 @@ export class BleDevice extends EventTarget {
     await this.chars.reset.writeValueWithResponse(new Uint8Array([]));
     this._log("Reboot command sent.", 'success');
     this._handleDisconnected();
+  }
+
+  // --- Config ---
+
+  async statConfig() {
+    this._log("Querying active config stat...");
+    try {
+      const statCmd = bled.encode_config_stat();
+      await this.chars.configControl.writeValueWithResponse(statCmd);
+
+      const dataView = await this.chars.configData.readValue();
+      await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset());
+
+      const stat = bled.decode_config_stat(new Uint8Array(dataView.buffer));
+      this._log(`Active config stat: size = ${stat.size} bytes`, 'success');
+      return stat;
+    } catch (err) {
+      try { await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset()); } catch (_) {}
+      throw err;
+    }
+  }
+
+  async readConfig(onProgress = null) {
+    this._log("Reading active config from device...");
+    try {
+      const stat = await this.statConfig();
+      const totalSize = stat.size;
+      let offset = 0;
+      const chunks = [];
+
+      while (offset < totalSize) {
+        const readCmd = bled.encode_config_read(offset);
+        await this.chars.configControl.writeValueWithResponse(readCmd);
+
+        const dataView = await this.chars.configData.readValue();
+        const bytes = new Uint8Array(dataView.buffer);
+        if (bytes.length === 0) break;
+
+        chunks.push(bytes);
+        offset += bytes.length;
+        if (onProgress) onProgress(Math.min(100, Math.round((offset / totalSize) * 100)));
+      }
+
+      await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset());
+
+      const combined = new Uint8Array(offset);
+      let ptr = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, ptr);
+        ptr += chunk.length;
+      }
+
+      if (onProgress) onProgress(100);
+      this._log(`Successfully read active config (${combined.length} bytes) from device.`, 'success');
+      return combined;
+    } catch (err) {
+      try { await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset()); } catch (_) {}
+      throw err;
+    }
   }
 
   // --- File I/O ---

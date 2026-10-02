@@ -92,6 +92,24 @@ pub enum DeviceAction {
 
     /// Reset the connected device.
     Reset,
+
+    /// Active configuration operations on the connected device.
+    Config {
+        #[command(subcommand)]
+        action: ConfigAction,
+    },
+}
+
+#[derive(Subcommand, Debug, PartialEq)]
+pub enum ConfigAction {
+    /// Stat the active configuration on the connected device.
+    Stat,
+
+    /// Read the active configuration from the connected device.
+    Read {
+        /// Local file path to write to (prints to terminal as JSON if omitted).
+        local_path: Option<PathBuf>,
+    },
 }
 
 #[derive(Subcommand, Debug, PartialEq)]
@@ -206,6 +224,12 @@ pub const COMMAND_NAMES: &[&str] = &[
 /// Subcommands for the `buffer` command, for tab completion.
 pub const BUFFER_SUBCOMMAND_NAMES: &[&str] = &["info", "read", "write"];
 
+/// Subcommands for the `device` command, for tab completion.
+pub const DEVICE_SUBCOMMAND_NAMES: &[&str] = &["info", "reset", "config"];
+
+/// Subcommands for the `device config` command, for tab completion.
+pub const CONFIG_SUBCOMMAND_NAMES: &[&str] = &["stat", "read"];
+
 /// Subcommands for the `file` command, for tab completion.
 pub const FILE_SUBCOMMAND_NAMES: &[&str] = &["read", "write", "delete", "stat"];
 
@@ -281,6 +305,9 @@ mod tests {
             "commit",
             "commit 8",
             "commit 1 8 3",
+            "device unknown",
+            "device config",
+            "device config unknown",
             "buffer",
             "buffer unknown",
             "buffer write",
@@ -410,6 +437,48 @@ mod tests {
                 action: BufferAction::Write {
                     local_path: PathBuf::from("in.bin"),
                     offset: 42,
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn device_commands_parse() {
+        assert_eq!(
+            parse_command("device info").unwrap(),
+            ShellCommand::Device {
+                action: DeviceAction::Info
+            }
+        );
+        assert_eq!(
+            parse_command("device reset").unwrap(),
+            ShellCommand::Device {
+                action: DeviceAction::Reset
+            }
+        );
+        assert_eq!(
+            parse_command("device config stat").unwrap(),
+            ShellCommand::Device {
+                action: DeviceAction::Config {
+                    action: ConfigAction::Stat,
+                }
+            }
+        );
+        assert_eq!(
+            parse_command("device config read").unwrap(),
+            ShellCommand::Device {
+                action: DeviceAction::Config {
+                    action: ConfigAction::Read { local_path: None },
+                }
+            }
+        );
+        assert_eq!(
+            parse_command("device config read out.json").unwrap(),
+            ShellCommand::Device {
+                action: DeviceAction::Config {
+                    action: ConfigAction::Read {
+                        local_path: Some(PathBuf::from("out.json")),
+                    },
                 }
             }
         );

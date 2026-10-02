@@ -2,12 +2,12 @@
 
 use anyhow::{Context, Result, anyhow, bail};
 use bled_api::{
-    ChannelMask, ChannelRanges, DeviceInfo, FileIoControl, FileStatResponse, LedBufferControl,
-    LedBufferInformation, MAX_PATH_LEN, RGB8, Rgb8Ranges,
+    ChannelMask, ChannelRanges, ConfigControl, ConfigStatResponse, DeviceInfo, FileIoControl,
+    FileStatResponse, LedBufferControl, LedBufferInformation, MAX_PATH_LEN, RGB8, Rgb8Ranges,
     ble::{
-        COMMIT_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID, FILE_IO_DATA_UUID,
-        LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, LED_RANGE_UUID, MAX_ATTRIBUTE_VALUE_LEN,
-        RESET_UUID, SERVICE_UUID,
+        COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
+        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, LED_RANGE_UUID,
+        MAX_ATTRIBUTE_VALUE_LEN, RESET_UUID, SERVICE_UUID,
     },
 };
 use btleplug::{
@@ -205,6 +205,11 @@ pub struct BledService {
     /// Reset (`WRITE`): reboots the device.
     pub reset: Characteristic,
 
+    /// Config Control (`WRITE`): active config commands.
+    pub config_control: Characteristic,
+    /// Config Data (`READ`): active config data transfers.
+    pub config_data: Characteristic,
+
     /// File IO Control (`WRITE`): filesystem commands.
     pub file_io_control: Characteristic,
     /// File IO Data (`READ`, `WRITE`): file data transfers.
@@ -243,6 +248,9 @@ pub fn find_service(characteristics: &BTreeSet<Characteristic>) -> Result<BledSe
     let device_info = find(DEVICE_INFO_UUID, CharPropFlags::READ)?;
     let reset = find(RESET_UUID, CharPropFlags::WRITE)?;
 
+    let config_control = find(CONFIG_CONTROL_UUID, CharPropFlags::WRITE)?;
+    let config_data = find(CONFIG_DATA_UUID, CharPropFlags::READ)?;
+
     let file_io_control = find(FILE_IO_CONTROL_UUID, CharPropFlags::WRITE)?;
     let file_io_data = find(
         FILE_IO_DATA_UUID,
@@ -260,6 +268,8 @@ pub fn find_service(characteristics: &BTreeSet<Characteristic>) -> Result<BledSe
     Ok(BledService {
         device_info,
         reset,
+        config_control,
+        config_data,
         file_io_control,
         file_io_data,
         commit,
@@ -288,6 +298,94 @@ pub async fn reset(peripheral: &Peripheral, characteristic: &Characteristic) -> 
         .write(characteristic, &[], WriteType::WithResponse)
         .await
         .context("writing reset request")
+}
+
+/// Sends a control command to the Config Control characteristic.
+pub async fn send_config_control(
+    peripheral: &Peripheral,
+    characteristic: &Characteristic,
+    command: &ConfigControl,
+) -> Result<()> {
+    let mut buffer = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let written = bled_api::io::encode_cbor(command, &mut buffer)
+        .map_err(|error| anyhow!("encoding Config control command: {error}"))?;
+    peripheral
+        .write(characteristic, &buffer[..written], WriteType::WithResponse)
+        .await
+        .context("writing Config control command")
+}
+
+/// Stats active device configuration.
+pub async fn stat_config(
+    peripheral: &Peripheral,
+    control: &Characteristic,
+    data: &Characteristic,
+) -> Result<ConfigStatResponse> {
+    send_config_control(peripheral, control, &ConfigControl::Stat)
+        .await
+        .context("preparing to stat active config")?;
+
+    let bytes = match peripheral.read(data).await {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
+            return Err(error).context("reading config stat data");
+        }
+    };
+
+    let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
+
+    bled_api::io::decode_cbor(&bytes)
+        .map_err(|error| anyhow!("decoding config stat response: {error}"))
+}
+
+/// Reads the active device configuration from the connected device.
+pub async fn read_config(
+    peripheral: &Peripheral,
+    control: &Characteristic,
+    data: &Characteristic,
+) -> Result<Vec<u8>> {
+    let stat = stat_config(peripheral, control, data).await?;
+    let total_size = usize::try_from(*stat.size())?;
+    let mut contents = Vec::with_capacity(total_size);
+    while contents.len() < total_size {
+        if let Err(error) = send_config_control(
+            peripheral,
+            control,
+            &ConfigControl::Read {
+                offset: u32::try_from(contents.len())?,
+            },
+        )
+        .await
+        {
+            let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
+            return Err(error).with_context(|| {
+                format!(
+                    "preparing to read chunk from config at offset {}",
+                    contents.len()
+                )
+            });
+        }
+
+        let chunk = match peripheral.read(data).await {
+            Ok(chunk) => chunk,
+            Err(error) => {
+                let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
+                return Err(error).context("reading chunk from config");
+            }
+        };
+
+        if chunk.is_empty() {
+            break;
+        }
+        contents.extend_from_slice(&chunk);
+    }
+
+    if let Err(error) = send_config_control(peripheral, control, &ConfigControl::Reset).await {
+        log::debug!("could not reset config state machine after reading: {error}");
+    }
+
+    Ok(contents)
 }
 
 /// Stages one solid-colour pixel range without rendering it.

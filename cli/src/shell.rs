@@ -1,10 +1,13 @@
 use crate::{
-    cli::{BufferAction, ConnectTarget, DeviceAction, FileAction, ShellCommand, parse_command},
+    cli::{
+        BufferAction, ConfigAction, ConnectTarget, DeviceAction, FileAction, ShellCommand,
+        parse_command,
+    },
     device::{self, BledService, Candidate, DeviceIdentity},
     prompt::Prompt,
 };
 use anyhow::{Context, Result, anyhow, bail};
-use bled_api::{DeviceInfo, RGB8};
+use bled_api::{DeviceConfig, DeviceInfo, RGB8};
 use btleplug::{api::Peripheral as _, platform::Adapter};
 use std::{path::Path, time::Duration};
 
@@ -83,6 +86,12 @@ impl Shell {
             ShellCommand::Device { action } => match action {
                 DeviceAction::Info => self.device_info().await?,
                 DeviceAction::Reset => self.reset().await?,
+                DeviceAction::Config { action } => match action {
+                    ConfigAction::Stat => self.device_config_stat().await?,
+                    ConfigAction::Read { local_path } => {
+                        self.device_config_read(local_path.as_deref()).await?;
+                    }
+                },
             },
             ShellCommand::File { action } => match action {
                 FileAction::Read {
@@ -230,6 +239,76 @@ impl Shell {
             .with_context(|| label.clone())?;
         self.connected = None;
         println!("reset requested for {label}");
+        Ok(())
+    }
+
+    async fn device_config_stat(&mut self) -> Result<()> {
+        let connection = self.active_connection().await?;
+        let stat = device::stat_config(
+            &connection.candidate.peripheral,
+            &connection.service.config_control,
+            &connection.service.config_data,
+        )
+        .await
+        .with_context(|| connection.candidate.label())?;
+
+        println!("active config: {} bytes", stat.size());
+        Ok(())
+    }
+
+    async fn device_config_read(&mut self, local_path: Option<&Path>) -> Result<()> {
+        let connection = self.active_connection().await?;
+        let data = device::read_config(
+            &connection.candidate.peripheral,
+            &connection.service.config_control,
+            &connection.service.config_data,
+        )
+        .await
+        .with_context(|| connection.candidate.label())?;
+
+        match bled_api::io::decode_cbor::<DeviceConfig>(&data) {
+            Ok(config) => {
+                let mut json_buf = [0u8; 4096];
+                let len = bled_api::io::encode_json(&config, &mut json_buf)
+                    .map_err(|error| anyhow!("encoding device config as JSON: {error}"))?;
+                let json_bytes = &json_buf[..len];
+                match local_path {
+                    Some(path) => {
+                        let bytes_to_write =
+                            if path.extension().and_then(|s| s.to_str()) == Some("cbor") {
+                                &data[..]
+                            } else {
+                                json_bytes
+                            };
+                        std::fs::write(path, bytes_to_write)
+                            .with_context(|| format!("writing to local file {}", path.display()))?;
+                        println!("read {} bytes of config to {}", data.len(), path.display());
+                    }
+                    None => match std::str::from_utf8(json_bytes) {
+                        Ok(text) => println!("{text}"),
+                        Err(_) => {
+                            println!(
+                                "<{} bytes of config data; specify a local path to save>",
+                                data.len()
+                            );
+                        }
+                    },
+                }
+            }
+            Err(error) => {
+                if let Some(path) = local_path {
+                    std::fs::write(path, &data)
+                        .with_context(|| format!("writing to local file {}", path.display()))?;
+                    println!(
+                        "read {} bytes of raw config to {}",
+                        data.len(),
+                        path.display()
+                    );
+                } else {
+                    bail!("decoding device config: {error}");
+                }
+            }
+        }
         Ok(())
     }
 

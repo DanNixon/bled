@@ -4,7 +4,10 @@
 //! completion. Rustyline is blocking, so each read happens on a blocking task
 //! and the editor is handed back and forth across the await point.
 
-use crate::cli::{BUFFER_SUBCOMMAND_NAMES, COMMAND_NAMES, FILE_SUBCOMMAND_NAMES};
+use crate::cli::{
+    BUFFER_SUBCOMMAND_NAMES, COMMAND_NAMES, CONFIG_SUBCOMMAND_NAMES, DEVICE_SUBCOMMAND_NAMES,
+    FILE_SUBCOMMAND_NAMES,
+};
 use anyhow::{Context as _, Result};
 use rustyline::{
     Cmd, CompletionType, Config, Context, Editor, KeyEvent, Movement,
@@ -43,15 +46,23 @@ impl Completer for BledHelper {
         let preceding = &line[..start];
         let mut words = preceding.split_whitespace();
 
-        let candidates: Vec<&str> = match (words.next(), words.next()) {
+        let first = words.next();
+        let second = words.next();
+        let third = words.next();
+
+        let candidates: Vec<&str> = match (first, second, third) {
             // Completing the first word: offer every command.
-            (None, _) => COMMAND_NAMES.to_vec(),
+            (None, _, _) => COMMAND_NAMES.to_vec(),
             // Completing the sole argument of `connect`: offer known devices.
-            (Some("connect"), None) => self.devices.iter().map(String::as_str).collect(),
+            (Some("connect"), None, _) => self.devices.iter().map(String::as_str).collect(),
+            // Completing the action argument of `device`: offer device subcommands.
+            (Some("device"), None, _) => DEVICE_SUBCOMMAND_NAMES.to_vec(),
+            // Completing the action argument of `device config`: offer config subcommands.
+            (Some("device"), Some("config"), None) => CONFIG_SUBCOMMAND_NAMES.to_vec(),
             // Completing the action argument of `buffer`: offer buffer subcommands.
-            (Some("buffer"), None) => BUFFER_SUBCOMMAND_NAMES.to_vec(),
+            (Some("buffer"), None, _) => BUFFER_SUBCOMMAND_NAMES.to_vec(),
             // Completing the action argument of `file`: offer file subcommands.
-            (Some("file"), None) => FILE_SUBCOMMAND_NAMES.to_vec(),
+            (Some("file"), None, _) => FILE_SUBCOMMAND_NAMES.to_vec(),
             _ => Vec::new(),
         };
 
@@ -254,6 +265,20 @@ mod tests {
         let (start, matches) = complete(&helper(), "buffer ");
         assert_eq!(start, "buffer ".len());
         assert_eq!(matches, ["info", "read", "write"]);
+    }
+
+    #[test]
+    fn device_argument_completes_subcommands() {
+        let (start, matches) = complete(&helper(), "device ");
+        assert_eq!(start, "device ".len());
+        assert_eq!(matches, ["info", "reset", "config"]);
+    }
+
+    #[test]
+    fn device_config_argument_completes_subcommands() {
+        let (start, matches) = complete(&helper(), "device config ");
+        assert_eq!(start, "device config ".len());
+        assert_eq!(matches, ["stat", "read"]);
     }
 
     #[test]
