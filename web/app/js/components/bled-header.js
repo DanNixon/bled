@@ -10,7 +10,7 @@ export class BledHeader extends HTMLElement {
       <header>
         <div class="title-group">
           <h1>BLED</h1>
-          <p>Configuration and control of BLED Bluetooth LED controllers</p>
+          <p>Configuration and control of BLED Bluetooth LED controllers [<a href="https://github.com/DanNixon/bled">GitHub</a>]</p>
         </div>
         <div class="conn-group">
           <button id="btnConnect" class="btn btn-primary">Connect device</button>
