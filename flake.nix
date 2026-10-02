@@ -9,7 +9,6 @@
       packages = with pkgs; [
         # Generic tools
         just
-        protobuf
 
         # Code formatting tools
         treefmt
@@ -33,7 +32,6 @@
       ];
 
       LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";
-
       PKG_CONFIG_PATH = "${pkgs.dbus.dev}/lib/pkgconfig";
     };
   };
