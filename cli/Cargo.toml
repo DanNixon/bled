@@ -18,7 +18,9 @@ btleplug = "0.13"
 clap = { version = "4", features = ["derive"] }
 env_logger = "0.11"
 futures = "0.3"
+heapless = "0.9"
 log = "0.4"
 rustyline = { version = "18.0.1", features = ["derive"] }
+serde = { version = "1", default-features = false }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
 uuid = { version = "1", features = ["v4"] }

@@ -300,19 +300,127 @@ pub async fn reset(peripheral: &Peripheral, characteristic: &Characteristic) -> 
         .context("writing reset request")
 }
 
+/// Sends a generic control command CBOR-encoded to the given characteristic.
+async fn send_control<C: serde::Serialize>(
+    peripheral: &Peripheral,
+    characteristic: &Characteristic,
+    name: &str,
+    command: &C,
+) -> Result<()> {
+    let mut buffer = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let written = bled_api::io::encode_cbor(command, &mut buffer)
+        .map_err(|error| anyhow!("encoding {name} control command: {error}"))?;
+    peripheral
+        .write(characteristic, &buffer[..written], WriteType::WithResponse)
+        .await
+        .with_context(|| format!("writing {name} control command"))
+}
+
+/// Reads a stream of data chunks from a peripheral characteristic until EOF or expected size.
+async fn read_chunked<C, F>(
+    peripheral: &Peripheral,
+    control: &Characteristic,
+    data: &Characteristic,
+    name: &str,
+    expected_size: Option<usize>,
+    reset_command: C,
+    mut make_read_command: F,
+) -> Result<Vec<u8>>
+where
+    C: serde::Serialize,
+    F: FnMut(u32) -> Result<C>,
+{
+    let mut contents = match expected_size {
+        Some(size) => Vec::with_capacity(size),
+        None => Vec::new(),
+    };
+
+    while expected_size.is_none_or(|size| contents.len() < size) {
+        let offset = u32::try_from(contents.len())?;
+        let cmd = make_read_command(offset)?;
+
+        if let Err(error) = send_control(peripheral, control, name, &cmd).await {
+            let _ = send_control(peripheral, control, name, &reset_command).await;
+            return Err(error).with_context(|| {
+                format!("preparing to read chunk from {name} at offset {offset}")
+            });
+        }
+
+        let chunk = match peripheral.read(data).await {
+            Ok(chunk) => chunk,
+            Err(error) => {
+                let _ = send_control(peripheral, control, name, &reset_command).await;
+                return Err(error).with_context(|| format!("reading chunk from {name}"));
+            }
+        };
+
+        if chunk.is_empty() {
+            break;
+        }
+        contents.extend_from_slice(&chunk);
+    }
+
+    if let Err(error) = send_control(peripheral, control, name, &reset_command).await {
+        log::debug!("could not reset {name} state machine after reading: {error}");
+    }
+
+    Ok(contents)
+}
+
+/// Writes data to a peripheral characteristic in chunks bounded by MTU.
+async fn write_chunked<C, F>(
+    peripheral: &Peripheral,
+    (control, data_char): (&Characteristic, &Characteristic),
+    name: &str,
+    data: &[u8],
+    start_offset: usize,
+    reset_command: C,
+    mut make_write_command: F,
+) -> Result<()>
+where
+    C: serde::Serialize,
+    F: FnMut(u32) -> Result<C>,
+{
+    let mtu = peripheral.mtu();
+    let chunk_size = (usize::from(mtu) - 3).min(MAX_ATTRIBUTE_VALUE_LEN);
+
+    let mut offset = start_offset;
+    for chunk in data.chunks(chunk_size) {
+        let current_offset = u32::try_from(offset)?;
+        let cmd = make_write_command(current_offset)?;
+
+        if let Err(error) = send_control(peripheral, control, name, &cmd).await {
+            let _ = send_control(peripheral, control, name, &reset_command).await;
+            return Err(error).with_context(|| {
+                format!("preparing to write chunk to {name} at offset {current_offset}")
+            });
+        }
+
+        if let Err(error) = peripheral
+            .write(data_char, chunk, WriteType::WithResponse)
+            .await
+        {
+            let _ = send_control(peripheral, control, name, &reset_command).await;
+            return Err(error).with_context(|| format!("writing chunk to {name}"));
+        }
+
+        offset += chunk.len();
+    }
+
+    send_control(peripheral, control, name, &reset_command)
+        .await
+        .with_context(|| format!("completing write for {name}"))?;
+
+    Ok(())
+}
+
 /// Sends a control command to the Config Control characteristic.
 pub async fn send_config_control(
     peripheral: &Peripheral,
     characteristic: &Characteristic,
     command: &ConfigControl,
 ) -> Result<()> {
-    let mut buffer = [0; MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(command, &mut buffer)
-        .map_err(|error| anyhow!("encoding Config control command: {error}"))?;
-    peripheral
-        .write(characteristic, &buffer[..written], WriteType::WithResponse)
-        .await
-        .context("writing Config control command")
+    send_control(peripheral, characteristic, "Config", command).await
 }
 
 /// Stats active device configuration.
@@ -347,45 +455,16 @@ pub async fn read_config(
 ) -> Result<Vec<u8>> {
     let stat = stat_config(peripheral, control, data).await?;
     let total_size = usize::try_from(*stat.size())?;
-    let mut contents = Vec::with_capacity(total_size);
-    while contents.len() < total_size {
-        if let Err(error) = send_config_control(
-            peripheral,
-            control,
-            &ConfigControl::Read {
-                offset: u32::try_from(contents.len())?,
-            },
-        )
-        .await
-        {
-            let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
-            return Err(error).with_context(|| {
-                format!(
-                    "preparing to read chunk from config at offset {}",
-                    contents.len()
-                )
-            });
-        }
-
-        let chunk = match peripheral.read(data).await {
-            Ok(chunk) => chunk,
-            Err(error) => {
-                let _ = send_config_control(peripheral, control, &ConfigControl::Reset).await;
-                return Err(error).context("reading chunk from config");
-            }
-        };
-
-        if chunk.is_empty() {
-            break;
-        }
-        contents.extend_from_slice(&chunk);
-    }
-
-    if let Err(error) = send_config_control(peripheral, control, &ConfigControl::Reset).await {
-        log::debug!("could not reset config state machine after reading: {error}");
-    }
-
-    Ok(contents)
+    read_chunked(
+        peripheral,
+        control,
+        data,
+        "config",
+        Some(total_size),
+        ConfigControl::Reset,
+        |offset| Ok(ConfigControl::Read { offset }),
+    )
+    .await
 }
 
 /// Stages one solid-colour pixel range without rendering it.
@@ -440,13 +519,7 @@ pub async fn send_file_io_control(
     characteristic: &Characteristic,
     command: &FileIoControl,
 ) -> Result<()> {
-    let mut buffer = [0; MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(command, &mut buffer)
-        .map_err(|error| anyhow!("encoding File IO control command: {error}"))?;
-    peripheral
-        .write(characteristic, &buffer[..written], WriteType::WithResponse)
-        .await
-        .context("writing File IO control command")
+    send_control(peripheral, characteristic, "File IO", command).await
 }
 
 /// Stats a file on the connected device.
@@ -491,49 +564,25 @@ pub async fn read_file(
     data: &Characteristic,
     path: &str,
 ) -> Result<Vec<u8>> {
-    let mut contents = Vec::new();
-    loop {
-        let chunk_path = path
-            .try_into()
-            .map_err(|_| anyhow!("path exceeds maximum length of {MAX_PATH_LEN} bytes"))?;
-        if let Err(error) = send_file_io_control(
-            peripheral,
-            control,
-            &FileIoControl::Read {
-                path: chunk_path,
-                offset: u32::try_from(contents.len())?,
-            },
-        )
-        .await
-        {
-            let _ = send_file_io_control(peripheral, control, &FileIoControl::Reset).await;
-            return Err(error).with_context(|| {
-                format!(
-                    "preparing to read chunk from {path} at offset {}",
-                    contents.len()
-                )
-            });
-        }
+    let heapless_path: heapless::String<MAX_PATH_LEN> = path
+        .try_into()
+        .map_err(|_| anyhow!("path exceeds maximum length of {MAX_PATH_LEN} bytes"))?;
 
-        let chunk = match peripheral.read(data).await {
-            Ok(chunk) => chunk,
-            Err(error) => {
-                let _ = send_file_io_control(peripheral, control, &FileIoControl::Reset).await;
-                return Err(error).with_context(|| format!("reading chunk from {path}"));
-            }
-        };
-
-        if chunk.is_empty() {
-            break;
-        }
-        contents.extend_from_slice(&chunk);
-    }
-
-    if let Err(error) = send_file_io_control(peripheral, control, &FileIoControl::Reset).await {
-        log::debug!("could not reset file IO state machine after reading {path}: {error}");
-    }
-
-    Ok(contents)
+    read_chunked(
+        peripheral,
+        control,
+        data,
+        path,
+        None,
+        FileIoControl::Reset,
+        |offset| {
+            Ok(FileIoControl::Read {
+                path: heapless_path.clone(),
+                offset,
+            })
+        },
+    )
+    .await
 }
 
 /// Writes data to a file on the connected device.
@@ -544,7 +593,7 @@ pub async fn write_file(
     path: &str,
     data: &[u8],
 ) -> Result<()> {
-    let create_path = path
+    let heapless_path: heapless::String<MAX_PATH_LEN> = path
         .try_into()
         .map_err(|_| anyhow!("path exceeds maximum length of {MAX_PATH_LEN} bytes"))?;
 
@@ -552,53 +601,28 @@ pub async fn write_file(
         peripheral,
         control,
         &FileIoControl::Create {
-            path: create_path,
+            path: heapless_path.clone(),
             size: u32::try_from(data.len())?,
         },
     )
     .await
     .with_context(|| format!("creating file {path} with size {}", data.len()))?;
 
-    let mtu = peripheral.mtu();
-    let chunk_size = (usize::from(mtu) - 3).min(MAX_ATTRIBUTE_VALUE_LEN);
-
-    let mut offset: u32 = 0;
-    for chunk in data.chunks(chunk_size) {
-        let chunk_path = path
-            .try_into()
-            .map_err(|_| anyhow!("path exceeds maximum length of {MAX_PATH_LEN} bytes"))?;
-
-        if let Err(error) = send_file_io_control(
-            peripheral,
-            control,
-            &FileIoControl::Write {
-                path: chunk_path,
+    write_chunked(
+        peripheral,
+        (control, data_char),
+        path,
+        data,
+        0,
+        FileIoControl::Reset,
+        |offset| {
+            Ok(FileIoControl::Write {
+                path: heapless_path.clone(),
                 offset,
-            },
-        )
-        .await
-        {
-            let _ = send_file_io_control(peripheral, control, &FileIoControl::Reset).await;
-            return Err(error)
-                .with_context(|| format!("preparing to write chunk to {path} at offset {offset}"));
-        }
-
-        if let Err(error) = peripheral
-            .write(data_char, chunk, WriteType::WithResponse)
-            .await
-        {
-            let _ = send_file_io_control(peripheral, control, &FileIoControl::Reset).await;
-            return Err(error).with_context(|| format!("writing chunk to {path}"));
-        }
-
-        offset += u32::try_from(chunk.len())?;
-    }
-
-    send_file_io_control(peripheral, control, &FileIoControl::Reset)
-        .await
-        .with_context(|| format!("completing write for {path}"))?;
-
-    Ok(())
+            })
+        },
+    )
+    .await
 }
 
 /// Deletes a file on the connected device.
@@ -627,13 +651,7 @@ pub async fn send_led_buffer_control(
     characteristic: &Characteristic,
     command: &LedBufferControl,
 ) -> Result<()> {
-    let mut buffer = [0; MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(command, &mut buffer)
-        .map_err(|error| anyhow!("encoding LED buffer control command: {error}"))?;
-    peripheral
-        .write(characteristic, &buffer[..written], WriteType::WithResponse)
-        .await
-        .context("writing LED buffer control command")
+    send_control(peripheral, characteristic, "LED buffer", command).await
 }
 
 /// Reads the LED buffer information from the connected device.
@@ -668,47 +686,16 @@ pub async fn read_led_buffer(
 ) -> Result<Vec<u8>> {
     let info = read_led_buffer_info(peripheral, control, data).await?;
     let total_size = usize::try_from(*info.size())?;
-    let mut contents = Vec::with_capacity(total_size);
-    while contents.len() < total_size {
-        if let Err(error) = send_led_buffer_control(
-            peripheral,
-            control,
-            &LedBufferControl::Read {
-                offset: u32::try_from(contents.len())?,
-            },
-        )
-        .await
-        {
-            let _ = send_led_buffer_control(peripheral, control, &LedBufferControl::Reset).await;
-            return Err(error).with_context(|| {
-                format!(
-                    "preparing to read chunk from LED buffer at offset {}",
-                    contents.len()
-                )
-            });
-        }
-
-        let chunk = match peripheral.read(data).await {
-            Ok(chunk) => chunk,
-            Err(error) => {
-                let _ =
-                    send_led_buffer_control(peripheral, control, &LedBufferControl::Reset).await;
-                return Err(error).context("reading chunk from LED buffer");
-            }
-        };
-
-        if chunk.is_empty() {
-            break;
-        }
-        contents.extend_from_slice(&chunk);
-    }
-
-    if let Err(error) = send_led_buffer_control(peripheral, control, &LedBufferControl::Reset).await
-    {
-        log::debug!("could not reset LED buffer state machine after reading: {error}");
-    }
-
-    Ok(contents)
+    read_chunked(
+        peripheral,
+        control,
+        data,
+        "LED buffer",
+        Some(total_size),
+        LedBufferControl::Reset,
+        |offset| Ok(LedBufferControl::Read { offset }),
+    )
+    .await
 }
 
 /// Writes data to the LED buffer on the connected device.
@@ -717,41 +704,16 @@ pub async fn write_led_buffer(
     control: &Characteristic,
     data_char: &Characteristic,
     data: &[u8],
-    mut offset: usize,
+    offset: usize,
 ) -> Result<()> {
-    let mtu = peripheral.mtu();
-    let chunk_size = (usize::from(mtu) - 3).min(MAX_ATTRIBUTE_VALUE_LEN);
-
-    for chunk in data.chunks(chunk_size) {
-        if let Err(error) = send_led_buffer_control(
-            peripheral,
-            control,
-            &LedBufferControl::Write {
-                offset: u32::try_from(offset)?,
-            },
-        )
-        .await
-        {
-            let _ = send_led_buffer_control(peripheral, control, &LedBufferControl::Reset).await;
-            return Err(error).with_context(|| {
-                format!("preparing to write chunk to LED buffer at offset {offset}")
-            });
-        }
-
-        if let Err(error) = peripheral
-            .write(data_char, chunk, WriteType::WithResponse)
-            .await
-        {
-            let _ = send_led_buffer_control(peripheral, control, &LedBufferControl::Reset).await;
-            return Err(error).context("writing chunk to LED buffer");
-        }
-
-        offset += chunk.len();
-    }
-
-    send_led_buffer_control(peripheral, control, &LedBufferControl::Reset)
-        .await
-        .context("completing write for LED buffer")?;
-
-    Ok(())
+    write_chunked(
+        peripheral,
+        (control, data_char),
+        "LED buffer",
+        data,
+        offset,
+        LedBufferControl::Reset,
+        |offset| Ok(LedBufferControl::Write { offset }),
+    )
+    .await
 }

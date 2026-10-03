@@ -194,10 +194,87 @@ export class BleDevice extends EventTarget {
     this._handleDisconnected();
   }
 
+  // --- Generic Chunked I/O ---
+
+  async _readChunked({
+    controlChar,
+    dataChar,
+    makeReadCmd,
+    resetCmd,
+    expectedSize = null,
+    onProgress = null,
+  }) {
+    try {
+      let offset = 0;
+      const chunks = [];
+
+      while (expectedSize === null || offset < expectedSize) {
+        const readCmd = makeReadCmd(offset);
+        await controlChar.writeValueWithResponse(readCmd);
+
+        const dataView = await dataChar.readValue();
+        const bytes = new Uint8Array(dataView.buffer);
+        if (bytes.length === 0) break;
+
+        chunks.push(bytes);
+        offset += bytes.length;
+
+        if (onProgress) {
+          if (expectedSize !== null && expectedSize > 0) {
+            onProgress(Math.min(100, Math.round((offset / expectedSize) * 100)));
+          } else {
+            onProgress(Math.min(95, chunks.length * 15));
+          }
+        }
+      }
+
+      await controlChar.writeValueWithResponse(resetCmd);
+
+      const totalLen = chunks.reduce((acc, c) => acc + c.length, 0);
+      const combined = new Uint8Array(totalLen);
+      let ptr = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, ptr);
+        ptr += chunk.length;
+      }
+
+      if (onProgress) onProgress(100);
+      return combined;
+    } catch (err) {
+      try {
+        await controlChar.writeValueWithResponse(resetCmd);
+      } catch (_) {}
+      throw err;
+    }
+  }
+
+  async _writeChunks({
+    controlChar,
+    dataChar,
+    chunks,
+    resetCmd,
+    onProgress = null,
+  }) {
+    try {
+      for (let i = 0; i < chunks.length; i++) {
+        await controlChar.writeValueWithResponse(toBytes(chunks[i].control));
+        await dataChar.writeValueWithResponse(toBytes(chunks[i].data));
+        if (onProgress) onProgress(Math.round(((i + 1) / chunks.length) * 100));
+      }
+
+      await controlChar.writeValueWithResponse(resetCmd);
+    } catch (err) {
+      try {
+        await controlChar.writeValueWithResponse(resetCmd);
+      } catch (_) {}
+      throw err;
+    }
+  }
+
   // --- Config ---
 
   async statConfig() {
-    this._log("Querying active config stat...");
+    this._log("Querying stat for active config...");
     try {
       const statCmd = bled.encode_config_stat();
       await this.chars.configControl.writeValueWithResponse(statCmd);
@@ -216,41 +293,17 @@ export class BleDevice extends EventTarget {
 
   async readConfig(onProgress = null) {
     this._log("Reading active config from device...");
-    try {
-      const stat = await this.statConfig();
-      const totalSize = stat.size;
-      let offset = 0;
-      const chunks = [];
-
-      while (offset < totalSize) {
-        const readCmd = bled.encode_config_read(offset);
-        await this.chars.configControl.writeValueWithResponse(readCmd);
-
-        const dataView = await this.chars.configData.readValue();
-        const bytes = new Uint8Array(dataView.buffer);
-        if (bytes.length === 0) break;
-
-        chunks.push(bytes);
-        offset += bytes.length;
-        if (onProgress) onProgress(Math.min(100, Math.round((offset / totalSize) * 100)));
-      }
-
-      await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset());
-
-      const combined = new Uint8Array(offset);
-      let ptr = 0;
-      for (const chunk of chunks) {
-        combined.set(chunk, ptr);
-        ptr += chunk.length;
-      }
-
-      if (onProgress) onProgress(100);
-      this._log(`Successfully read active config (${combined.length} bytes) from device.`, 'success');
-      return combined;
-    } catch (err) {
-      try { await this.chars.configControl.writeValueWithResponse(bled.encode_config_reset()); } catch (_) {}
-      throw err;
-    }
+    const stat = await this.statConfig();
+    const combined = await this._readChunked({
+      controlChar: this.chars.configControl,
+      dataChar: this.chars.configData,
+      makeReadCmd: (offset) => bled.encode_config_read(offset),
+      resetCmd: bled.encode_config_reset(),
+      expectedSize: stat.size,
+      onProgress,
+    });
+    this._log(`Successfully read active config (${combined.length} bytes) from device.`, 'success');
+    return combined;
   }
 
   // --- File I/O ---
@@ -275,67 +328,40 @@ export class BleDevice extends EventTarget {
 
   async readFile(path, onProgress = null) {
     this._log(`Reading file "${path}" from device...`);
-    try {
-      let offset = 0;
-      const chunks = [];
-
-      while (true) {
-        const readCmd = bled.encode_file_io_read(path, offset);
-        await this.chars.fileControl.writeValueWithResponse(readCmd);
-
-        const dataView = await this.chars.fileData.readValue();
-        const bytes = new Uint8Array(dataView.buffer);
-        if (bytes.length === 0) break;
-
-        chunks.push(bytes);
-        offset += bytes.length;
-        if (onProgress) onProgress(Math.min(95, chunks.length * 15));
-      }
-
-      await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset());
-
-      const totalLen = chunks.reduce((acc, c) => acc + c.length, 0);
-      const combined = new Uint8Array(totalLen);
-      let ptr = 0;
-      for (const chunk of chunks) {
-        combined.set(chunk, ptr);
-        ptr += chunk.length;
-      }
-
-      if (onProgress) onProgress(100);
-      this._log(`Successfully read "${path}" (${totalLen} bytes) from device.`, 'success');
-      return combined;
-    } catch (err) {
-      try { await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset()); } catch (_) {}
-      throw err;
-    }
+    const combined = await this._readChunked({
+      controlChar: this.chars.fileControl,
+      dataChar: this.chars.fileData,
+      makeReadCmd: (offset) => bled.encode_file_io_read(path, offset),
+      resetCmd: bled.encode_file_io_reset(),
+      onProgress,
+    });
+    this._log(`Successfully read "${path}" (${combined.length} bytes) from device.`, 'success');
+    return combined;
   }
 
   async writeFile(path, data, onProgress = null) {
     this._log(`Writing ${data.length} bytes to "${path}" on device...`);
     try {
-      // 1. Create file with size
       const createCmd = bled.encode_file_io_create(path, data.length);
       await this.chars.fileControl.writeValueWithResponse(createCmd);
-
-      // 2. Slice and write data chunks
-      const payloadBudget = 244;
-      const chunks = bled.slice_file_write(path, data, payloadBudget);
-      this._log(`Sending ${chunks.length} chunks to device...`);
-
-      for (let i = 0; i < chunks.length; i++) {
-        await this.chars.fileControl.writeValueWithResponse(toBytes(chunks[i].control));
-        await this.chars.fileData.writeValueWithResponse(toBytes(chunks[i].data));
-        if (onProgress) onProgress(Math.round(((i + 1) / chunks.length) * 100));
-      }
-
-      // 3. Reset state machine
-      await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset());
-      this._log(`Successfully wrote "${path}" (${data.length} bytes) to device!`, 'success');
     } catch (err) {
       try { await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset()); } catch (_) {}
       throw err;
     }
+
+    const payloadBudget = 244;
+    const chunks = bled.slice_file_write(path, data, payloadBudget);
+    this._log(`Sending ${chunks.length} chunks to device...`);
+
+    await this._writeChunks({
+      controlChar: this.chars.fileControl,
+      dataChar: this.chars.fileData,
+      chunks,
+      resetCmd: bled.encode_file_io_reset(),
+      onProgress,
+    });
+
+    this._log(`Successfully wrote "${path}" (${data.length} bytes) to device!`, 'success');
   }
 
   async deleteFile(path) {
@@ -389,58 +415,32 @@ export class BleDevice extends EventTarget {
 
   async readBuffer(size, onProgress = null) {
     this._log(`Reading entire LED buffer (${size} bytes)...`);
-    try {
-      let offset = 0;
-      const chunks = [];
-
-      while (offset < size) {
-        const readCmd = bled.encode_led_buffer_read(offset);
-        await this.chars.bufferControl.writeValueWithResponse(readCmd);
-
-        const dataView = await this.chars.bufferData.readValue();
-        const bytes = new Uint8Array(dataView.buffer);
-        if (bytes.length === 0) break;
-
-        chunks.push(bytes);
-        offset += bytes.length;
-        if (onProgress) onProgress(Math.min(100, Math.round((offset / size) * 100)));
-      }
-
-      await this.chars.bufferControl.writeValueWithResponse(bled.encode_led_buffer_reset());
-
-      const combined = new Uint8Array(offset);
-      let ptr = 0;
-      for (const chunk of chunks) {
-        combined.set(chunk, ptr);
-        ptr += chunk.length;
-      }
-
-      this._log(`Successfully read ${combined.length} bytes from LED buffer!`, 'success');
-      return combined;
-    } catch (err) {
-      try { await this.chars.bufferControl.writeValueWithResponse(bled.encode_led_buffer_reset()); } catch (_) {}
-      throw err;
-    }
+    const combined = await this._readChunked({
+      controlChar: this.chars.bufferControl,
+      dataChar: this.chars.bufferData,
+      makeReadCmd: (offset) => bled.encode_led_buffer_read(offset),
+      resetCmd: bled.encode_led_buffer_reset(),
+      expectedSize: size,
+      onProgress,
+    });
+    this._log(`Successfully read ${combined.length} bytes from LED buffer!`, 'success');
+    return combined;
   }
 
   async writeBuffer(offset, rawData, onProgress = null) {
     this._log(`Writing ${rawData.length} bytes to LED buffer at offset ${offset}...`);
-    try {
-      const payloadBudget = 244;
-      const chunks = bled.slice_led_buffer_write(offset, rawData, payloadBudget);
-      this._log(`Slices: ${chunks.length} chunks. Uploading...`);
+    const payloadBudget = 244;
+    const chunks = bled.slice_led_buffer_write(offset, rawData, payloadBudget);
+    this._log(`Slices: ${chunks.length} chunks. Uploading...`);
 
-      for (let i = 0; i < chunks.length; i++) {
-        await this.chars.bufferControl.writeValueWithResponse(toBytes(chunks[i].control));
-        await this.chars.bufferData.writeValueWithResponse(toBytes(chunks[i].data));
-        if (onProgress) onProgress(Math.round(((i + 1) / chunks.length) * 100));
-      }
+    await this._writeChunks({
+      controlChar: this.chars.bufferControl,
+      dataChar: this.chars.bufferData,
+      chunks,
+      resetCmd: bled.encode_led_buffer_reset(),
+      onProgress,
+    });
 
-      await this.chars.bufferControl.writeValueWithResponse(bled.encode_led_buffer_reset());
-      this._log(`Successfully wrote ${rawData.length} bytes to LED buffer!`, 'success');
-    } catch (err) {
-      try { await this.chars.bufferControl.writeValueWithResponse(bled.encode_led_buffer_reset()); } catch (_) {}
-      throw err;
-    }
+    this._log(`Successfully wrote ${rawData.length} bytes to LED buffer!`, 'success');
   }
 }
