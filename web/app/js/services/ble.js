@@ -5,7 +5,7 @@ import { log } from './logger.js';
 const GATT_OPERATIONS = [
   'readDeviceInfo', 'rebootDevice',
   'statFile', 'readFile', 'writeFile', 'deleteFile',
-  'stageRange', 'commitChannels',
+  'setChannelPixels', 'commitChannels',
   'readBufferInfo', 'readBuffer', 'writeBuffer',
 ];
 
@@ -118,7 +118,6 @@ export class BleDevice extends EventTarget {
       this.chars.configControl = await service.getCharacteristic(bled.config_control_uuid());
       this.chars.configData    = await service.getCharacteristic(bled.config_data_uuid());
       this.chars.commit        = await service.getCharacteristic(bled.commit_uuid());
-      this.chars.range         = await service.getCharacteristic(bled.led_range_uuid());
       this.chars.bufferControl = await service.getCharacteristic(bled.led_buffer_control_uuid());
       this.chars.bufferData    = await service.getCharacteristic(bled.led_buffer_data_uuid());
       this.chars.fileControl   = await service.getCharacteristic(bled.file_io_control_uuid());
@@ -371,13 +370,33 @@ export class BleDevice extends EventTarget {
     this._log(`Successfully deleted "${path}" on device.`, 'success');
   }
 
-  // --- LED Range & Commit ---
+  // --- LED Pixels & Commit ---
 
-  async stageRange(channel, start, count, r, g, b, autoCommit = true) {
-    this._log(`Staging range: Ch ${channel}, start ${start}, count ${count}, RGB(${r}, ${g}, ${b})...`);
-    const rangeBytes = bled.encode_range(channel, start, count, r, g, b);
-    await this.chars.range.writeValueWithResponse(rangeBytes);
-    this._log(`Staged range on Ch ${channel}.`, 'success');
+  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
+    let channelOffset = 0;
+    for (const ch of this.config?.channels ?? []) {
+      if (ch.index === channel) break;
+      channelOffset += ch.length;
+    }
+    const byteOffset = (channelOffset + start) * 3;
+    const rawData = new Uint8Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      rawData[idx] = r;
+      rawData[idx + 1] = g;
+      rawData[idx + 2] = b;
+    }
+
+    this._log(`Setting pixels: Ch ${channel}, start ${start}, count ${count}, RGB(${r}, ${g}, ${b}) at buffer offset ${byteOffset}...`);
+    const payloadBudget = 244;
+    const chunks = bled.slice_led_buffer_write(byteOffset, rawData, payloadBudget);
+    await this._writeChunks({
+      controlChar: this.chars.bufferControl,
+      dataChar: this.chars.bufferData,
+      chunks,
+      resetCmd: bled.encode_led_buffer_reset(),
+    });
+    this._log(`Updated LED buffer for Ch ${channel}.`, 'success');
 
     if (autoCommit) {
       const commitBytes = bled.encode_commit(new Uint8Array([channel]));

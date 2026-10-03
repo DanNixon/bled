@@ -8,12 +8,11 @@ use crate::{
     sdcard::SdCardStorage,
 };
 use bled_api::{
-    ChannelMask, ChannelRanges, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
-    PixelRanges, RGB8, Rgb8Ranges,
+    ChannelMask, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
     ble::{
         COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
-        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, LED_RANGE_UUID,
-        MAX_ATTRIBUTE_VALUE_LEN, RESET_UUID, SERVICE_UUID,
+        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
+        RESET_UUID, SERVICE_UUID,
     },
 };
 use defmt::{debug, error, info, warn};
@@ -57,13 +56,6 @@ pub(super) struct LedService {
 
     #[characteristic(uuid = LED_BUFFER_DATA_UUID.as_u128(), read, write)]
     led_buffer_data: (),
-
-    #[characteristic(
-        uuid = LED_RANGE_UUID.as_u128(),
-        write,
-        write_without_response
-    )]
-    range_data: (),
 }
 
 pub(super) async fn gatt_events_task<P: PacketPool>(
@@ -109,8 +101,6 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                             process_led_buffer_control_write(event, &mut led_buffer).await
                         } else if event.handle() == server.led_service.led_buffer_data.handle {
                             process_led_buffer_data_write(event, &mut led_buffer).await
-                        } else if event.handle() == server.led_service.range_data.handle {
-                            process_range_data(event).await
                         } else {
                             event.accept()
                         }
@@ -487,45 +477,4 @@ async fn process_reset<'stack, P: PacketPool>(
 ) -> Result<Reply<'stack, P>, Error> {
     crate::status::reset();
     event.accept()
-}
-
-async fn process_range_data<'stack, P: PacketPool>(
-    event: WriteEvent<'stack, '_, P>,
-) -> Result<Reply<'stack, P>, Error> {
-    let result: Result<(), AttErrorCode> = async {
-        let ranges = event.with_data(|offset, data| {
-            if offset != 0 {
-                return Err(AttErrorCode::INVALID_OFFSET);
-            }
-            bled_api::io::decode_cbor::<ChannelRanges<RGB8, Rgb8Ranges<24>>>(data)
-                .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
-        })?;
-
-        let mut channel_data = leds::channel_data().await;
-
-        let channel = usize::from(*ranges.channel());
-        let data = channel_data
-            .try_channel_mut::<RGB8>(channel)
-            .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
-
-        // Validate the complete message before staging any changes.
-        for (range, _) in ranges.ranges().iter() {
-            if range.end > data.len() {
-                return Err(AttErrorCode::VALUE_NOT_ALLOWED);
-            }
-        }
-
-        for (range, colour) in ranges.ranges().iter() {
-            data[range].fill(colour);
-        }
-        Ok(())
-    }
-    .await;
-    match result {
-        Ok(()) => {
-            debug!("led range data");
-            event.accept_unprocessed()
-        }
-        Err(err) => event.reject(err),
-    }
 }
