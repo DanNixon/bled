@@ -120,8 +120,10 @@ dependencies = [
  "clap",
  "env_logger",
  "futures",
+ "heapless 0.9.3",
  "log",
  "rustyline",
+ "serde",
  "tokio",
  "uuid",
 ]
