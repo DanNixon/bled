@@ -63,34 +63,6 @@ jobs:
           cd ./firmware
           nix develop --command just
 
-  cli:
-    name: CLI
-    needs:
-      - api
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-      - uses: DeterminateSystems/nix-installer-action@v23
-
-      - name: Clippy
-        run: |
-          set -x
-          cd ./cli
-          nix develop --command cargo clippy -- -Dwarnings
-
-      - name: Tests
-        run: |
-          set -x
-          cd ./web
-          nix develop --command cargo test
-
-      - name: Build
-        run: |
-          set -x
-          cd ./cli
-          nix develop --command cargo build --release
-
   web:
     name: Web
     needs:

@@ -25,10 +25,6 @@
 
         # PCB tools
         kikit
-
-        # CLI dependencies
-        pkg-config
-        dbus
       ];
 
       LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";

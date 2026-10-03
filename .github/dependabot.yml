@@ -9,8 +9,8 @@ updates:
   - package-ecosystem: cargo
     directories:
       - api
-      - cli
-      - firmware-
+      - firmware
+      - web
     schedule:
       interval: quarterly
     groups:
