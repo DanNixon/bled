@@ -1,32 +1,32 @@
 import { log } from '../services/logger.js';
 
 /**
- * Colour picker and range controls for one device. Set `.device` before
+ * Colour picker and pixel controls for one device. Set `.device` before
  * attaching, then call `setPreset()` whenever a channel or segment is selected.
  */
-export class BledLedRange extends HTMLElement {
+export class BledLedPixels extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="card-title">LED Range</span>
-            <span id="rangeTarget" class="card-subtitle" style="display: block;"></span>
+            <span class="card-title">LED Pixels</span>
+            <span id="pixelTarget" class="card-subtitle" style="display: block;"></span>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group" style="flex: 1;">
-            <label for="rangeChannel">Channel</label>
-            <select id="rangeChannel" disabled></select>
+            <label for="pixelChannel">Channel</label>
+            <select id="pixelChannel" disabled></select>
           </div>
           <div class="form-group" style="flex: 1;">
-            <label for="rangeStart">Start Pixel</label>
-            <input type="number" id="rangeStart" value="0" min="0" max="65535">
+            <label for="pixelStart">Start Pixel</label>
+            <input type="number" id="pixelStart" value="0" min="0" max="65535">
           </div>
           <div class="form-group" style="flex: 1;">
-            <label for="rangeCount">Count</label>
-            <input type="number" id="rangeCount" value="1" min="1" max="65535">
+            <label for="pixelCount">Count</label>
+            <input type="number" id="pixelCount" value="1" min="1" max="65535">
           </div>
         </div>
 
@@ -73,76 +73,88 @@ export class BledLedRange extends HTMLElement {
 
         <div class="form-row" style="justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 0.75rem;">
           <label style="display: flex; align-items: center; gap: 0.375rem; cursor: pointer;">
-            <input type="checkbox" id="autoCommitCheck" checked> Auto-commit channel on stage
+            <input type="checkbox" id="autoCommitCheck" checked> Auto-commit channel on write
           </label>
-          <button id="btnStageRange" class="btn btn-primary">Stage Range</button>
+          <button id="btnSetColours" class="btn btn-primary">Set Colours</button>
         </div>
       </div>
     `;
 
     // Elements
-    this.rangeTarget = this.querySelector('#rangeTarget');
-    this.rangeChannel = this.querySelector('#rangeChannel');
-    this.rangeStart = this.querySelector('#rangeStart');
-    this.rangeCount = this.querySelector('#rangeCount');
+    this.pixelTarget = this.querySelector('#pixelTarget');
+    this.pixelChannel = this.querySelector('#pixelChannel');
+    this.pixelStart = this.querySelector('#pixelStart');
+    this.pixelCount = this.querySelector('#pixelCount');
     this.colorPreview = this.querySelector('#colorPreview');
     this.colorHex = this.querySelector('#colorHex');
     this.colorR = this.querySelector('#colorR');
     this.colorG = this.querySelector('#colorG');
     this.colorB = this.querySelector('#colorB');
     this.autoCommitCheck = this.querySelector('#autoCommitCheck');
-    this.btnStageRange = this.querySelector('#btnStageRange');
+    this.btnSetColours = this.querySelector('#btnSetColours');
 
     // Initialize iro.js ColorPicker
     this._initColorPicker();
 
     // Event listeners
-    this.btnStageRange.onclick = async () => {
-      const ch = parseInt(this.rangeChannel.value, 10);
-      const start = parseInt(this.rangeStart.value, 10);
-      const count = parseInt(this.rangeCount.value, 10);
-      const r = parseInt(this.colorR.value, 10);
-      const g = parseInt(this.colorG.value, 10);
-      const b = parseInt(this.colorB.value, 10);
+    this.btnSetColours.onclick = () => this.applyColours();
 
-      try {
-        await this.device.stageRange(ch, start, count, r, g, b, this.autoCommitCheck.checked);
-      } catch (err) {
-        log(`Stage range failed: ${err.message}`, 'error');
-      }
+    const onEnterKey = (e) => {
+      if (e.key === 'Enter') this.applyColours();
     };
+    this.colorHex.addEventListener('keydown', onEnterKey);
+    this.colorR.addEventListener('keydown', onEnterKey);
+    this.colorG.addEventListener('keydown', onEnterKey);
+    this.colorB.addEventListener('keydown', onEnterKey);
 
     // Channel options come from the device config, if it could be read.
     for (const ch of this.device.config?.channels ?? []) {
       const opt = document.createElement('option');
       opt.value = String(ch.index);
       opt.textContent = ch.name;
-      this.rangeChannel.appendChild(opt);
+      this.pixelChannel.appendChild(opt);
     }
 
     if (this._pendingPreset) this.setPreset(this._pendingPreset);
   }
 
+  async applyColours() {
+    const ch = parseInt(this.pixelChannel.value, 10);
+    const start = parseInt(this.pixelStart.value, 10);
+    const count = parseInt(this.pixelCount.value, 10);
+    const r = parseInt(this.colorR.value, 10);
+    const g = parseInt(this.colorG.value, 10);
+    const b = parseInt(this.colorB.value, 10);
+
+    if (Number.isNaN(ch) || Number.isNaN(start) || Number.isNaN(count) || count < 1) return;
+
+    try {
+      await this.device.setChannelPixels(ch, start, count, r, g, b, this.autoCommitCheck.checked);
+    } catch (err) {
+      log(`Set colours failed: ${err.message}`, 'error');
+    }
+  }
+
   /**
-   * Preset the range controls.
+   * Preset the pixel controls.
    * `channel` is a config channel `{ index, name, length }`, `segment` an
    * optional `{ name, start, length }`. Without a segment the whole channel is used.
    */
   setPreset({ channel, segment = null }) {
-    if (!this.rangeChannel) {
+    if (!this.pixelChannel) {
       this._pendingPreset = { channel, segment };
       return;
     }
     const start = segment ? segment.start : 0;
     const count = segment ? segment.length : channel.length;
 
-    this.rangeChannel.value = String(channel.index);
-    this.rangeStart.value = start;
-    this.rangeCount.value = Math.max(1, count);
-    this.rangeTarget.textContent = segment
+    this.pixelChannel.value = String(channel.index);
+    this.pixelStart.value = start;
+    this.pixelCount.value = Math.max(1, count);
+    this.pixelTarget.textContent = segment
       ? `${channel.name} / ${segment.name}: pixels ${start}-${start + count - 1}`
       : `${channel.name}: entire channel (${channel.length} pixels)`;
-    this.btnStageRange.disabled = count < 1;
+    this.btnSetColours.disabled = count < 1;
   }
 
   _initColorPicker() {
@@ -184,6 +196,10 @@ export class BledLedRange extends HTMLElement {
       isUpdatingColor = true;
       updateColorUI(color.hexString, color.rgb.r, color.rgb.g, color.rgb.b);
       isUpdatingColor = false;
+    });
+
+    colorPicker.on('input:end', () => {
+      this.applyColours();
     });
 
     colorPicker.on('input:start', () => {
@@ -231,9 +247,10 @@ export class BledLedRange extends HTMLElement {
         colorPicker.color.set({ r, g, b });
         updateColorUI(colorPicker.color.hexString, r, g, b);
         isUpdatingColor = false;
+        this.applyColours();
       };
     });
   }
 }
 
-customElements.define('bled-led-range', BledLedRange);
+customElements.define('bled-led-pixels', BledLedPixels);

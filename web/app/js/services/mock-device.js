@@ -92,8 +92,25 @@ export class MockBleDevice extends BleDevice {
     if (!this.files.delete(path)) throw new Error(`file not found: ${path}`);
   }
 
-  async stageRange(channel, start, count, r, g, b, autoCommit = true) {
-    this._log(`(mock) staged Ch ${channel} start ${start} count ${count} RGB(${r},${g},${b})${autoCommit ? ' + commit' : ''}`, 'success');
+  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
+    let channelOffset = 0;
+    for (const ch of this.config?.channels ?? []) {
+      if (ch.index === channel) break;
+      channelOffset += ch.length;
+    }
+    const byteOffset = (channelOffset + start) * 3;
+    const rawData = new Uint8Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      rawData[idx] = r;
+      rawData[idx + 1] = g;
+      rawData[idx + 2] = b;
+    }
+    const next = new Uint8Array(Math.max(this.buffer.length, byteOffset + rawData.length));
+    next.set(this.buffer);
+    next.set(rawData, byteOffset);
+    this.buffer = next;
+    this._log(`(mock) set Ch ${channel} start ${start} count ${count} RGB(${r},${g},${b})${autoCommit ? ' + commit' : ''}`, 'success');
   }
 
   async commitChannels(channels) {

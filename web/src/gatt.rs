@@ -38,12 +38,6 @@ pub fn commit_uuid() -> String {
     bled_api::ble::COMMIT_UUID.to_string()
 }
 
-/// Packed pixel range GATT characteristic UUID.
-#[wasm_bindgen]
-pub fn led_range_uuid() -> String {
-    bled_api::ble::LED_RANGE_UUID.to_string()
-}
-
 /// LED buffer control GATT characteristic UUID.
 #[wasm_bindgen]
 pub fn led_buffer_control_uuid() -> String {

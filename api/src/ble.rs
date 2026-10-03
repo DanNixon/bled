@@ -31,9 +31,6 @@ pub const LED_BUFFER_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb0000
 /// LED buffer data GATT characteristic UUID (read/write).
 pub const LED_BUFFER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000142");
 
-/// Packed pixel range GATT characteristic UUID (write-only).
-pub const LED_RANGE_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000143");
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,7 +46,6 @@ mod tests {
             COMMIT_UUID,
             LED_BUFFER_CONTROL_UUID,
             LED_BUFFER_DATA_UUID,
-            LED_RANGE_UUID,
         ];
 
         for (index, &uuid) in all.iter().enumerate() {
