@@ -26,7 +26,7 @@ impl DeviceConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{ChannelSectionConfig, ChannelSectionLayout};
+    use crate::config::{ChannelSectionConfig, PixelLayout};
 
     #[test]
     fn json_round_trip() {
@@ -34,12 +34,12 @@ mod tests {
             ChannelSectionConfig::new(
                 "onboard".try_into().unwrap(),
                 0,
-                ChannelSectionLayout::single_pixel(),
+                PixelLayout::single_pixel(),
             ),
             ChannelSectionConfig::new(
                 "test".try_into().unwrap(),
                 1,
-                ChannelSectionLayout::linear_array(12),
+                PixelLayout::linear_array(12),
             ),
         ]
         .into();

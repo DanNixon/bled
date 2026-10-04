@@ -6,8 +6,8 @@ pub use config::*;
 pub use layouts::*;
 pub use section::*;
 
-/// A range of a single channel.
-pub trait ChannelSpan {
+/// A range of pixels in a single channel.
+pub trait PixelSpan {
     /// Number of pixels in this span.
     fn len(&self) -> u32;
 

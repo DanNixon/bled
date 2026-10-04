@@ -1,4 +1,4 @@
-use crate::config::{ChannelSpan, ChannelSectionLayout, MAX_NAME_LEN};
+use crate::config::{MAX_NAME_LEN, PixelLayout, PixelSpan};
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
@@ -15,11 +15,11 @@ pub struct ChannelSectionConfig {
     start: u32,
 
     /// Layout of the section
-    layout: ChannelSectionLayout,
+    layout: PixelLayout,
 }
 
 impl ChannelSectionConfig {
-    pub fn new(name: String<{ MAX_NAME_LEN }>, start: u32, layout: ChannelSectionLayout) -> Self {
+    pub fn new(name: String<{ MAX_NAME_LEN }>, start: u32, layout: PixelLayout) -> Self {
         Self {
             name,
             start,
@@ -28,7 +28,7 @@ impl ChannelSectionConfig {
     }
 }
 
-impl ChannelSpan for ChannelSectionConfig {
+impl PixelSpan for ChannelSectionConfig {
     fn len(&self) -> u32 {
         self.layout.len()
     }
