@@ -1,9 +1,9 @@
 mod config;
-mod modes;
+mod layouts;
 mod section;
 
 pub use config::*;
-pub use modes::*;
+pub use layouts::*;
 pub use section::*;
 
 pub trait ChannelPartOps {

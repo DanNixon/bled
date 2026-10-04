@@ -132,7 +132,7 @@ impl ChannelPartOps for ChannelConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ChannelSectionMode;
+    use crate::ChannelSectionLayout;
 
     #[test]
     fn empty_channel_has_zero_length() {
@@ -148,18 +148,22 @@ mod tests {
             ChannelSectionConfig::new(
                 "onboard".try_into().unwrap(),
                 0,
-                ChannelSectionMode::single_pixel(),
+                ChannelSectionLayout::single_pixel(),
             ),
-            ChannelSectionConfig::new("gap".try_into().unwrap(), 1, ChannelSectionMode::inop(4)),
+            ChannelSectionConfig::new(
+                "gap".try_into().unwrap(),
+                1,
+                ChannelSectionLayout::linear_array(4),
+            ),
             ChannelSectionConfig::new(
                 "strip".try_into().unwrap(),
                 5,
-                ChannelSectionMode::linear_array(20),
+                ChannelSectionLayout::linear_array(20),
             ),
             ChannelSectionConfig::new(
                 "unused".try_into().unwrap(),
                 25,
-                ChannelSectionMode::inop(0),
+                ChannelSectionLayout::linear_array(0),
             ),
         ]
         .into();
@@ -176,17 +180,17 @@ mod tests {
             ChannelSectionConfig::new(
                 "first".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
             ChannelSectionConfig::new(
                 "second".try_into().unwrap(),
                 10,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
             ChannelSectionConfig::new(
                 "third".try_into().unwrap(),
                 15,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
         ]
         .into();
@@ -201,17 +205,17 @@ mod tests {
             ChannelSectionConfig::new(
                 "first".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
             ChannelSectionConfig::new(
                 "second".try_into().unwrap(),
                 10,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
             ChannelSectionConfig::new(
                 "third".try_into().unwrap(),
                 20,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
         ]
         .into();
@@ -233,7 +237,7 @@ mod tests {
             [ChannelSectionConfig::new(
                 "first".try_into().unwrap(),
                 2,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             )]
             .into();
 
@@ -254,12 +258,12 @@ mod tests {
             ChannelSectionConfig::new(
                 "second".try_into().unwrap(),
                 10,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
             ChannelSectionConfig::new(
                 "first".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
         ]
         .into();
@@ -274,12 +278,12 @@ mod tests {
             ChannelSectionConfig::new(
                 "first".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
             ChannelSectionConfig::new(
                 "second".try_into().unwrap(),
                 8,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
         ]
         .into();
@@ -301,12 +305,12 @@ mod tests {
             ChannelSectionConfig::new(
                 "outer".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(20),
+                ChannelSectionLayout::linear_array(20),
             ),
             ChannelSectionConfig::new(
                 "inner".try_into().unwrap(),
                 5,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             ),
         ]
         .into();
@@ -327,12 +331,12 @@ mod tests {
             ChannelSectionConfig::new(
                 "a".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
             ChannelSectionConfig::new(
                 "b".try_into().unwrap(),
                 0,
-                ChannelSectionMode::linear_array(10),
+                ChannelSectionLayout::linear_array(10),
             ),
         ]
         .into();
@@ -353,7 +357,7 @@ mod tests {
             [ChannelSectionConfig::new(
                 "overflow".try_into().unwrap(),
                 u32::MAX - 2,
-                ChannelSectionMode::linear_array(5),
+                ChannelSectionLayout::linear_array(5),
             )]
             .into();
 

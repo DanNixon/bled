@@ -1,4 +1,4 @@
-use crate::{ChannelPartOps, ChannelSectionMode, MAX_NAME_LEN};
+use crate::{ChannelPartOps, ChannelSectionLayout, MAX_NAME_LEN};
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
@@ -14,18 +14,22 @@ pub struct ChannelSectionConfig {
     /// Start index of the section
     start: u32,
 
-    /// Type of the section
-    mode: ChannelSectionMode,
+    /// Layout of the section
+    layout: ChannelSectionLayout,
 }
 
 impl ChannelSectionConfig {
-    pub fn new(name: String<{ MAX_NAME_LEN }>, start: u32, mode: ChannelSectionMode) -> Self {
-        Self { name, start, mode }
+    pub fn new(name: String<{ MAX_NAME_LEN }>, start: u32, layout: ChannelSectionLayout) -> Self {
+        Self {
+            name,
+            start,
+            layout,
+        }
     }
 }
 
 impl ChannelPartOps for ChannelSectionConfig {
     fn len(&self) -> u32 {
-        self.mode.len()
+        self.layout.len()
     }
 }

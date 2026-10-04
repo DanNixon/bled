@@ -1,10 +1,8 @@
-mod inop;
 mod linear_array;
 mod single_pixel;
 
 use serde::{Deserialize, Serialize};
 
-pub use inop::Inop;
 pub use linear_array::LinearArray;
 pub use single_pixel::SinglePixel;
 
@@ -12,10 +10,7 @@ use crate::ChannelPartOps;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum ChannelSectionMode {
-    /// Inoperative section, will never be illuminated
-    Inop(Inop),
-
+pub enum ChannelSectionLayout {
     /// A single pixel
     SinglePixel(SinglePixel),
 
@@ -23,12 +18,7 @@ pub enum ChannelSectionMode {
     LinearArray(LinearArray),
 }
 
-impl ChannelSectionMode {
-    #[must_use]
-    pub fn inop(len: u32) -> Self {
-        Self::Inop(Inop::new(len))
-    }
-
+impl ChannelSectionLayout {
     #[must_use]
     pub fn single_pixel() -> Self {
         Self::SinglePixel(SinglePixel::default())
@@ -40,10 +30,9 @@ impl ChannelSectionMode {
     }
 }
 
-impl ChannelPartOps for ChannelSectionMode {
+impl ChannelPartOps for ChannelSectionLayout {
     fn len(&self) -> u32 {
         match self {
-            Self::Inop(m) => m.len(),
             Self::SinglePixel(m) => m.len(),
             Self::LinearArray(m) => m.len(),
         }
