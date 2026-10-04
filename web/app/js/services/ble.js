@@ -6,7 +6,7 @@ const GATT_OPERATIONS = [
   'readDeviceInfo', 'rebootDevice',
   'statFile', 'readFile', 'writeFile', 'deleteFile',
   'setChannelPixels', 'commitChannels',
-  'readBufferInfo', 'readBuffer', 'writeBuffer',
+  'readBufferInfo', 'readBuffer', 'readBufferRange', 'writeBuffer',
 ];
 
 export const CONFIG_PATH = '/config.json';
@@ -40,6 +40,27 @@ export function normaliseConfig(raw) {
     return { index, name: ch.name, length, segments };
   });
   return { name: raw.name, channels };
+}
+
+/**
+ * Calculates start pixel, pixel count, byte offset, and byte length in the
+ * device LED buffer for a channel or segment.
+ */
+export function getChannelBufferRange(channels, channelIndex, segment = null) {
+  let channelOffset = 0;
+  let targetChannel = null;
+  for (const ch of channels ?? []) {
+    if (ch.index === channelIndex) {
+      targetChannel = ch;
+      break;
+    }
+    channelOffset += ch.length;
+  }
+  const startPixel = channelOffset + (segment ? segment.start : 0);
+  const pixelCount = segment ? segment.length : (targetChannel?.length ?? 0);
+  const byteOffset = startPixel * 3;
+  const byteLength = pixelCount * 3;
+  return { startPixel, pixelCount, byteOffset, byteLength };
 }
 
 /** One connected BLED device. Emits `ready`, `config` and `disconnected`. */
@@ -200,14 +221,16 @@ export class BleDevice extends EventTarget {
     dataChar,
     makeReadCmd,
     resetCmd,
+    startOffset = 0,
     expectedSize = null,
     onProgress = null,
   }) {
     try {
-      let offset = 0;
+      let offset = startOffset;
       const chunks = [];
+      const endOffset = expectedSize !== null ? startOffset + expectedSize : null;
 
-      while (expectedSize === null || offset < expectedSize) {
+      while (endOffset === null || offset < endOffset) {
         const readCmd = makeReadCmd(offset);
         await controlChar.writeValueWithResponse(readCmd);
 
@@ -215,12 +238,15 @@ export class BleDevice extends EventTarget {
         const bytes = new Uint8Array(dataView.buffer);
         if (bytes.length === 0) break;
 
-        chunks.push(bytes);
-        offset += bytes.length;
+        const remaining = endOffset !== null ? endOffset - offset : bytes.length;
+        const slice = remaining < bytes.length ? bytes.subarray(0, remaining) : bytes;
+        chunks.push(slice);
+        offset += slice.length;
 
         if (onProgress) {
           if (expectedSize !== null && expectedSize > 0) {
-            onProgress(Math.min(100, Math.round((offset / expectedSize) * 100)));
+            const bytesRead = offset - startOffset;
+            onProgress(Math.min(100, Math.round((bytesRead / expectedSize) * 100)));
           } else {
             onProgress(Math.min(95, chunks.length * 15));
           }
@@ -434,11 +460,21 @@ export class BleDevice extends EventTarget {
 
   async readBuffer(size, onProgress = null) {
     this._log(`Reading entire LED buffer (${size} bytes)...`);
+    return this._readBufferRangeInternal(0, size, onProgress);
+  }
+
+  async readBufferRange(offset, size, onProgress = null) {
+    this._log(`Reading LED buffer range: offset ${offset}, ${size} bytes...`);
+    return this._readBufferRangeInternal(offset, size, onProgress);
+  }
+
+  async _readBufferRangeInternal(offset, size, onProgress = null) {
     const combined = await this._readChunked({
       controlChar: this.chars.bufferControl,
       dataChar: this.chars.bufferData,
-      makeReadCmd: (offset) => bled.encode_led_buffer_read(offset),
+      makeReadCmd: (off) => bled.encode_led_buffer_read(off),
       resetCmd: bled.encode_led_buffer_reset(),
+      startOffset: offset,
       expectedSize: size,
       onProgress,
     });
