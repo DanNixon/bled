@@ -1,4 +1,4 @@
-use crate::config::PixelSpan;
+use crate::config::SizedPixelSpan;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ impl LinearArray {
     }
 }
 
-impl PixelSpan for LinearArray {
+impl SizedPixelSpan for LinearArray {
     fn len(&self) -> u32 {
         self.length
     }

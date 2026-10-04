@@ -1,4 +1,8 @@
-use crate::config::{ChannelSectionConfig, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL, PixelSpan};
+use crate::config::{
+    ChannelSectionConfig, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL, PositionalPixelSpan,
+    SizedPixelSpan,
+};
+use core::ops::Range;
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -115,17 +119,17 @@ impl ChannelConfig {
 
         Ok(())
     }
+}
 
-    /// Returns `true` if the channel configuration is valid.
-    #[must_use]
-    pub fn is_valid(&self) -> bool {
-        self.validate().is_ok()
+impl SizedPixelSpan for ChannelConfig {
+    fn len(&self) -> u32 {
+        self.sections.iter().map(|s| s.len()).sum()
     }
 }
 
-impl PixelSpan for ChannelConfig {
-    fn len(&self) -> u32 {
-        self.sections.iter().map(|s| s.len()).sum()
+impl PositionalPixelSpan for ChannelConfig {
+    fn range(&self) -> Range<u32> {
+        0..self.len()
     }
 }
 
@@ -138,7 +142,6 @@ mod tests {
     fn empty_channel_has_zero_length() {
         let channel = ChannelConfig::new("empty".try_into().unwrap(), Vec::new());
         assert_eq!(channel.validate(), Ok(()));
-        assert!(channel.is_valid());
         assert_eq!(channel.len(), 0);
     }
 
@@ -166,7 +169,6 @@ mod tests {
 
         let channel = ChannelConfig::new("main".try_into().unwrap(), sections);
         assert_eq!(channel.validate(), Ok(()));
-        assert!(channel.is_valid());
         assert_eq!(channel.len(), 25);
     }
 
@@ -292,7 +294,6 @@ mod tests {
                 b: "second".try_into().unwrap(),
             })
         );
-        assert!(!channel.is_valid());
     }
 
     #[test]

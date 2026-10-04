@@ -1,4 +1,5 @@
-use crate::config::{MAX_NAME_LEN, PixelLayout, PixelSpan};
+use crate::config::{MAX_NAME_LEN, PixelLayout, PositionalPixelSpan, SizedPixelSpan};
+use core::ops::Range;
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
@@ -28,8 +29,14 @@ impl ChannelSectionConfig {
     }
 }
 
-impl PixelSpan for ChannelSectionConfig {
+impl SizedPixelSpan for ChannelSectionConfig {
     fn len(&self) -> u32 {
         self.layout.len()
+    }
+}
+
+impl PositionalPixelSpan for ChannelSectionConfig {
+    fn range(&self) -> Range<u32> {
+        self.start..self.start + self.len()
     }
 }
