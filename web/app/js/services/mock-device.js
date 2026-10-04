@@ -43,6 +43,10 @@ export class MockBleDevice extends BleDevice {
   async connect() {
     this.server = { connected: true };
     await this.loadConfig();
+    const totalPixels = this.config?.channels.reduce((sum, ch) => sum + ch.length, 0) ?? 0;
+    if (this.buffer.length < totalPixels * 3) {
+      this.buffer = new Uint8Array(totalPixels * 3);
+    }
     this.dispatchEvent(new CustomEvent('ready'));
   }
 
@@ -122,8 +126,17 @@ export class MockBleDevice extends BleDevice {
   }
 
   async readBuffer(size, onProgress = null) {
+    return this.readBufferRange(0, size, onProgress);
+  }
+
+  async readBufferRange(offset, size, onProgress = null) {
     onProgress?.(100);
-    return this.buffer.slice(0, size);
+    const result = new Uint8Array(size);
+    if (this.buffer.length > offset) {
+      const available = this.buffer.subarray(offset, Math.min(this.buffer.length, offset + size));
+      result.set(available);
+    }
+    return result;
   }
 
   async writeBuffer(offset, data, onProgress = null) {

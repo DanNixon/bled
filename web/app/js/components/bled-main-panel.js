@@ -4,6 +4,7 @@ import './bled-file-staging.js';
 import './bled-led-pixels.js';
 import './bled-led-commit.js';
 import './bled-led-buffer.js';
+import './bled-channel-buffer.js';
 
 const VIEWS = {
   info: 'bled-device-info',
@@ -11,6 +12,7 @@ const VIEWS = {
   commit: 'bled-led-commit',
   files: 'bled-file-staging',
   pixels: 'bled-led-pixels',
+  channelBuffer: 'bled-channel-buffer',
 };
 
 /**
@@ -66,7 +68,7 @@ export class BledMainPanel extends HTMLElement {
         el,
         deviceId: dev.id,
         config: dev.config,
-        configDriven: name === 'pixels' || name === 'commit',
+        configDriven: name === 'pixels' || name === 'commit' || name === 'channelBuffer',
       };
       this.views.set(key, entry);
     }
@@ -105,7 +107,9 @@ export class BledMainPanel extends HTMLElement {
         default: {
           const pixels = this._view(dev, 'pixels');
           pixels.setPreset({ channel, segment });
-          visible = [pixels];
+          const chBuffer = this._view(dev, 'channelBuffer');
+          chBuffer.setTarget({ channel, segment });
+          visible = [pixels, chBuffer];
         }
       }
     }
