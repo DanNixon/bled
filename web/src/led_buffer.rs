@@ -14,17 +14,17 @@ pub struct BufferWriteChunk {
 
 /// Pure Rust encoding of a `LedBufferControl` command into CBOR.
 pub fn internal_encode_led_buffer_control(
-    cmd: &bled_api::LedBufferControl,
+    cmd: &bled_core::LedBufferControl,
 ) -> Result<Vec<u8>, String> {
-    let mut buffer = [0u8; bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(cmd, &mut buffer)
+    let mut buffer = [0u8; bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN];
+    let written = bled_core::io::encode_cbor(cmd, &mut buffer)
         .map_err(|e| format!("failed to encode LED buffer control: {e}"))?;
     Ok(buffer[..written].to_vec())
 }
 
 /// Calculates the maximum number of RGB pixels that fit into a single write given `payload_budget`.
 pub fn internal_pixels_per_write(payload_budget: usize) -> Result<usize, String> {
-    let budget = payload_budget.min(bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN);
+    let budget = payload_budget.min(bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN);
     let count = budget / 3;
     if count == 0 {
         return Err("ATT payload budget is too small for an RGB pixel".into());
@@ -38,7 +38,7 @@ pub fn internal_slice_led_buffer_write(
     data: &[u8],
     payload_budget: usize,
 ) -> Result<Vec<BufferWriteChunk>, String> {
-    let chunk_size = payload_budget.min(bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN);
+    let chunk_size = payload_budget.min(bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN);
     if chunk_size == 0 {
         return Err("payload budget must be greater than 0".into());
     }
@@ -46,7 +46,7 @@ pub fn internal_slice_led_buffer_write(
     let mut offset = start_offset;
     for chunk in data.chunks(chunk_size) {
         let control =
-            internal_encode_led_buffer_control(&bled_api::LedBufferControl::Write { offset })?;
+            internal_encode_led_buffer_control(&bled_core::LedBufferControl::Write { offset })?;
         chunks.push(BufferWriteChunk {
             offset,
             control,
@@ -62,35 +62,35 @@ pub fn internal_slice_led_buffer_write(
 /// Encodes a `LedBufferControl::Info` request into CBOR.
 #[wasm_bindgen]
 pub fn encode_led_buffer_info() -> Result<Vec<u8>, JsError> {
-    internal_encode_led_buffer_control(&bled_api::LedBufferControl::Info)
+    internal_encode_led_buffer_control(&bled_core::LedBufferControl::Info)
         .map_err(|e| JsError::new(&e))
 }
 
 /// Encodes a `LedBufferControl::Read { offset }` command into CBOR.
 #[wasm_bindgen]
 pub fn encode_led_buffer_read(offset: u32) -> Result<Vec<u8>, JsError> {
-    internal_encode_led_buffer_control(&bled_api::LedBufferControl::Read { offset })
+    internal_encode_led_buffer_control(&bled_core::LedBufferControl::Read { offset })
         .map_err(|e| JsError::new(&e))
 }
 
 /// Encodes a `LedBufferControl::Write { offset }` command into CBOR.
 #[wasm_bindgen]
 pub fn encode_led_buffer_write(offset: u32) -> Result<Vec<u8>, JsError> {
-    internal_encode_led_buffer_control(&bled_api::LedBufferControl::Write { offset })
+    internal_encode_led_buffer_control(&bled_core::LedBufferControl::Write { offset })
         .map_err(|e| JsError::new(&e))
 }
 
 /// Encodes a `LedBufferControl::Reset` command into CBOR.
 #[wasm_bindgen]
 pub fn encode_led_buffer_reset() -> Result<Vec<u8>, JsError> {
-    internal_encode_led_buffer_control(&bled_api::LedBufferControl::Reset)
+    internal_encode_led_buffer_control(&bled_core::LedBufferControl::Reset)
         .map_err(|e| JsError::new(&e))
 }
 
 /// Decodes the CBOR payload for `LedBufferInformation` into `{ capacity: number, size: number }`.
 #[wasm_bindgen]
 pub fn decode_led_buffer_info(data: &[u8]) -> Result<JsValue, JsError> {
-    let info: bled_api::LedBufferInformation = bled_api::io::decode_cbor(data)
+    let info: bled_core::LedBufferInformation = bled_core::io::decode_cbor(data)
         .map_err(|e| JsError::new(&format!("failed to decode LedBufferInformation: {e}")))?;
     serde_wasm_bindgen::to_value(&info)
         .map_err(|e| JsError::new(&format!("failed to serialize LedBufferInformation: {e}")))
@@ -127,33 +127,33 @@ mod tests {
         assert_eq!(internal_pixels_per_write(102).unwrap(), 34);
         assert_eq!(
             internal_pixels_per_write(1000).unwrap(),
-            bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN / 3
+            bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN / 3
         );
     }
 
     #[test]
     fn test_led_buffer_control() {
         let info_bytes =
-            internal_encode_led_buffer_control(&bled_api::LedBufferControl::Info).unwrap();
-        let decoded_info: bled_api::LedBufferControl =
-            bled_api::io::decode_cbor(&info_bytes).unwrap();
-        assert_eq!(decoded_info, bled_api::LedBufferControl::Info);
+            internal_encode_led_buffer_control(&bled_core::LedBufferControl::Info).unwrap();
+        let decoded_info: bled_core::LedBufferControl =
+            bled_core::io::decode_cbor(&info_bytes).unwrap();
+        assert_eq!(decoded_info, bled_core::LedBufferControl::Info);
 
         let write_bytes =
-            internal_encode_led_buffer_control(&bled_api::LedBufferControl::Write { offset: 42 })
+            internal_encode_led_buffer_control(&bled_core::LedBufferControl::Write { offset: 42 })
                 .unwrap();
-        let decoded_write: bled_api::LedBufferControl =
-            bled_api::io::decode_cbor(&write_bytes).unwrap();
+        let decoded_write: bled_core::LedBufferControl =
+            bled_core::io::decode_cbor(&write_bytes).unwrap();
         assert_eq!(
             decoded_write,
-            bled_api::LedBufferControl::Write { offset: 42 }
+            bled_core::LedBufferControl::Write { offset: 42 }
         );
 
         let reset_bytes =
-            internal_encode_led_buffer_control(&bled_api::LedBufferControl::Reset).unwrap();
-        let decoded_reset: bled_api::LedBufferControl =
-            bled_api::io::decode_cbor(&reset_bytes).unwrap();
-        assert_eq!(decoded_reset, bled_api::LedBufferControl::Reset);
+            internal_encode_led_buffer_control(&bled_core::LedBufferControl::Reset).unwrap();
+        let decoded_reset: bled_core::LedBufferControl =
+            bled_core::io::decode_cbor(&reset_bytes).unwrap();
+        assert_eq!(decoded_reset, bled_core::LedBufferControl::Reset);
     }
 
     #[test]
@@ -168,8 +168,8 @@ mod tests {
         assert_eq!(chunks[2].offset, 300);
         assert_eq!(chunks[2].data.len(), 100);
 
-        let decoded: bled_api::LedBufferControl =
-            bled_api::io::decode_cbor(&chunks[0].control).unwrap();
-        assert_eq!(decoded, bled_api::LedBufferControl::Write { offset: 100 });
+        let decoded: bled_core::LedBufferControl =
+            bled_core::io::decode_cbor(&chunks[0].control).unwrap();
+        assert_eq!(decoded, bled_core::LedBufferControl::Write { offset: 100 });
     }
 }

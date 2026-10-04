@@ -1,4 +1,4 @@
-use bled_api::{ConfigStatResponse, DeviceConfig, MAX_CONFIG_CBOR_SIZE};
+use bled_core::{ConfigStatResponse, DeviceConfig, MAX_CONFIG_CBOR_SIZE};
 use defmt::{Format, info};
 
 #[derive(Debug, Format)]
@@ -48,7 +48,7 @@ impl<'a> ConfigSession<'a> {
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
         let bytes =
-            bled_api::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
 
         self.mode = ConfigMode::Stat {
             response: ConfigStatResponse::new(bytes as u32),
@@ -62,7 +62,7 @@ impl<'a> ConfigSession<'a> {
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
         let bytes =
-            bled_api::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
 
         if offset > bytes {
             return Err(Error::IndexOutOfBounds);
@@ -83,7 +83,7 @@ impl<'a> ConfigSession<'a> {
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
         let bytes =
-            bled_api::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
 
         if offset >= bytes {
             return Ok(0);

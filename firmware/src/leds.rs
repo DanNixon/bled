@@ -1,4 +1,4 @@
-use bled_api::{
+use bled_core::{
     ChannelConfig, ChannelMask, ChannelPartOps, MAX_CHANNEL_COUNT, RGB8,
     pixel_data::{PixelDataBuffer, PixelDataChannelSize},
 };

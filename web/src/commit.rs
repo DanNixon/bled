@@ -7,17 +7,17 @@ pub fn internal_encode_commit(channels: &[u8]) -> Result<Vec<u8>, String> {
     if channels.is_empty() {
         return Err("at least one channel index is required".into());
     }
-    let mask = bled_api::ChannelMask::from_indices(channels.iter().copied().map(usize::from))
+    let mask = bled_core::ChannelMask::from_indices(channels.iter().copied().map(usize::from))
         .ok_or_else(|| "channel index out of range (must be 0..7)".to_string())?;
     let mut buffer = [0u8; 16];
-    let written = bled_api::io::encode_cbor(&mask, &mut buffer)
+    let written = bled_core::io::encode_cbor(&mask, &mut buffer)
         .map_err(|e| format!("failed to encode Commit command: {e}"))?;
     Ok(buffer[..written].to_vec())
 }
 
 /// Pure Rust decoding of a Commit command CBOR payload into an array of selected channel indices.
 pub fn internal_decode_commit(data: &[u8]) -> Result<Vec<u8>, String> {
-    let mask: bled_api::ChannelMask = bled_api::io::decode_cbor(data)
+    let mask: bled_core::ChannelMask = bled_core::io::decode_cbor(data)
         .map_err(|e| format!("failed to decode Commit mask: {e}"))?;
     Ok(mask.iter_indices().map(|i| i as u8).collect())
 }
@@ -46,7 +46,7 @@ mod tests {
         let decoded = internal_decode_commit(&bytes).unwrap();
         assert_eq!(decoded, vec![0, 2, 5]);
 
-        let mask: bled_api::ChannelMask = bled_api::io::decode_cbor(&bytes).unwrap();
+        let mask: bled_core::ChannelMask = bled_core::io::decode_cbor(&bytes).unwrap();
         assert!(mask.contains_index(0));
         assert!(mask.contains_index(2));
         assert!(mask.contains_index(5));

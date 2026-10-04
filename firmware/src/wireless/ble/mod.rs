@@ -3,7 +3,7 @@ mod gatt;
 
 use super::BtController;
 use crate::sdcard::SdCardStorage;
-use bled_api::DeviceConfig;
+use bled_core::DeviceConfig;
 use cyw43::Control;
 use defmt::{error, info};
 use embassy_futures::join::join;

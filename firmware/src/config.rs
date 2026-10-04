@@ -1,5 +1,5 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
-use bled_api::{
+use bled_core::{
     ChannelConfig, ChannelSectionConfig, ChannelSectionMode, DeviceConfig, MAX_CONFIG_JSON_SIZE,
 };
 use defmt::{error, info, warn};
@@ -34,7 +34,7 @@ pub(super) async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
 async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
     match sd.read_file(CONFIG_PATH, &mut bytes).await {
-        Ok(len) => match bled_api::io::decode_json::<DeviceConfig>(&bytes[..len]) {
+        Ok(len) => match bled_core::io::decode_json::<DeviceConfig>(&bytes[..len]) {
             Ok(config) => Ok(Some(config)),
             Err(e) => {
                 warn!("Failed to parse config loaded from SD card: {}", e);
@@ -53,7 +53,7 @@ async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
 pub(crate) async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bool {
     info!("Saving config");
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
-    match bled_api::io::encode_json(config, &mut bytes) {
+    match bled_core::io::encode_json(config, &mut bytes) {
         Ok(len) => sd.write_file(CONFIG_PATH, &bytes[..len]).await.is_ok(),
         Err(e) => {
             warn!("Failed to serialize config: {}", e);

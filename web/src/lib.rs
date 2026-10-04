@@ -1,4 +1,4 @@
-//! WebAssembly bindings for `bled-api`.
+//! WebAssembly bindings for `bled-core`.
 //!
 //! Provides protocol encoding, decoding, and client framing for Web Bluetooth
 //! and other JavaScript/TypeScript environments.

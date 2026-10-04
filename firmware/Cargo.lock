@@ -150,7 +150,7 @@ version = "0.1.0"
 dependencies = [
  "aligned",
  "assign-resources",
- "bled-api",
+ "bled-core",
  "bt-hci",
  "cortex-m-rt",
  "cyw43",
@@ -178,7 +178,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bled-api"
+name = "bled-core"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.13.2",
