@@ -297,7 +297,9 @@ impl SdBlockDevice {
     fn new(r: SdCardResources) -> SdBlockDevice {
         let detect = Input::new(r.detect, Pull::Up);
 
-        let spi = Spi::new_blocking(r.spi, r.sck, r.mosi, r.miso, Config::default());
+        let mut config = Config::default();
+        config.frequency = 16_000_000;
+        let spi = Spi::new_blocking(r.spi, r.sck, r.mosi, r.miso, config);
         let cs = Output::new(r.cs, Level::High);
         let spi = unwrap!(ExclusiveDevice::new(spi, cs, Delay));
         let sd = SpiSdCard::new(spi, Delay);
