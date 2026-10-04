@@ -1,4 +1,4 @@
-use crate::ChannelPartOps;
+use crate::config::ChannelPartOps;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]

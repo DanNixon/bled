@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub use linear_array::LinearArray;
 pub use single_pixel::SinglePixel;
 
-use crate::ChannelPartOps;
+use crate::config::ChannelPartOps;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]

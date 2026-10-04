@@ -1,4 +1,4 @@
-use crate::MAX_CHANNEL_COUNT;
+use crate::config::MAX_CHANNEL_COUNT;
 use serde::{Deserialize, Serialize};
 
 bitflags::bitflags! {

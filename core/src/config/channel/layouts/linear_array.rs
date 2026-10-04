@@ -1,4 +1,4 @@
-use crate::ChannelPartOps;
+use crate::config::ChannelPartOps;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 

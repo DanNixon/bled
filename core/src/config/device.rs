@@ -1,4 +1,4 @@
-use crate::{ChannelConfig, MAX_CHANNEL_COUNT, MAX_NAME_LEN};
+use crate::config::{ChannelConfig, MAX_CHANNEL_COUNT, MAX_NAME_LEN};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -26,7 +26,7 @@ impl DeviceConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ChannelSectionConfig, ChannelSectionLayout};
+    use crate::config::{ChannelSectionConfig, ChannelSectionLayout};
 
     #[test]
     fn json_round_trip() {

@@ -1,4 +1,4 @@
-use crate::{LedBufferInformation, MAX_CHANNEL_COUNT};
+use crate::{api::LedBufferInformation, config::MAX_CHANNEL_COUNT};
 use bytemuck::{AnyBitPattern, NoUninit, Pod};
 use core::ops::Range;
 use heapless::Vec;

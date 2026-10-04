@@ -1,4 +1,4 @@
-use crate::{ChannelPartOps, ChannelSectionConfig, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL};
+use crate::config::{ChannelPartOps, ChannelSectionConfig, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -132,7 +132,7 @@ impl ChannelPartOps for ChannelConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ChannelSectionLayout;
+    use crate::config::ChannelSectionLayout;
 
     #[test]
     fn empty_channel_has_zero_length() {

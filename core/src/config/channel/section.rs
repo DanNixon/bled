@@ -1,4 +1,4 @@
-use crate::{ChannelPartOps, ChannelSectionLayout, MAX_NAME_LEN};
+use crate::config::{ChannelPartOps, ChannelSectionLayout, MAX_NAME_LEN};
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
