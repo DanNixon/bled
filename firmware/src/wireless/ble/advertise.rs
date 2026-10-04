@@ -1,4 +1,4 @@
-use bled_api::ble::SERVICE_UUID;
+use bled_core::ble::SERVICE_UUID;
 use defmt::info;
 use trouble_host::prelude::*;
 

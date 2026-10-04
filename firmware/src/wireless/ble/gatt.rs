@@ -7,7 +7,7 @@ use crate::{
     leds,
     sdcard::SdCardStorage,
 };
-use bled_api::{
+use bled_core::{
     ChannelMask, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
     ble::{
         COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
@@ -129,7 +129,7 @@ async fn process_config_data_read<'config, 'stack, P: PacketPool>(
     match config.mode() {
         ConfigMode::Stat { response } => {
             let mut buf = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
-            let n = bled_api::io::encode_cbor(response, &mut buf)
+            let n = bled_core::io::encode_cbor(response, &mut buf)
                 .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
             event.accept_unprocessed(&buf[..n])
         }
@@ -158,7 +158,7 @@ async fn process_config_control_write<'config, 'stack, P: PacketPool>(
         if offset != 0 {
             return Err(AttErrorCode::INVALID_OFFSET);
         }
-        bled_api::io::decode_cbor::<ConfigControl>(data)
+        bled_core::io::decode_cbor::<ConfigControl>(data)
             .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
     }) {
         Ok(cmd) => cmd,
@@ -201,7 +201,7 @@ async fn process_device_info<'stack, P: PacketPool>(
     let device_info = crate::device_info();
 
     let mut b = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
-    let n = bled_api::io::encode_cbor(&device_info, &mut b)
+    let n = bled_core::io::encode_cbor(&device_info, &mut b)
         .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
 
     event.accept_unprocessed(&b[..n])
@@ -214,7 +214,7 @@ async fn process_file_io_data_read<'stack, P: PacketPool>(
     match file_io.mode() {
         FileIoMode::Stat { response } => {
             let mut buf = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
-            let n = bled_api::io::encode_cbor(response, &mut buf)
+            let n = bled_core::io::encode_cbor(response, &mut buf)
                 .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
             event.accept_unprocessed(&buf[..n])
         }
@@ -246,7 +246,7 @@ async fn process_file_io_control_write<'stack, P: PacketPool>(
         if offset != 0 {
             return Err(AttErrorCode::INVALID_OFFSET);
         }
-        bled_api::io::decode_cbor::<FileIoControl>(data)
+        bled_core::io::decode_cbor::<FileIoControl>(data)
             .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
     }) {
         Ok(cmd) => cmd,
@@ -353,7 +353,7 @@ async fn process_commit<'stack, P: PacketPool>(
         if offset != 0 {
             Err(AttErrorCode::INVALID_OFFSET)
         } else {
-            bled_api::io::decode_cbor::<ChannelMask>(data)
+            bled_core::io::decode_cbor::<ChannelMask>(data)
                 .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
         }
     }) {
@@ -373,7 +373,7 @@ async fn process_led_buffer_data_read<'stack, P: PacketPool>(
     match led_buffer.mode() {
         LedBufferMode::Info { response } => {
             let mut buf = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
-            let n = bled_api::io::encode_cbor(response, &mut buf)
+            let n = bled_core::io::encode_cbor(response, &mut buf)
                 .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
             event.accept_unprocessed(&buf[..n])
         }
@@ -402,7 +402,7 @@ async fn process_led_buffer_control_write<'stack, P: PacketPool>(
         if offset != 0 {
             return Err(AttErrorCode::INVALID_OFFSET);
         }
-        bled_api::io::decode_cbor::<LedBufferControl>(data)
+        bled_core::io::decode_cbor::<LedBufferControl>(data)
             .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
     }) {
         Ok(cmd) => cmd,

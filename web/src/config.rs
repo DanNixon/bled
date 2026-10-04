@@ -3,31 +3,32 @@
 use wasm_bindgen::prelude::*;
 
 /// Pure Rust encoding of a `ConfigControl` command into CBOR.
-pub fn internal_encode_config_control(cmd: &bled_api::ConfigControl) -> Result<Vec<u8>, String> {
-    let mut buffer = [0u8; bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(cmd, &mut buffer)
+pub fn internal_encode_config_control(cmd: &bled_core::ConfigControl) -> Result<Vec<u8>, String> {
+    let mut buffer = [0u8; bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN];
+    let written = bled_core::io::encode_cbor(cmd, &mut buffer)
         .map_err(|e| format!("failed to encode Config control: {e}"))?;
     Ok(buffer[..written].to_vec())
 }
 
 /// Pure Rust encoding of a Config Stat command into CBOR.
 pub fn internal_encode_config_stat() -> Result<Vec<u8>, String> {
-    internal_encode_config_control(&bled_api::ConfigControl::Stat)
+    internal_encode_config_control(&bled_core::ConfigControl::Stat)
 }
 
 /// Pure Rust encoding of a Config Read command at `offset` into CBOR.
 pub fn internal_encode_config_read(offset: u32) -> Result<Vec<u8>, String> {
-    internal_encode_config_control(&bled_api::ConfigControl::Read { offset })
+    internal_encode_config_control(&bled_core::ConfigControl::Read { offset })
 }
 
 /// Pure Rust encoding of a Config Reset command into CBOR.
 pub fn internal_encode_config_reset() -> Result<Vec<u8>, String> {
-    internal_encode_config_control(&bled_api::ConfigControl::Reset)
+    internal_encode_config_control(&bled_core::ConfigControl::Reset)
 }
 
 /// Pure Rust decoding of a CBOR payload into `ConfigStatResponse`.
-pub fn internal_decode_config_stat(data: &[u8]) -> Result<bled_api::ConfigStatResponse, String> {
-    bled_api::io::decode_cbor(data).map_err(|e| format!("failed to decode ConfigStatResponse: {e}"))
+pub fn internal_decode_config_stat(data: &[u8]) -> Result<bled_core::ConfigStatResponse, String> {
+    bled_core::io::decode_cbor(data)
+        .map_err(|e| format!("failed to decode ConfigStatResponse: {e}"))
 }
 
 /// Encodes a `ConfigControl::Stat` command into CBOR.
@@ -64,23 +65,23 @@ mod tests {
     fn test_config_control() {
         // Stat
         let stat_bytes = internal_encode_config_stat().unwrap();
-        let decoded: bled_api::ConfigControl = bled_api::io::decode_cbor(&stat_bytes).unwrap();
-        assert_eq!(decoded, bled_api::ConfigControl::Stat);
+        let decoded: bled_core::ConfigControl = bled_core::io::decode_cbor(&stat_bytes).unwrap();
+        assert_eq!(decoded, bled_core::ConfigControl::Stat);
 
         // Read
         let read_bytes = internal_encode_config_read(128).unwrap();
-        let decoded: bled_api::ConfigControl = bled_api::io::decode_cbor(&read_bytes).unwrap();
-        assert_eq!(decoded, bled_api::ConfigControl::Read { offset: 128 });
+        let decoded: bled_core::ConfigControl = bled_core::io::decode_cbor(&read_bytes).unwrap();
+        assert_eq!(decoded, bled_core::ConfigControl::Read { offset: 128 });
 
         // Reset
         let reset_bytes = internal_encode_config_reset().unwrap();
-        let decoded: bled_api::ConfigControl = bled_api::io::decode_cbor(&reset_bytes).unwrap();
-        assert_eq!(decoded, bled_api::ConfigControl::Reset);
+        let decoded: bled_core::ConfigControl = bled_core::io::decode_cbor(&reset_bytes).unwrap();
+        assert_eq!(decoded, bled_core::ConfigControl::Reset);
 
         // Decode Stat
-        let stat_response = bled_api::ConfigStatResponse::new(512);
+        let stat_response = bled_core::ConfigStatResponse::new(512);
         let mut buffer = [0u8; 64];
-        let written = bled_api::io::encode_cbor(&stat_response, &mut buffer).unwrap();
+        let written = bled_core::io::encode_cbor(&stat_response, &mut buffer).unwrap();
         let decoded_stat = internal_decode_config_stat(&buffer[..written]).unwrap();
         assert_eq!(*decoded_stat.size(), 512);
     }

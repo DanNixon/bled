@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bled-api"
+name = "bled-core"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.13.2",

@@ -1,5 +1,5 @@
 use crate::leds;
-use bled_api::LedBufferInformation;
+use bled_core::LedBufferInformation;
 use defmt::{Format, info};
 
 #[derive(Debug, Format)]

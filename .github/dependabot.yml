@@ -8,7 +8,7 @@ updates:
 
   - package-ecosystem: cargo
     directories:
-      - api
+      - core
       - firmware
       - web
     schedule:

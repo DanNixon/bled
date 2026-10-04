@@ -10,7 +10,7 @@ mod status;
 mod wireless;
 
 use crate::sdcard::SdCardStorage;
-use bled_api::{BootReason, ChannelMask, DeviceInfo};
+use bled_core::{BootReason, ChannelMask, DeviceInfo};
 use defmt::{error, info, unwrap};
 use defmt_rtt as _;
 use embassy_executor::Spawner;

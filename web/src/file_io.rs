@@ -13,22 +13,22 @@ pub struct FileWriteChunk {
 }
 
 /// Converts a path string slice into a fixed-capacity heapless string, validating bounds.
-fn to_heapless_path(path: &str) -> Result<heapless::String<{ bled_api::MAX_PATH_LEN }>, String> {
+fn to_heapless_path(path: &str) -> Result<heapless::String<{ bled_core::MAX_PATH_LEN }>, String> {
     if path.is_empty() {
         return Err("remote path cannot be empty".to_string());
     }
     path.try_into().map_err(|_| {
         format!(
             "remote path exceeds maximum length of {} bytes",
-            bled_api::MAX_PATH_LEN
+            bled_core::MAX_PATH_LEN
         )
     })
 }
 
 /// Pure Rust encoding of a `FileIoControl` command into CBOR.
-pub fn internal_encode_file_io_control(cmd: &bled_api::FileIoControl) -> Result<Vec<u8>, String> {
-    let mut buffer = [0u8; bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN];
-    let written = bled_api::io::encode_cbor(cmd, &mut buffer)
+pub fn internal_encode_file_io_control(cmd: &bled_core::FileIoControl) -> Result<Vec<u8>, String> {
+    let mut buffer = [0u8; bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN];
+    let written = bled_core::io::encode_cbor(cmd, &mut buffer)
         .map_err(|e| format!("failed to encode File IO control: {e}"))?;
     Ok(buffer[..written].to_vec())
 }
@@ -36,7 +36,7 @@ pub fn internal_encode_file_io_control(cmd: &bled_api::FileIoControl) -> Result<
 /// Pure Rust encoding of a File IO Stat command for `path`.
 pub fn internal_encode_file_io_stat(path: &str) -> Result<Vec<u8>, String> {
     let heapless_path = to_heapless_path(path)?;
-    internal_encode_file_io_control(&bled_api::FileIoControl::Stat {
+    internal_encode_file_io_control(&bled_core::FileIoControl::Stat {
         path: heapless_path,
     })
 }
@@ -44,7 +44,7 @@ pub fn internal_encode_file_io_stat(path: &str) -> Result<Vec<u8>, String> {
 /// Pure Rust encoding of a File IO Read command for `path` at `offset`.
 pub fn internal_encode_file_io_read(path: &str, offset: u32) -> Result<Vec<u8>, String> {
     let heapless_path = to_heapless_path(path)?;
-    internal_encode_file_io_control(&bled_api::FileIoControl::Read {
+    internal_encode_file_io_control(&bled_core::FileIoControl::Read {
         path: heapless_path,
         offset,
     })
@@ -53,7 +53,7 @@ pub fn internal_encode_file_io_read(path: &str, offset: u32) -> Result<Vec<u8>, 
 /// Pure Rust encoding of a File IO Create command for `path` with allocated `size`.
 pub fn internal_encode_file_io_create(path: &str, size: u32) -> Result<Vec<u8>, String> {
     let heapless_path = to_heapless_path(path)?;
-    internal_encode_file_io_control(&bled_api::FileIoControl::Create {
+    internal_encode_file_io_control(&bled_core::FileIoControl::Create {
         path: heapless_path,
         size,
     })
@@ -62,7 +62,7 @@ pub fn internal_encode_file_io_create(path: &str, size: u32) -> Result<Vec<u8>, 
 /// Pure Rust encoding of a File IO Write command for `path` at `offset`.
 pub fn internal_encode_file_io_write(path: &str, offset: u32) -> Result<Vec<u8>, String> {
     let heapless_path = to_heapless_path(path)?;
-    internal_encode_file_io_control(&bled_api::FileIoControl::Write {
+    internal_encode_file_io_control(&bled_core::FileIoControl::Write {
         path: heapless_path,
         offset,
     })
@@ -71,19 +71,19 @@ pub fn internal_encode_file_io_write(path: &str, offset: u32) -> Result<Vec<u8>,
 /// Pure Rust encoding of a File IO Delete command for `path`.
 pub fn internal_encode_file_io_delete(path: &str) -> Result<Vec<u8>, String> {
     let heapless_path = to_heapless_path(path)?;
-    internal_encode_file_io_control(&bled_api::FileIoControl::Delete {
+    internal_encode_file_io_control(&bled_core::FileIoControl::Delete {
         path: heapless_path,
     })
 }
 
 /// Pure Rust encoding of a File IO Reset command.
 pub fn internal_encode_file_io_reset() -> Result<Vec<u8>, String> {
-    internal_encode_file_io_control(&bled_api::FileIoControl::Reset)
+    internal_encode_file_io_control(&bled_core::FileIoControl::Reset)
 }
 
 /// Pure Rust decoding of a CBOR payload into `FileStatResponse`.
-pub fn internal_decode_file_stat(data: &[u8]) -> Result<bled_api::FileStatResponse, String> {
-    bled_api::io::decode_cbor(data).map_err(|e| format!("failed to decode FileStatResponse: {e}"))
+pub fn internal_decode_file_stat(data: &[u8]) -> Result<bled_core::FileStatResponse, String> {
+    bled_core::io::decode_cbor(data).map_err(|e| format!("failed to decode FileStatResponse: {e}"))
 }
 
 /// Slices file write data into chunks fitting `payload_budget` with corresponding Write control packets.
@@ -92,7 +92,7 @@ pub fn internal_slice_file_write(
     data: &[u8],
     payload_budget: usize,
 ) -> Result<Vec<FileWriteChunk>, String> {
-    let chunk_size = payload_budget.min(bled_api::ble::MAX_ATTRIBUTE_VALUE_LEN);
+    let chunk_size = payload_budget.min(bled_core::ble::MAX_ATTRIBUTE_VALUE_LEN);
     if chunk_size == 0 {
         return Err("payload budget must be greater than 0".into());
     }
@@ -100,7 +100,7 @@ pub fn internal_slice_file_write(
     let mut chunks = Vec::new();
     let mut offset: u32 = 0;
     for chunk in data.chunks(chunk_size) {
-        let control = internal_encode_file_io_control(&bled_api::FileIoControl::Write {
+        let control = internal_encode_file_io_control(&bled_core::FileIoControl::Write {
             path: heapless_path.clone(),
             offset,
         })?;
@@ -182,20 +182,20 @@ mod tests {
     fn test_file_io_control_round_trip() {
         // Stat
         let stat_bytes = internal_encode_file_io_stat("/config.json").unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&stat_bytes).unwrap();
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&stat_bytes).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Stat {
+            bled_core::FileIoControl::Stat {
                 path: "/config.json".try_into().unwrap()
             }
         );
 
         // Read
         let read_bytes = internal_encode_file_io_read("/test.txt", 128).unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&read_bytes).unwrap();
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&read_bytes).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Read {
+            bled_core::FileIoControl::Read {
                 path: "/test.txt".try_into().unwrap(),
                 offset: 128,
             }
@@ -203,10 +203,10 @@ mod tests {
 
         // Create
         let create_bytes = internal_encode_file_io_create("/new.bin", 1024).unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&create_bytes).unwrap();
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&create_bytes).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Create {
+            bled_core::FileIoControl::Create {
                 path: "/new.bin".try_into().unwrap(),
                 size: 1024,
             }
@@ -214,10 +214,10 @@ mod tests {
 
         // Write
         let write_bytes = internal_encode_file_io_write("/write.bin", 64).unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&write_bytes).unwrap();
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&write_bytes).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Write {
+            bled_core::FileIoControl::Write {
                 path: "/write.bin".try_into().unwrap(),
                 offset: 64,
             }
@@ -225,34 +225,34 @@ mod tests {
 
         // Delete
         let delete_bytes = internal_encode_file_io_delete("/del.bin").unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&delete_bytes).unwrap();
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&delete_bytes).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Delete {
+            bled_core::FileIoControl::Delete {
                 path: "/del.bin".try_into().unwrap()
             }
         );
 
         // Reset
         let reset_bytes = internal_encode_file_io_reset().unwrap();
-        let decoded: bled_api::FileIoControl = bled_api::io::decode_cbor(&reset_bytes).unwrap();
-        assert_eq!(decoded, bled_api::FileIoControl::Reset);
+        let decoded: bled_core::FileIoControl = bled_core::io::decode_cbor(&reset_bytes).unwrap();
+        assert_eq!(decoded, bled_core::FileIoControl::Reset);
     }
 
     #[test]
     fn test_file_io_path_validation() {
         assert!(internal_encode_file_io_stat("").is_err());
-        let long_path = "a".repeat(bled_api::MAX_PATH_LEN + 1);
+        let long_path = "a".repeat(bled_core::MAX_PATH_LEN + 1);
         assert!(internal_encode_file_io_stat(&long_path).is_err());
-        let exact_path = "a".repeat(bled_api::MAX_PATH_LEN);
+        let exact_path = "a".repeat(bled_core::MAX_PATH_LEN);
         assert!(internal_encode_file_io_stat(&exact_path).is_ok());
     }
 
     #[test]
     fn test_decode_file_stat() {
-        let stat = bled_api::FileStatResponse::new(4096);
+        let stat = bled_core::FileStatResponse::new(4096);
         let mut buffer = [0u8; 64];
-        let written = bled_api::io::encode_cbor(&stat, &mut buffer).unwrap();
+        let written = bled_core::io::encode_cbor(&stat, &mut buffer).unwrap();
         let decoded = internal_decode_file_stat(&buffer[..written]).unwrap();
         assert_eq!(*decoded.size(), 4096);
     }
@@ -269,11 +269,11 @@ mod tests {
         assert_eq!(chunks[2].offset, 200);
         assert_eq!(chunks[2].data.len(), 50);
 
-        let decoded: bled_api::FileIoControl =
-            bled_api::io::decode_cbor(&chunks[1].control).unwrap();
+        let decoded: bled_core::FileIoControl =
+            bled_core::io::decode_cbor(&chunks[1].control).unwrap();
         assert_eq!(
             decoded,
-            bled_api::FileIoControl::Write {
+            bled_core::FileIoControl::Write {
                 path: "/out.bin".try_into().unwrap(),
                 offset: 100,
             }

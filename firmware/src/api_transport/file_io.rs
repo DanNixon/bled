@@ -1,5 +1,5 @@
 use crate::sdcard::{File, FsError, OpenOptions, SdCardStorage};
-use bled_api::{FileStatResponse, MAX_PATH_LEN};
+use bled_core::{FileStatResponse, MAX_PATH_LEN};
 use defmt::{Format, debug, info};
 use heapless::String;
 
