@@ -3,5 +3,6 @@
 pub mod api;
 pub mod ble;
 pub mod config;
+pub mod effects;
 pub mod io;
 pub mod pixel_data;
