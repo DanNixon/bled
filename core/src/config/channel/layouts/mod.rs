@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub use linear_array::LinearArray;
 pub use single_pixel::SinglePixel;
 
-use crate::config::ChannelPartOps;
+use crate::config::ChannelSpan;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -30,7 +30,7 @@ impl ChannelSectionLayout {
     }
 }
 
-impl ChannelPartOps for ChannelSectionLayout {
+impl ChannelSpan for ChannelSectionLayout {
     fn len(&self) -> u32 {
         match self {
             Self::SinglePixel(m) => m.len(),

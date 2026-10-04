@@ -1,4 +1,4 @@
-use crate::config::ChannelPartOps;
+use crate::config::ChannelSpan;
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ impl LinearArray {
     }
 }
 
-impl ChannelPartOps for LinearArray {
+impl ChannelSpan for LinearArray {
     fn len(&self) -> u32 {
         self.length
     }

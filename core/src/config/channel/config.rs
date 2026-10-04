@@ -1,4 +1,4 @@
-use crate::config::{ChannelPartOps, ChannelSectionConfig, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL};
+use crate::config::{ChannelSectionConfig, ChannelSpan, MAX_NAME_LEN, MAX_SECTIONS_PER_CHANNEL};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -123,7 +123,7 @@ impl ChannelConfig {
     }
 }
 
-impl ChannelPartOps for ChannelConfig {
+impl ChannelSpan for ChannelConfig {
     fn len(&self) -> u32 {
         self.sections.iter().map(|s| s.len()).sum()
     }

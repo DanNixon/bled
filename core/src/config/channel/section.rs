@@ -1,4 +1,4 @@
-use crate::config::{ChannelPartOps, ChannelSectionLayout, MAX_NAME_LEN};
+use crate::config::{ChannelSpan, ChannelSectionLayout, MAX_NAME_LEN};
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,7 @@ impl ChannelSectionConfig {
     }
 }
 
-impl ChannelPartOps for ChannelSectionConfig {
+impl ChannelSpan for ChannelSectionConfig {
     fn len(&self) -> u32 {
         self.layout.len()
     }

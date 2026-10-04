@@ -6,9 +6,12 @@ pub use config::*;
 pub use layouts::*;
 pub use section::*;
 
-pub trait ChannelPartOps {
+/// A range of a single channel.
+pub trait ChannelSpan {
+    /// Number of pixels in this span.
     fn len(&self) -> u32;
 
+    /// Returns `true` if this span is empty (i.e. has no pixels).
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
