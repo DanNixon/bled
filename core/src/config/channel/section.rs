@@ -40,3 +40,13 @@ impl PositionalPixelSpan for ChannelSectionConfig {
         self.start..self.start + self.len()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn target_types_have_known_sizes() {
+        assert_eq!(core::mem::size_of::<ChannelSectionConfig>(), 40);
+    }
+}

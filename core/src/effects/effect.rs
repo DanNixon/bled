@@ -14,9 +14,10 @@ pub trait EffectCreate: Sized {
 #[enum_dispatch]
 pub trait EffectRun {
     /// Steps the effect forward, returning the next step result.
-    fn step(
+    fn step<const N: usize>(
         &mut self,
         now: core::time::Duration,
+        led_data: &mut crate::pixel_data::PixelDataBuffer<N>,
     ) -> Result<crate::effects::StepResult, &'static str>;
 }
 

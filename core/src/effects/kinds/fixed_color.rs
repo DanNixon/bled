@@ -1,4 +1,7 @@
-use crate::effects::{EffectCreate, EffectRun};
+use crate::{
+    effects::{EffectCreate, EffectRun},
+    pixel_data::PixelDataBuffer,
+};
 use core::time::Duration;
 use getset::Getters;
 use rgb::RGB8;
@@ -15,7 +18,11 @@ impl EffectCreate for FixedColor {
 }
 
 impl EffectRun for FixedColor {
-    fn step(&mut self, _now: Duration) -> Result<crate::effects::StepResult, &'static str> {
+    fn step<const N: usize>(
+        &mut self,
+        _now: Duration,
+        led_data: &mut PixelDataBuffer<N>,
+    ) -> Result<crate::effects::StepResult, &'static str> {
         todo!()
     }
 }

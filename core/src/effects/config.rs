@@ -1,6 +1,6 @@
 use crate::{
     config::MAX_NAME_LEN,
-    effects::{EffectKindConfig, TargetConfig},
+    effects::{EffectKindConfig, TargetConfigs},
 };
 use getset::Getters;
 use heapless::String;
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 #[getset(get = "pub")]
 pub struct EffectConfig {
     name: String<{ MAX_NAME_LEN }>,
-    target: TargetConfig,
+    target: TargetConfigs,
     effect: EffectKindConfig,
 }
 
