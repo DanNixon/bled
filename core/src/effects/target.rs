@@ -1,7 +1,8 @@
 use crate::{
     api::ChannelNumber,
-    config::{MAX_CHANNEL_COUNT, MAX_NAME_LEN, PixelLayout},
+    config::{MAX_CHANNEL_COUNT, MAX_NAME_LEN, PixelLayout, PositionalPixelSpan, SizedPixelSpan},
 };
+use core::ops::Range;
 use getset::Getters;
 use heapless::{String, Vec};
 use nutype::nutype;
@@ -43,6 +44,18 @@ pub struct Target {
 
     /// Layout of the section
     layout: PixelLayout,
+}
+
+impl SizedPixelSpan for Target {
+    fn len(&self) -> u32 {
+        self.layout.len()
+    }
+}
+
+impl PositionalPixelSpan for Target {
+    fn range(&self) -> Range<u32> {
+        self.start..self.start + self.len()
+    }
 }
 
 #[cfg(test)]

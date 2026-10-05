@@ -1,5 +1,6 @@
 use crate::{
     api::ChannelMask,
+    config::PositionalPixelSpan,
     effects::{EffectCreate, EffectRun, StepResult, Targets},
     pixel_data::PixelDataBuffer,
 };
@@ -36,7 +37,8 @@ impl EffectRun for FixedColor {
 
         for t in self.targets.as_ref() {
             if let Ok(channel) = led_data.try_channel_mut::<RGB8>(*t.channel().as_ref() as usize) {
-                // TODO
+                let s = t.range();
+                channel[s.start as usize..s.end as usize].fill(self.color);
             }
         }
 
