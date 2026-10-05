@@ -11,10 +11,12 @@ unused_crate_dependencies = "deny"
 bitflags = { version = "2", default-features = false, features = ["serde"] }
 bytemuck = { version = "1.25.2", default-features = false }
 defmt = { version = "1", default-features = false, optional = true }
+enum_dispatch = "0.3.13"
 getset = "0.1.7"
 heapless = { version = "0.9", features = ["serde"] }
 minicbor = "2.3.0"
 minicbor-serde = "0.7.1"
+nutype = { version = "0.8.0", default-features = false, features = ["derive_unchecked", "serde"] }
 rgb = { version = "0.8.53", features = ["serde"] }
 serde = { version = "1.0.229", default-features = false, features = ["derive"] }
 serde-json-core = "0.6.0"

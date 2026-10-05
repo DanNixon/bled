@@ -139,6 +139,46 @@ mod tests {
     use crate::config::PixelLayout;
 
     #[test]
+    fn deserialize_channel_from_json() {
+        let json = r#"{
+            "name": "main",
+            "sections": [
+                {
+                    "name": "onboard",
+                    "start": 0,
+                    "layout": { "single_pixel": {} }
+                },
+                {
+                    "name": "strip",
+                    "start": 1,
+                    "layout": { "linear_array": { "length": 20 } }
+                }
+            ]
+        }"#;
+
+        let (channel, consumed) = serde_json_core::from_str::<ChannelConfig>(json).unwrap();
+        let expected = ChannelConfig::new(
+            "main".try_into().unwrap(),
+            [
+                ChannelSectionConfig::new(
+                    "onboard".try_into().unwrap(),
+                    0,
+                    PixelLayout::single_pixel(),
+                ),
+                ChannelSectionConfig::new(
+                    "strip".try_into().unwrap(),
+                    1,
+                    PixelLayout::linear_array(20),
+                ),
+            ]
+            .into(),
+        );
+
+        assert_eq!(channel, expected);
+        assert_eq!(consumed, json.len());
+    }
+
+    #[test]
     fn empty_channel_has_zero_length() {
         let channel = ChannelConfig::new("empty".try_into().unwrap(), Vec::new());
         assert_eq!(channel.validate(), Ok(()));
