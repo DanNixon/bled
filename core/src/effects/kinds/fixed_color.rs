@@ -36,7 +36,7 @@ impl EffectRun for FixedColor {
         let channels = ChannelMask::empty();
 
         for t in self.targets.as_ref() {
-            if let Ok(channel) = led_data.try_channel_mut::<RGB8>(*t.channel().as_ref() as usize) {
+            if let Ok(channel) = led_data.try_channel_mut::<RGB8>(t.channel().clone()) {
                 let s = t.range();
                 channel[s.start as usize..s.end as usize].fill(self.color);
             }

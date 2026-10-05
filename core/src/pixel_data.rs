@@ -1,4 +1,7 @@
-use crate::{api::LedBufferInformation, config::MAX_CHANNEL_COUNT};
+use crate::{
+    api::{ChannelNumber, LedBufferInformation},
+    config::MAX_CHANNEL_COUNT,
+};
 use bytemuck::{AnyBitPattern, NoUninit, Pod};
 use core::ops::Range;
 use heapless::Vec;
@@ -122,20 +125,22 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
 
     pub fn try_channel<P: AnyBitPattern>(
         &self,
-        channel: usize,
+        channel: ChannelNumber,
     ) -> Result<&[P], PixelDataBufferError> {
+        let channel_idx = *channel.as_ref() as usize;
+
         let r = self
             .ranges
-            .get(channel)
+            .get(channel_idx)
             .ok_or(PixelDataBufferError::InvalidChannel {
-                channel,
+                channel: channel_idx,
                 channel_count: self.ranges.len(),
             })?;
         let s = self
             .data
             .get(r.start..r.end)
             .ok_or(PixelDataBufferError::InvalidChannel {
-                channel,
+                channel: channel_idx,
                 channel_count: self.ranges.len(),
             })?;
         bytemuck::try_cast_slice(s).map_err(|_| PixelDataBufferError::TypeCastFailed)
@@ -143,20 +148,22 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
 
     pub fn try_channel_mut<P: AnyBitPattern + NoUninit>(
         &mut self,
-        channel: usize,
+        channel: ChannelNumber,
     ) -> Result<&mut [P], PixelDataBufferError> {
+        let channel_idx = *channel.as_ref() as usize;
+
         let r = self
             .ranges
-            .get(channel)
+            .get(channel_idx)
             .ok_or(PixelDataBufferError::InvalidChannel {
-                channel,
+                channel: channel_idx,
                 channel_count: self.ranges.len(),
             })?;
         let s = self
             .data
             .get_mut(r.start..r.end)
             .ok_or(PixelDataBufferError::InvalidChannel {
-                channel,
+                channel: channel_idx,
                 channel_count: self.ranges.len(),
             })?;
         bytemuck::try_cast_slice_mut(s).map_err(|_| PixelDataBufferError::TypeCastFailed)
@@ -209,21 +216,29 @@ mod tests {
         ];
 
         assert_eq!(buffer.try_reshape(&sizes), Ok(()));
-        let ch0 = buffer.try_channel_mut::<RGB8>(0).unwrap();
+        let ch0 = buffer
+            .try_channel_mut::<RGB8>(ChannelNumber::try_new(0).unwrap())
+            .unwrap();
         assert_eq!(ch0.len(), 2);
         ch0[0] = RGB8::new(1, 2, 3);
         ch0[1] = RGB8::new(4, 5, 6);
 
-        let ch1 = buffer.try_channel_mut::<RGB8>(1).unwrap();
+        let ch1 = buffer
+            .try_channel_mut::<RGB8>(ChannelNumber::try_new(1).unwrap())
+            .unwrap();
         assert_eq!(ch1.len(), 3);
         ch1[2] = RGB8::new(7, 8, 9);
 
         assert_eq!(
-            buffer.try_channel::<RGB8>(0).unwrap()[0],
+            buffer
+                .try_channel::<RGB8>(ChannelNumber::try_new(0).unwrap())
+                .unwrap()[0],
             RGB8::new(1, 2, 3)
         );
         assert_eq!(
-            buffer.try_channel::<RGB8>(1).unwrap()[2],
+            buffer
+                .try_channel::<RGB8>(ChannelNumber::try_new(1).unwrap())
+                .unwrap()[2],
             RGB8::new(7, 8, 9)
         );
     }
@@ -266,7 +281,7 @@ mod tests {
     fn buffer_channel_out_of_bounds() {
         let buffer = PixelDataBuffer::<32>::new();
         assert_eq!(
-            buffer.try_channel::<RGB8>(2),
+            buffer.try_channel::<RGB8>(ChannelNumber::try_new(2).unwrap()),
             Err(PixelDataBufferError::InvalidChannel {
                 channel: 2,
                 channel_count: 0,
