@@ -6,6 +6,8 @@ use crate::effects::{EffectCreate, EffectRun};
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[enum_dispatch(EffectRun)]
 pub enum EffectKind {
     FixedColor(FixedColor),

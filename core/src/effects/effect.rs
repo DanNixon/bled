@@ -1,4 +1,4 @@
-use crate::api::ChannelMask;
+use crate::{api::ChannelMask, effects::Targets};
 use core::time::Duration;
 use enum_dispatch::enum_dispatch;
 use getset::Getters;
@@ -8,7 +8,7 @@ pub trait EffectCreate: Sized {
     type Config: Serialize + DeserializeOwned;
 
     /// Creates a new effect with the given configuration.
-    fn new(config: Self::Config) -> Result<Self, &'static str>;
+    fn new(targets: Targets, config: Self::Config) -> Result<Self, &'static str>;
 }
 
 #[enum_dispatch]
@@ -31,4 +31,10 @@ pub struct StepResult {
 
     /// The time that the next step should take place.
     next: Duration,
+}
+
+impl StepResult {
+    pub fn new(render: ChannelMask, next: Duration) -> Self {
+        Self { render, next }
+    }
 }

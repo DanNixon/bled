@@ -1,6 +1,6 @@
 use crate::{
-    api::ChannelMask,
-    config::{ChannelSectionConfig, MAX_CHANNEL_COUNT, MAX_NAME_LEN, PixelLayout},
+    api::ChannelNumber,
+    config::{MAX_CHANNEL_COUNT, MAX_NAME_LEN, PixelLayout},
 };
 use getset::Getters;
 use heapless::{String, Vec};
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub const MAX_TARGETS: usize = MAX_CHANNEL_COUNT;
 
 #[nutype(
-    derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize),
+    derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef),
     cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
 )]
 pub struct TargetConfigs(Vec<TargetSectionConfig, MAX_TARGETS>);
@@ -25,7 +25,7 @@ pub struct TargetSectionConfig {
 }
 
 #[nutype(
-    derive(Debug, Clone, PartialEq, Eq),
+    derive(Debug, Clone, PartialEq, Eq, AsRef),
     cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
 )]
 pub struct Targets(Vec<Target, MAX_TARGETS>);
@@ -36,7 +36,7 @@ pub struct Targets(Vec<Target, MAX_TARGETS>);
 #[getset(get = "pub")]
 pub struct Target {
     /// Channel the target resides on
-    channel: ChannelMask,
+    channel: ChannelNumber,
 
     /// Start index of the section
     start: u32,
