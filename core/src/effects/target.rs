@@ -7,7 +7,7 @@ use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct TargetSectionConfig {
@@ -16,7 +16,7 @@ pub struct TargetSectionConfig {
 }
 
 /// A single target for an effect, represented as a continuous range in a channel.
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, PartialEq, Eq, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct Target {

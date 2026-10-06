@@ -44,7 +44,7 @@ impl EffectRun for FixedColor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct FixedColorConfig {

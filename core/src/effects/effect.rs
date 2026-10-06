@@ -1,8 +1,22 @@
-use crate::{api::ChannelMask, effects::Target};
-use core::time::Duration;
+use crate::{
+    config::MAX_NAME_LEN,
+    effects::{EffectKind, Target},
+};
 use enum_dispatch::enum_dispatch;
 use getset::Getters;
+use heapless::String;
 use serde::{Serialize, de::DeserializeOwned};
+
+#[derive(Debug, Getters)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[getset(get = "pub")]
+pub struct Effect {
+    /// Name of the effect
+    name: String<{ MAX_NAME_LEN }>,
+
+    /// Effect logic
+    effect: EffectKind,
+}
 
 pub trait EffectCreate: Sized {
     type Config: Serialize + DeserializeOwned;
@@ -19,22 +33,4 @@ pub trait EffectRun {
         now: core::time::Duration,
         led_data: &mut crate::pixel_data::PixelDataBuffer<N>,
     ) -> Result<crate::effects::StepResult, &'static str>;
-}
-
-/// The result of a single step of an effect.
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-#[getset(get = "pub")]
-pub struct StepResult {
-    /// Channels that need to be rendered.
-    render: ChannelMask,
-
-    /// The time that the next step should take place.
-    next: Duration,
-}
-
-impl StepResult {
-    pub fn new(render: ChannelMask, next: Duration) -> Self {
-        Self { render, next }
-    }
 }

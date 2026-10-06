@@ -13,7 +13,7 @@ pub enum EffectKind {
     FixedColor(FixedColor),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(rename_all = "snake_case")]
 pub enum EffectKindConfig {

@@ -6,12 +6,17 @@ use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct EffectConfig {
+    /// Name of the effect
     name: String<{ MAX_NAME_LEN }>,
+
+    /// Target section to apply the effect to
     target: TargetSectionConfig,
+
+    /// Effect logic configuration
     effect: EffectKindConfig,
 }
 
