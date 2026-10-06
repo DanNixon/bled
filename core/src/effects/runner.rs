@@ -30,5 +30,6 @@ mod tests {
     #[test]
     fn types_have_known_size() {
         assert_eq!(core::mem::size_of::<RunningEffect>(), 64);
+        assert_eq!(core::mem::size_of::<EffectRunner<16>>(), 1032);
     }
 }
