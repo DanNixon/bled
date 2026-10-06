@@ -1,5 +1,6 @@
 use crate::SdCardResources;
 use aligned::{A4, Aligned};
+use bled_core::{DirEntry, DirEntryType, MAX_PATH_LEN};
 use defmt::{Format, info, unwrap, warn};
 use embassy_rp::{
     gpio::{Input, Level, Output, Pull},
@@ -12,8 +13,11 @@ use embedded_sdmmc::{Block, BlockCount, BlockDevice as _, BlockIdx, SdCard as Sp
 use exfat_embedded::{BlockDevice as FormatBlockDevice, Scratch};
 pub(crate) use exfat_slim::blocking::file::{File, OpenOptions};
 use exfat_slim::blocking::{BlockDevice, error::ExFatError};
+use heapless::String;
 use mbr_nostd::{MasterBootRecord, PartitionTable};
 use static_cell::StaticCell;
+
+pub(crate) type DirectoryIterator = exfat_slim::blocking::directory::DirectoryIterator<512>;
 
 #[derive(Debug, Format)]
 pub(crate) enum FormatError {
@@ -267,6 +271,53 @@ impl SdCardStorage {
             warn!("failed to delete file {}: {}", filename, e);
             e
         })
+    }
+
+    #[inline(never)]
+    pub(crate) async fn open_dir(&self, path: &str) -> Result<DirectoryIterator, FsError> {
+        let mut guard = self.fs.lock().await;
+        let fs = guard.as_mut().unwrap();
+
+        fs.read_dir(path).map_err(|e| {
+            warn!("failed to open dir {}: {}", path, e);
+            e
+        })
+    }
+
+    #[inline(never)]
+    pub(crate) async fn next_dir_entry(
+        &self,
+        dir: &mut DirectoryIterator,
+    ) -> Result<Option<DirEntry>, FsError> {
+        let mut guard = self.fs.lock().await;
+        let fs = guard.as_mut().unwrap();
+
+        let mut name_buf = [0u8; exfat_slim::blocking::directory::MAX_NAME_LEN];
+        match dir.next_entry(fs, &mut name_buf) {
+            Ok(Some(entry)) => {
+                let mut heapless_name = String::<MAX_PATH_LEN>::new();
+                for c in entry.name.chars() {
+                    if heapless_name.len() + c.len_utf8() > MAX_PATH_LEN {
+                        break;
+                    }
+                    let _ = heapless_name.push(c);
+                }
+
+                let kind = if entry.metadata.is_dir() {
+                    DirEntryType::Directory
+                } else {
+                    DirEntryType::File {
+                        size: entry.metadata.len(),
+                    }
+                };
+                Ok(Some(DirEntry::new(heapless_name, kind)))
+            }
+            Ok(None) => Ok(None),
+            Err(e) => {
+                warn!("failed to read next dir entry: {}", e);
+                Err(e)
+            }
+        }
     }
 }
 
