@@ -26,6 +26,12 @@
 //! ## Deleting a file
 //!
 //! 1. Send `FileIoControl::Delete` to the `FILE_IO_CONTROL` characteristic.
+//!
+//! ## Listing a directory
+//!
+//! 1. Send `FileIoControl::ReadDir` to the `FILE_IO_CONTROL` characteristic with `index = 0`.
+//! 2. Receive a CBOR encoded `DirEntry` from the `FILE_IO_DATA` characteristic.
+//! 3. Repeat from step 1, incrementing the index until an empty buffer is returned.
 
 use getset::Getters;
 use heapless::String;
@@ -49,8 +55,11 @@ pub enum FileIoControl {
         offset: u32,
     },
 
-    /// Resets the read/write state machine. Will not roll back any in-progress write.
-    Reset,
+    /// Read a directory entry at the given index from the specified directory.
+    ReadDir {
+        path: String<MAX_PATH_LEN>,
+        index: u32,
+    },
 
     /// Stat the specified file.
     Stat { path: String<MAX_PATH_LEN> },
@@ -63,6 +72,36 @@ pub enum FileIoControl {
 
     /// Delete the specified file.
     Delete { path: String<MAX_PATH_LEN> },
+
+    /// Resets the read/write state machine. Will not roll back any in-progress write.
+    Reset,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[getset(get = "pub")]
+pub struct DirEntry {
+    /// Name of the file or directory.
+    name: String<MAX_PATH_LEN>,
+
+    kind: DirEntryType,
+}
+
+impl DirEntry {
+    #[must_use]
+    pub fn new(name: String<MAX_PATH_LEN>, kind: DirEntryType) -> Self {
+        Self { name, kind }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum DirEntryType {
+    File {
+        /// Size of the file in bytes.
+        size: u64,
+    },
+    Directory,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Getters, Default)]
@@ -70,12 +109,12 @@ pub enum FileIoControl {
 #[getset(get = "pub")]
 pub struct FileStatResponse {
     /// Size of the file in bytes.
-    size: u32,
+    size: u64,
 }
 
 impl FileStatResponse {
     #[must_use]
-    pub fn new(size: u32) -> Self {
+    pub fn new(size: u64) -> Self {
         Self { size }
     }
 }

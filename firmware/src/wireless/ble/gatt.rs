@@ -218,6 +218,16 @@ async fn process_file_io_data_read<'stack, P: PacketPool>(
                 .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
             event.accept_unprocessed(&buf[..n])
         }
+        FileIoMode::ReadingDir { current_entry, .. } => {
+            if let Some(entry) = current_entry {
+                let mut buf = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
+                let n = bled_core::io::encode_cbor(entry, &mut buf)
+                    .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)?;
+                event.accept_unprocessed(&buf[..n])
+            } else {
+                event.accept_unprocessed(&[])
+            }
+        }
         FileIoMode::Reading { .. } => {
             let mut chunk = [0u8; MAX_ATTRIBUTE_VALUE_LEN];
             match file_io.read_chunk(&mut chunk).await {
@@ -316,6 +326,18 @@ async fn process_file_io_control_write<'stack, P: PacketPool>(
                 event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
             }
         },
+        FileIoControl::ReadDir { path, index } => {
+            match file_io.prepare_read_dir(path, index as usize).await {
+                Ok(()) => {
+                    debug!("Prepared to read dir");
+                    event.accept_unprocessed()
+                }
+                Err(e) => {
+                    warn!("Failed to prepare reading dir: {}", e);
+                    event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
+                }
+            }
+        }
     }
 }
 

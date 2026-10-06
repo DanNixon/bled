@@ -4,7 +4,7 @@ import { log } from './logger.js';
 /** Operations that talk to the device over GATT; serialised per device. */
 const GATT_OPERATIONS = [
   'readDeviceInfo', 'rebootDevice',
-  'statFile', 'readFile', 'writeFile', 'deleteFile',
+  'statFile', 'readFile', 'writeFile', 'deleteFile', 'listDirectory',
   'setChannelPixels', 'commitChannels',
   'readBufferInfo', 'readBuffer', 'readBufferRange', 'writeBuffer',
 ];
@@ -394,6 +394,38 @@ export class BleDevice extends EventTarget {
     const delCmd = bled.encode_file_io_delete(path);
     await this.chars.fileControl.writeValueWithResponse(delCmd);
     this._log(`Successfully deleted "${path}" on device.`, 'success');
+  }
+
+  async listDirectory(path = '/', onProgress = null) {
+    this._log(`Listing directory "${path}" on device...`);
+    const entries = [];
+    let index = 0;
+    try {
+      while (true) {
+        const readDirCmd = bled.encode_file_io_read_dir(path, index);
+        await this.chars.fileControl.writeValueWithResponse(readDirCmd);
+
+        const dataView = await this.chars.fileData.readValue();
+        if (dataView.byteLength === 0) {
+          break;
+        }
+
+        const entry = bled.decode_dir_entry(new Uint8Array(dataView.buffer));
+        if (!entry) {
+          break;
+        }
+        entries.push(entry);
+        index++;
+        if (onProgress) onProgress(entries.length);
+      }
+
+      await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset());
+      this._log(`Found ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} in "${path}".`, 'success');
+      return entries;
+    } catch (err) {
+      try { await this.chars.fileControl.writeValueWithResponse(bled.encode_file_io_reset()); } catch (_) {}
+      throw err;
+    }
   }
 
   // --- LED Pixels & Commit ---

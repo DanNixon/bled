@@ -1,5 +1,5 @@
-use crate::sdcard::{File, FsError, OpenOptions, SdCardStorage};
-use bled_core::{FileStatResponse, MAX_PATH_LEN};
+use crate::sdcard::{DirectoryIterator, File, FsError, OpenOptions, SdCardStorage};
+use bled_core::{DirEntry, FileStatResponse, MAX_PATH_LEN};
 use defmt::{Format, debug, info};
 use heapless::String;
 
@@ -16,6 +16,7 @@ pub(crate) enum WriteChunkError {
 }
 
 #[derive(Default)]
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum FileIoMode {
     #[default]
     Idle,
@@ -34,6 +35,13 @@ pub(crate) enum FileIoMode {
         path: String<MAX_PATH_LEN>,
         offset: usize,
         file: File,
+    },
+
+    ReadingDir {
+        path: String<MAX_PATH_LEN>,
+        next_index: usize,
+        dir: DirectoryIterator,
+        current_entry: Option<DirEntry>,
     },
 }
 
@@ -77,7 +85,55 @@ impl FileIoSession {
 
         let size = self.sd.stat_file(path.as_str()).await?;
         self.mode = FileIoMode::Stat {
-            response: FileStatResponse::new(size as u32),
+            response: FileStatResponse::new(size),
+        };
+
+        Ok(())
+    }
+
+    pub(crate) async fn prepare_read_dir(
+        &mut self,
+        path: String<MAX_PATH_LEN>,
+        index: usize,
+    ) -> Result<(), FsError> {
+        info!("Prepare read dir response for {} at index {}", path, index);
+
+        match &mut self.mode {
+            FileIoMode::ReadingDir {
+                path: current_path,
+                next_index,
+                dir,
+                current_entry,
+            } if *current_path == path && *next_index == index => {
+                let entry = self.sd.next_dir_entry(dir).await?;
+                *current_entry = entry;
+                *next_index += 1;
+                return Ok(());
+            }
+            _ => {
+                self.reset().await;
+            }
+        }
+
+        let mut dir = self.sd.open_dir(path.as_str()).await?;
+        for _ in 0..index {
+            if self.sd.next_dir_entry(&mut dir).await?.is_none() {
+                self.mode = FileIoMode::ReadingDir {
+                    path,
+                    next_index: index + 1,
+                    dir,
+                    current_entry: None,
+                };
+                return Ok(());
+            }
+        }
+
+        let current_entry = self.sd.next_dir_entry(&mut dir).await?;
+        self.mode = FileIoMode::ReadingDir {
+            path,
+            next_index: index + 1,
+            dir,
+            current_entry,
         };
 
         Ok(())

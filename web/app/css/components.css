@@ -81,3 +81,69 @@ pre#log, pre.log-output {
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+/* Directory listing */
+
+.dir-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--code-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+}
+
+.dir-table-wrap {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  background: var(--card-bg);
+}
+
+.dir-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.dir-table th,
+.dir-table td {
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.dir-table th {
+  background: var(--code-bg);
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.dir-table tbody tr:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.dir-row-name {
+  color: var(--text);
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.dir-row-name:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.dir-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 1rem !important;
+  font-style: italic;
+}
