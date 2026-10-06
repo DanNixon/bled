@@ -1,21 +1,11 @@
 use crate::{
-    api::ChannelNumber,
-    config::{MAX_CHANNEL_COUNT, MAX_NAME_LEN, PixelLayout, PositionalPixelSpan, SizedPixelSpan},
+    api::{ChannelNumber, PixelIndex},
+    config::{MAX_NAME_LEN, PixelLayout, PositionalPixelSpan, SizedPixelSpan},
 };
 use core::ops::Range;
 use getset::Getters;
-use heapless::{String, Vec};
-use nutype::nutype;
+use heapless::String;
 use serde::{Deserialize, Serialize};
-
-/// The maximum number of targets that can be configured for a single effect.
-pub const MAX_TARGETS: usize = MAX_CHANNEL_COUNT;
-
-#[nutype(
-    derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef),
-    cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
-)]
-pub struct TargetConfigs(Vec<TargetSectionConfig, MAX_TARGETS>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -24,12 +14,6 @@ pub struct TargetSectionConfig {
     channel: String<MAX_NAME_LEN>,
     section: String<MAX_NAME_LEN>,
 }
-
-#[nutype(
-    derive(Debug, Clone, PartialEq, Eq, AsRef),
-    cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
-)]
-pub struct Targets(Vec<Target, MAX_TARGETS>);
 
 /// A single target for an effect, represented as a continuous range in a channel.
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
@@ -40,21 +24,21 @@ pub struct Target {
     channel: ChannelNumber,
 
     /// Start index of the section
-    start: u32,
+    start: PixelIndex,
 
     /// Layout of the section
     layout: PixelLayout,
 }
 
 impl SizedPixelSpan for Target {
-    fn len(&self) -> u32 {
+    fn len(&self) -> usize {
         self.layout.len()
     }
 }
 
 impl PositionalPixelSpan for Target {
-    fn range(&self) -> Range<u32> {
-        self.start..self.start + self.len()
+    fn range(&self) -> Range<usize> {
+        self.start as usize..self.start as usize + self.len()
     }
 }
 
@@ -64,9 +48,7 @@ mod tests {
 
     #[test]
     fn target_types_have_known_sizes() {
-        assert_eq!(core::mem::size_of::<TargetConfigs>(), 392);
         assert_eq!(core::mem::size_of::<TargetSectionConfig>(), 48);
-        assert_eq!(core::mem::size_of::<Targets>(), 136);
         assert_eq!(core::mem::size_of::<Target>(), 16);
     }
 }

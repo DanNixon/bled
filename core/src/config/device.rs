@@ -26,7 +26,7 @@ impl DeviceConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{ChannelSectionConfig, PixelLayout};
+    use crate::config::{ChannelSectionConfig, ChannelSectionsConfig, PixelLayout};
 
     #[test]
     fn json_round_trip() {
@@ -36,13 +36,10 @@ mod tests {
                 0,
                 PixelLayout::single_pixel(),
             ),
-            ChannelSectionConfig::new(
-                "test".try_into().unwrap(),
-                1,
-                PixelLayout::linear_array(12),
-            ),
+            ChannelSectionConfig::new("test".try_into().unwrap(), 1, PixelLayout::linear_array(12)),
         ]
         .into();
+        let strip_config = ChannelSectionsConfig::try_new(strip_config).unwrap();
 
         let config = DeviceConfig::new(
             "bled".try_into().unwrap(),

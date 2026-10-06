@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct SinglePixel {}
 
 impl SizedPixelSpan for SinglePixel {
-    fn len(&self) -> u32 {
+    fn len(&self) -> usize {
         1
     }
 }

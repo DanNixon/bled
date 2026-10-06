@@ -1,6 +1,6 @@
 use crate::{
     config::MAX_NAME_LEN,
-    effects::{EffectKindConfig, TargetConfigs},
+    effects::{EffectKindConfig, TargetSectionConfig},
 };
 use getset::Getters;
 use heapless::String;
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 #[getset(get = "pub")]
 pub struct EffectConfig {
     name: String<{ MAX_NAME_LEN }>,
-    target: TargetConfigs,
+    target: TargetSectionConfig,
     effect: EffectKindConfig,
 }
 
@@ -24,10 +24,10 @@ mod tests {
     fn json_deserialization() {
         let json = br#"{
             "name": "warm white",
-            "target": [
-                { "channel": "a", "section": "onboard" },
-                { "channel": "b", "section": "strip" }
-            ],
+            "target": {
+                "channel": "a",
+                "section": "onboard"
+            },
             "effect": {
                 "fixed_color": {
                     "color": { "r": 255, "g": 127, "b": 63 }
@@ -38,12 +38,9 @@ mod tests {
         let config: EffectConfig = crate::io::decode_json(json).unwrap();
 
         assert_eq!(config.name().as_str(), "warm white");
-        let targets = config.target().clone().into_inner();
-        assert_eq!(targets.len(), 2);
-        assert_eq!(targets[0].channel().as_str(), "a");
-        assert_eq!(targets[0].section().as_str(), "onboard");
-        assert_eq!(targets[1].channel().as_str(), "b");
-        assert_eq!(targets[1].section().as_str(), "strip");
+        let targets = config.target();
+        assert_eq!(targets.channel().as_str(), "a");
+        assert_eq!(targets.section().as_str(), "onboard");
         let EffectKindConfig::FixedColor(effect) = config.effect();
         assert_eq!(*effect.color(), RGB8::new(255, 127, 63));
     }

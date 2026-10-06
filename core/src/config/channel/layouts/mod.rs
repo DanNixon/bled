@@ -4,7 +4,7 @@ mod single_pixel;
 pub use linear_array::LinearArray;
 pub use single_pixel::SinglePixel;
 
-use crate::config::SizedPixelSpan;
+use crate::{api::PixelIndex, config::SizedPixelSpan};
 use serde::{Deserialize, Serialize};
 
 /// The physical layout of a span of pixels on a single channel.
@@ -26,13 +26,13 @@ impl PixelLayout {
     }
 
     #[must_use]
-    pub fn linear_array(len: u32) -> Self {
+    pub fn linear_array(len: PixelIndex) -> Self {
         Self::LinearArray(LinearArray::new(len))
     }
 }
 
 impl SizedPixelSpan for PixelLayout {
-    fn len(&self) -> u32 {
+    fn len(&self) -> usize {
         match self {
             Self::SinglePixel(m) => m.len(),
             Self::LinearArray(m) => m.len(),

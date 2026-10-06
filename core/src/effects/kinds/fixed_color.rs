@@ -1,7 +1,7 @@
 use crate::{
     api::ChannelMask,
     config::PositionalPixelSpan,
-    effects::{EffectCreate, EffectRun, StepResult, Targets},
+    effects::{EffectCreate, EffectRun, StepResult, Target},
     pixel_data::PixelDataBuffer,
 };
 use core::time::Duration;
@@ -12,16 +12,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct FixedColor {
-    targets: Targets,
+    target: Target,
     color: RGB8,
 }
 
 impl EffectCreate for FixedColor {
     type Config = FixedColorConfig;
 
-    fn new(targets: Targets, config: Self::Config) -> Result<Self, &'static str> {
+    fn new(target: Target, config: Self::Config) -> Result<Self, &'static str> {
         Ok(Self {
-            targets,
+            target,
             color: config.color,
         })
     }
@@ -33,16 +33,14 @@ impl EffectRun for FixedColor {
         now: Duration,
         led_data: &mut PixelDataBuffer<N>,
     ) -> Result<crate::effects::StepResult, &'static str> {
-        let channels = ChannelMask::empty();
+        let mask = ChannelMask::from_index(self.target.channel().into_inner() as usize).unwrap();
 
-        for t in self.targets.as_ref() {
-            if let Ok(channel) = led_data.try_channel_mut::<RGB8>(*t.channel()) {
-                let s = t.range();
-                channel[s.start as usize..s.end as usize].fill(self.color);
-            }
+        if let Ok(channel) = led_data.try_channel_mut::<RGB8>(*self.target.channel()) {
+            let s = self.target.range();
+            channel[s.start as usize..s.end as usize].fill(self.color);
         }
 
-        Ok(StepResult::new(channels, now + Duration::from_secs(1)))
+        Ok(StepResult::new(mask, now + Duration::from_secs(1)))
     }
 }
 

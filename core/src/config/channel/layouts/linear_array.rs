@@ -1,4 +1,4 @@
-use crate::config::SizedPixelSpan;
+use crate::{api::PixelIndex, config::SizedPixelSpan};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
@@ -6,18 +6,18 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct LinearArray {
-    length: u32,
+    length: PixelIndex,
 }
 
 impl LinearArray {
     #[must_use]
-    pub fn new(length: u32) -> Self {
+    pub fn new(length: PixelIndex) -> Self {
         Self { length }
     }
 }
 
 impl SizedPixelSpan for LinearArray {
-    fn len(&self) -> u32 {
-        self.length
+    fn len(&self) -> usize {
+        self.length as usize
     }
 }

@@ -1,4 +1,4 @@
-use crate::{api::ChannelMask, effects::Targets};
+use crate::{api::ChannelMask, effects::Target};
 use core::time::Duration;
 use enum_dispatch::enum_dispatch;
 use getset::Getters;
@@ -8,7 +8,7 @@ pub trait EffectCreate: Sized {
     type Config: Serialize + DeserializeOwned;
 
     /// Creates a new effect with the given configuration.
-    fn new(targets: Targets, config: Self::Config) -> Result<Self, &'static str>;
+    fn new(target: Target, config: Self::Config) -> Result<Self, &'static str>;
 }
 
 #[enum_dispatch]
