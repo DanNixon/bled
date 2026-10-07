@@ -1,5 +1,5 @@
 use crate::{
-    config::MAX_NAME_LEN,
+    api::MAX_PATH_LEN,
     effects::{EffectKind, Target},
 };
 use enum_dispatch::enum_dispatch;
@@ -11,17 +11,16 @@ use serde::{Serialize, de::DeserializeOwned};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub", get_mut = "pub")]
 pub struct Effect {
-    /// Name of the effect
-    name: String<{ MAX_NAME_LEN }>,
+    /// File the effect was loaded from
+    filename: String<{ MAX_PATH_LEN }>,
 
     /// Effect logic
     kind: EffectKind,
 }
 
 impl Effect {
-    pub fn new(name: &str, kind: EffectKind) -> Result<Self, &'static str> {
-        let name = String::try_from(name).map_err(|_| "effect name is too long")?;
-        Ok(Self { name, kind })
+    pub fn new(filename: String<{ MAX_PATH_LEN }>, kind: EffectKind) -> Result<Self, &'static str> {
+        Ok(Self { filename, kind })
     }
 }
 

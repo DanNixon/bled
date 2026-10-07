@@ -15,7 +15,7 @@ pub const MAX_CHANNEL_COUNT: usize = 8;
 pub const MAX_SECTIONS_PER_CHANNEL: usize = 16;
 
 /// Maximum allowable size of the config file in bytes when encoded as JSON.
-pub const MAX_CONFIG_JSON_SIZE: usize = 4096; // TODO: calculate
+pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 4; // TODO: calculate
 
 /// Maximum allowable size of the config file in bytes when encoded as CBOR.
-pub const MAX_CONFIG_CBOR_SIZE: usize = 2048; // TODO: calculate
+pub const MAX_CONFIG_CBOR_SIZE: usize = 1024 * 2; // TODO: calculate
