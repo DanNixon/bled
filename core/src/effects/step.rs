@@ -8,14 +8,17 @@ use getset::Getters;
 #[getset(get = "pub")]
 pub struct StepResult {
     /// Channels that need to be rendered.
-    render: ChannelMask,
+    updated_channels: ChannelMask,
 
     /// The time that the next step should take place.
     next: Duration,
 }
 
 impl StepResult {
-    pub fn new(render: ChannelMask, next: Duration) -> Self {
-        Self { render, next }
+    pub fn new(updated_channels: ChannelMask, next: Duration) -> Self {
+        Self {
+            updated_channels,
+            next,
+        }
     }
 }

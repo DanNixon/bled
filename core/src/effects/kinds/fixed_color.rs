@@ -16,6 +16,13 @@ pub struct FixedColor {
     color: RGB8,
 }
 
+impl FixedColorConfig {
+    #[must_use]
+    pub const fn new(color: RGB8) -> Self {
+        Self { color }
+    }
+}
+
 impl EffectCreate for FixedColor {
     type Config = FixedColorConfig;
 

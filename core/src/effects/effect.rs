@@ -3,19 +3,26 @@ use crate::{
     effects::{EffectKind, Target},
 };
 use enum_dispatch::enum_dispatch;
-use getset::Getters;
+use getset::{Getters, MutGetters};
 use heapless::String;
 use serde::{Serialize, de::DeserializeOwned};
 
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, MutGetters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-#[getset(get = "pub")]
+#[getset(get = "pub", get_mut = "pub")]
 pub struct Effect {
     /// Name of the effect
     name: String<{ MAX_NAME_LEN }>,
 
     /// Effect logic
-    effect: EffectKind,
+    kind: EffectKind,
+}
+
+impl Effect {
+    pub fn new(name: &str, kind: EffectKind) -> Result<Self, &'static str> {
+        let name = String::try_from(name).map_err(|_| "effect name is too long")?;
+        Ok(Self { name, kind })
+    }
 }
 
 pub trait EffectCreate: Sized {

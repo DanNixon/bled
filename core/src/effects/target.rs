@@ -30,6 +30,17 @@ pub struct Target {
     layout: PixelLayout,
 }
 
+impl Target {
+    #[must_use]
+    pub fn new(channel: ChannelNumber, start: PixelIndex, layout: PixelLayout) -> Self {
+        Self {
+            channel,
+            start,
+            layout,
+        }
+    }
+}
+
 impl SizedPixelSpan for Target {
     fn len(&self) -> usize {
         self.layout.len()
