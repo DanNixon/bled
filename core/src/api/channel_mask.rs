@@ -1,5 +1,6 @@
-use crate::config::MAX_CHANNEL_COUNT;
 use serde::{Deserialize, Serialize};
+
+pub const MAX_CHANNEL_COUNT: usize = 8;
 
 bitflags::bitflags! {
     /// The set of LED channel indices selected by a Commit write.

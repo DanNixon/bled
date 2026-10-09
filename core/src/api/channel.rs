@@ -1,4 +1,4 @@
-use crate::config::MAX_CHANNEL_COUNT;
+use crate::api::MAX_CHANNEL_COUNT;
 use nutype::nutype;
 
 #[nutype(

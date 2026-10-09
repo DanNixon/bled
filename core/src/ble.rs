@@ -27,7 +27,6 @@ pub const COMMIT_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000140");
 
 /// LED buffer control GATT characteristic UUID (write-only).
 pub const LED_BUFFER_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000141");
-
 /// LED buffer data GATT characteristic UUID (read/write).
 pub const LED_BUFFER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000142");
 

@@ -1,4 +1,4 @@
-use crate::config::{ChannelConfig, MAX_CHANNEL_COUNT, MAX_NAME_LEN};
+use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -10,51 +10,5 @@ pub struct DeviceConfig {
     /// Human-readable device name.
     pub name: String<{ MAX_NAME_LEN }>,
 
-    pub channels: Vec<ChannelConfig, { MAX_CHANNEL_COUNT }>,
-}
-
-impl DeviceConfig {
-    #[must_use]
-    pub fn new(
-        name: String<{ MAX_NAME_LEN }>,
-        channels: Vec<ChannelConfig, { MAX_CHANNEL_COUNT }>,
-    ) -> Self {
-        Self { name, channels }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::config::{ChannelSectionConfig, ChannelSectionsConfig, PixelLayout};
-
-    #[test]
-    fn json_round_trip() {
-        let strip_config: Vec<_, _> = [
-            ChannelSectionConfig::new(
-                "onboard".try_into().unwrap(),
-                0,
-                PixelLayout::single_pixel(),
-            ),
-            ChannelSectionConfig::new("test".try_into().unwrap(), 1, PixelLayout::linear_array(12)),
-        ]
-        .into();
-        let strip_config = ChannelSectionsConfig::try_new(strip_config).unwrap();
-
-        let config = DeviceConfig::new(
-            "bled".try_into().unwrap(),
-            [
-                ChannelConfig::new("a".try_into().unwrap(), strip_config.clone()),
-                ChannelConfig::new("b".try_into().unwrap(), strip_config.clone()),
-                ChannelConfig::new("c".try_into().unwrap(), strip_config.clone()),
-                ChannelConfig::new("d".try_into().unwrap(), strip_config),
-            ]
-            .into(),
-        );
-
-        let mut bytes = [0u8; 2048];
-        let len = crate::io::encode_json(&config, &mut bytes).unwrap();
-        let decoded: DeviceConfig = crate::io::decode_json(&bytes[..len]).unwrap();
-        assert_eq!(config, decoded);
-    }
+    pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
 }
