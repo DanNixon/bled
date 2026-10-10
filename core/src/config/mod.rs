@@ -12,8 +12,10 @@ pub use span::*;
 /// Shoudl never be more than the maximum length of an allowable BLE device name.
 pub const MAX_NAME_LEN: usize = 16;
 
+/// Maximum number of pixels that may be configured on a single device.
 pub const MAX_FIXTURE_COUNT: usize = 8;
 
+/// Maximum number of spanls that may be used in a single fixture.
 pub const MAX_SPAN_PER_FIXTURE_COUNT: usize = 8;
 
 /// Maximum allowable size of the config file in bytes when encoded as JSON.

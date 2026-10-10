@@ -6,13 +6,14 @@ use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct DeviceConfig {
     /// Human-readable device name.
     pub name: String<{ MAX_NAME_LEN }>,
 
+    /// Light fixtures controlled by this device.
     pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
 }
 
