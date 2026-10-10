@@ -54,7 +54,7 @@ impl LedBufferSession {
     pub(crate) async fn prepare_info(&mut self) {
         info!("Prepare LED buffer info response");
 
-        let channel_data = leds::channel_data().await;
+        let channel_data = leds::data().await;
 
         self.mode = LedBufferMode::Info {
             response: channel_data.info(),
@@ -64,7 +64,7 @@ impl LedBufferSession {
     pub(crate) async fn prepare_read(&mut self, offset: usize) -> Result<(), ()> {
         info!("Prepare read LED buffer response at offset {}", offset);
 
-        let channel_data = leds::channel_data().await;
+        let channel_data = leds::data().await;
         if offset > channel_data.size() {
             return Err(());
         }
@@ -81,7 +81,7 @@ impl LedBufferSession {
             _ => return Err(ReadChunkError::NotReading),
         };
 
-        let channel_data = leds::channel_data().await;
+        let channel_data = leds::data().await;
         let size = channel_data.size();
         if offset >= size {
             return Ok(0);
@@ -97,7 +97,7 @@ impl LedBufferSession {
     pub(crate) async fn prepare_write(&mut self, offset: usize) -> Result<(), ()> {
         info!("Prepare write LED buffer request at offset {}", offset);
 
-        let channel_data = leds::channel_data().await;
+        let channel_data = leds::data().await;
         if offset > channel_data.size() {
             return Err(());
         }
@@ -123,7 +123,7 @@ impl LedBufferSession {
             .checked_add(data.len())
             .ok_or(WriteChunkError::OutOfBounds)?;
 
-        let mut channel_data = leds::channel_data().await;
+        let mut channel_data = leds::data().await;
         if end > channel_data.size() {
             return Err(WriteChunkError::OutOfBounds);
         }

@@ -102,16 +102,11 @@ async fn main(spawner: Spawner) {
         control.gpio_set(0, false).await;
     }
 
-    let config = config::boot_time_load(&sd).await;
+    config::init(&sd).await;
 
-    spawner.spawn(unwrap!(wireless::ble::task(
-        bt,
-        bt_address,
-        config.clone(),
-        sd.clone()
-    )));
+    spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
 
-    spawner.spawn(unwrap!(leds::task(r.led, config.channels)));
+    spawner.spawn(unwrap!(leds::task(r.led)));
     leds::draw().await;
 
     spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
@@ -123,7 +118,7 @@ fn device_info() -> DeviceInfo {
         boot_reason(),
         Instant::now().as_millis(),
         leds::LED_MEMORY.try_into().unwrap(),
-        4, // TODO: this should be a constant
+        leds::CHANNEL_COUNT.try_into().unwrap(),
     )
 }
 

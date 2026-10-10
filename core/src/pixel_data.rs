@@ -27,16 +27,14 @@ pub struct PixelDataBuffer<const LEN: usize, const CHANNEL_COUNT: usize> {
     data: [u8; LEN],
 }
 
-impl<const LEN: usize, const CHANNEL_COUNT: usize> Default for PixelDataBuffer<LEN, CHANNEL_COUNT> {
-    fn default() -> Self {
+impl<const LEN: usize, const CHANNEL_COUNT: usize> PixelDataBuffer<LEN, CHANNEL_COUNT> {
+    pub const fn new() -> Self {
         Self {
-            ranges: core::array::from_fn(|_| 0..0),
+            ranges: [const { 0..0 }; CHANNEL_COUNT],
             data: [0u8; LEN],
         }
     }
-}
 
-impl<const LEN: usize, const CHANNEL_COUNT: usize> PixelDataBuffer<LEN, CHANNEL_COUNT> {
     #[must_use]
     pub const fn capacity(&self) -> usize {
         LEN
@@ -185,7 +183,7 @@ mod tests {
 
     #[test]
     fn buffer_reshape_and_channel_access() {
-        let mut buffer = PixelDataBuffer::<32, 2>::default();
+        let mut buffer = PixelDataBuffer::<32, 2>::new();
         let sizes = [
             PixelDataChannelSize::new::<RGB8>(2),
             PixelDataChannelSize::new::<RGB8>(3),
@@ -213,7 +211,7 @@ mod tests {
 
     #[test]
     fn buffer_reshape_overflow() {
-        let mut buffer = PixelDataBuffer::<10, 2>::default();
+        let mut buffer = PixelDataBuffer::<10, 2>::new();
         let sizes = [
             PixelDataChannelSize::new::<RGB8>(2), // 6 bytes
             PixelDataChannelSize::new::<RGB8>(2), // 6 bytes -> total 12 > 10
@@ -230,7 +228,7 @@ mod tests {
 
     #[test]
     fn buffer_reshape_size_multiplication_overflow() {
-        let mut buffer = PixelDataBuffer::<10, 1>::default();
+        let mut buffer = PixelDataBuffer::<10, 1>::new();
         let size = PixelDataChannelSize::new::<RGB8>(usize::MAX);
         assert_eq!(size.count(), usize::MAX);
         assert_eq!(size.bytes_per_pixel(), 3);
@@ -247,7 +245,7 @@ mod tests {
 
     #[test]
     fn buffer_channel_out_of_bounds() {
-        let buffer = PixelDataBuffer::<32, 2>::default();
+        let buffer = PixelDataBuffer::<32, 2>::new();
         assert_eq!(
             buffer.try_channel::<RGB8>(2),
             Err(PixelDataBufferError::InvalidChannel {
@@ -259,7 +257,7 @@ mod tests {
 
     #[test]
     fn buffer_capacity_size_info() {
-        let mut buffer = PixelDataBuffer::<64, 2>::default();
+        let mut buffer = PixelDataBuffer::<64, 2>::new();
         assert_eq!(buffer.capacity(), 64);
         assert_eq!(buffer.size(), 0);
         assert_eq!(buffer.info().capacity(), &64u32);

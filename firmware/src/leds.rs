@@ -13,20 +13,20 @@ use embassy_sync::{
     mutex::{Mutex, MutexGuard},
     signal::Signal,
 };
-use heapless::Vec;
 use smart_leds::SmartLedsWriteAsync;
 
 pub(crate) const LED_MEMORY: usize = 16 * 1024;
+pub(crate) const CHANNEL_COUNT: usize = 4;
 
-static CHANNEL_DATA: Mutex<CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY>> =
+static CHANNEL_DATA: Mutex<CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY, CHANNEL_COUNT>> =
     Mutex::new(PixelDataBuffer::new());
 
 static DRAW_MUTEX: Mutex<CriticalSectionRawMutex, ()> = Mutex::new(());
 static DRAW_REQUEST: Channel<CriticalSectionRawMutex, (), 1> = Channel::new();
 static DRAW_COMPLETE: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 
-pub(crate) async fn channel_data()
--> MutexGuard<'static, CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY>> {
+pub(crate) async fn data()
+-> MutexGuard<'static, CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY, CHANNEL_COUNT>> {
     CHANNEL_DATA.lock().await
 }
 
@@ -40,15 +40,12 @@ pub(crate) async fn draw() {
 }
 
 #[embassy_executor::task]
-pub(super) async fn task(
-    r: super::LedResources,
-    config: Vec<ChannelConfig, { MAX_CHANNEL_COUNT }>,
-) -> ! {
-    let channel_sizes: Vec<PixelDataChannelSize, { MAX_CHANNEL_COUNT }> = config
-        .iter()
-        .map(|c| PixelDataChannelSize::new::<RGB8>(c.len() as usize))
-        .collect();
-    unwrap!(CHANNEL_DATA.lock().await.try_reshape(&channel_sizes));
+pub(super) async fn task(r: super::LedResources) -> ! {
+    let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] = crate::config::get()
+        .channel_lengths::<CHANNEL_COUNT>()
+        .unwrap()
+        .map(PixelDataChannelSize::new::<RGB8>);
+    unwrap!(CHANNEL_DATA.lock().await.try_reshape(channel_sizes));
 
     let mut pio = Pio::new(r.pio, super::Irqs);
     let program = PioWs2812Program::new(&mut pio.common);
@@ -92,7 +89,7 @@ pub(super) async fn task(
 
         let data = CHANNEL_DATA.lock().await;
 
-        for channel in 0..4 {
+        for channel in 0..CHANNEL_COUNT {
             if let Ok(pixels) = data.try_channel::<RGB8>(channel) {
                 match channel {
                     0 => channel_0.write(pixels.iter().copied()).await.unwrap(),

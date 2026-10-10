@@ -14,7 +14,6 @@ use bled_core::{
         FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
         RESET_UUID, SERVICE_UUID,
     },
-    config::DeviceConfig,
 };
 use defmt::{debug, error, info, warn};
 use trouble_host::{
@@ -63,11 +62,10 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
     sd: SdCardStorage,
-    config: &DeviceConfig,
 ) {
     let mut file_io = FileIoSession::new(sd);
     let mut led_buffer = LedBufferSession::new();
-    let mut config = ConfigSession::new(config);
+    let mut config = ConfigSession::new(crate::config::get());
 
     let reason = loop {
         match conn.next().await {

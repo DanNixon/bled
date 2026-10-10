@@ -3,7 +3,6 @@ mod gatt;
 
 use super::BtController;
 use crate::sdcard::SdCardStorage;
-use bled_core::config::DeviceConfig;
 use cyw43::Control;
 use defmt::{error, info};
 use embassy_futures::join::join;
@@ -16,15 +15,10 @@ const CONNECTIONS_MAX: usize = 1;
 const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 
 #[embassy_executor::task]
-pub(crate) async fn task(
-    controller: BtController,
-    address: Address,
-    config: DeviceConfig,
-    sd: SdCardStorage,
-) {
+pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardStorage) {
     info!("Our BT address = {:?}", address);
 
-    let device_name = config.name.clone();
+    let device_name = crate::config::get().name.clone();
 
     let mut resources: HostResources<DefaultPacketPool, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX> =
         HostResources::new();
@@ -53,7 +47,7 @@ pub(crate) async fn task(
             let mut srv = async || -> Result<(), BleHostError<_>> {
                 let conn = advertise::advertise(&device_name, &mut peripheral).await?;
                 let conn = conn.with_attribute_server(&server)?;
-                gatt::gatt_events_task(&server, &conn, sd.clone(), &config).await;
+                gatt::gatt_events_task(&server, &conn, sd.clone()).await;
                 Ok(())
             };
 

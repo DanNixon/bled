@@ -4,13 +4,30 @@ use bled_core::{
     config::{DeviceConfig, Fixture, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan},
 };
 use defmt::{error, info, warn};
+use embassy_sync::once_lock::OnceLock;
 use exfat_slim::blocking::error::ExFatError;
+
+static CONFIG: OnceLock<DeviceConfig> = OnceLock::new();
+
+#[inline(never)]
+pub(crate) async fn init(sd: &SdCardStorage) {
+    let config = boot_time_load(sd).await;
+    CONFIG
+        .init(config)
+        .expect("device config initialized more than once");
+}
+
+pub(crate) fn get() -> &'static DeviceConfig {
+    CONFIG
+        .try_get()
+        .expect("device config accessed before initialization")
+}
 
 /// File name of the config file on the SD card.
 const CONFIG_PATH: &str = "/config.json";
 
 #[inline(never)]
-pub(super) async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
+async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
     let config = match load_config(sd).await {
         Ok(Some(config)) => config,
         Ok(None) => {
@@ -50,7 +67,7 @@ async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
 }
 
 #[inline(never)]
-pub(crate) async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bool {
+async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bool {
     info!("Saving config");
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
     match bled_core::io::encode_json(config, &mut bytes) {
