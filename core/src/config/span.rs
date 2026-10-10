@@ -1,4 +1,4 @@
-use crate::api::{ChannelNumber, PixelIndex};
+use crate::{ChannelNumber, PixelIndex};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 

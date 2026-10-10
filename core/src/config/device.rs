@@ -4,6 +4,8 @@ use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+// TODO: add startup effect to device config
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
