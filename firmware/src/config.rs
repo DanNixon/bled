@@ -1,8 +1,10 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
-use bled_core::config::{DeviceConfig, MAX_CONFIG_JSON_SIZE};
+use bled_core::{
+    ChannelNumber,
+    config::{DeviceConfig, Fixture, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan},
+};
 use defmt::{error, info, warn};
 use exfat_slim::blocking::error::ExFatError;
-use heapless::Vec;
 
 /// File name of the config file on the SD card.
 const CONFIG_PATH: &str = "/config.json";
@@ -62,28 +64,21 @@ pub(crate) async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bo
 
 #[inline(never)]
 fn default_config() -> DeviceConfig {
-    let strip_config: Vec<_, _> = [
-        ChannelSectionConfig::new(
-            "onboard".try_into().unwrap(),
-            0,
-            ChannelSectionMode::single_pixel(),
-        ),
-        ChannelSectionConfig::new(
-            "test".try_into().unwrap(),
-            1,
-            ChannelSectionMode::linear_array(12),
-        ),
-    ]
-    .into();
-
-    DeviceConfig::new(
-        "bled-default".try_into().unwrap(),
+    let onboard_leds = Fixture::new(
+        "onboard".try_into().unwrap(),
+        PixelLayout::LinearArray(LinearArray::default()),
         [
-            ChannelConfig::new("a".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("b".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("c".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("d".try_into().unwrap(), strip_config),
+            PixelSpan::new(ChannelNumber::new(0), 0, 1),
+            PixelSpan::new(ChannelNumber::new(1), 0, 1),
+            PixelSpan::new(ChannelNumber::new(2), 0, 1),
+            PixelSpan::new(ChannelNumber::new(3), 0, 1),
         ]
-        .into(),
-    )
+        .try_into()
+        .unwrap(),
+    );
+
+    DeviceConfig {
+        name: "bled-default".try_into().unwrap(),
+        fixtures: [onboard_leds].into(),
+    }
 }

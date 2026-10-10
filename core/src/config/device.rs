@@ -1,4 +1,4 @@
-use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, Span};
+use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, PixelSpan};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -63,22 +63,23 @@ impl DeviceConfig {
         }
 
         // Check for overlapping spans.
-        let overlaps = |first: &Span, second: &Span| -> Result<bool, DeviceConfigValidationError> {
-            if first.channel() != second.channel() {
-                return Ok(false);
-            }
+        let overlaps =
+            |first: &PixelSpan, second: &PixelSpan| -> Result<bool, DeviceConfigValidationError> {
+                if first.channel() != second.channel() {
+                    return Ok(false);
+                }
 
-            let first_end = first
-                .start()
-                .checked_add(*first.length())
-                .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
-            let second_end = second
-                .start()
-                .checked_add(*second.length())
-                .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
+                let first_end = first
+                    .start()
+                    .checked_add(*first.length())
+                    .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
+                let second_end = second
+                    .start()
+                    .checked_add(*second.length())
+                    .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
 
-            Ok(*first.start() < second_end && *second.start() < first_end)
-        };
+                Ok(*first.start() < second_end && *second.start() < first_end)
+            };
 
         for (fixture_index, fixture) in self.fixtures.iter().enumerate() {
             for (span_index, span) in fixture.spans().iter().enumerate() {
