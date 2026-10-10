@@ -1,4 +1,7 @@
-use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN};
+use crate::{
+    api::MAX_CHANNEL_COUNT,
+    config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN},
+};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
@@ -11,4 +14,14 @@ pub struct DeviceConfig {
     pub name: String<{ MAX_NAME_LEN }>,
 
     pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
+}
+
+impl DeviceConfig {
+    pub fn channel_lengths(&self) -> Vec<usize, MAX_CHANNEL_COUNT> {
+        todo!()
+    }
+
+    pub fn validate(&self) -> Result<(), ()> {
+        todo!()
+    }
 }
