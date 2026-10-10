@@ -7,7 +7,8 @@ export const formatBytes = (bytes) => {
 
 export const formatUptime = (ms) => {
   if (ms == null) return '—';
-  const sec = Math.floor(ms / 1000);
+  const msNum = Number(ms);
+  const sec = Math.floor(msNum / 1000);
   const d = Math.floor(sec / 86400);
   const h = Math.floor((sec % 86400) / 3600);
   const m = Math.floor((sec % 3600) / 60);
@@ -16,7 +17,7 @@ export const formatUptime = (ms) => {
   if (d > 0) formatted += `${d}d `;
   if (h > 0 || d > 0) formatted += `${h}h `;
   if (m > 0 || h > 0 || d > 0) formatted += `${m}m `;
-  formatted += `${s}s (${ms.toLocaleString()} ms)`;
+  formatted += `${s}s (${msNum.toLocaleString()} ms)`;
   return formatted;
 };
 

@@ -4,10 +4,11 @@ import { escapeHtml } from '../utils/formatters.js';
 const sameSelection = (a, b) =>
   !!a && !!b &&
   a.deviceId === b.deviceId && a.kind === b.kind &&
+  a.fixture === b.fixture && a.span === b.span &&
   a.channel === b.channel && a.segment === b.segment;
 
 /**
- * Sidebar tree: DEVICE > (SD card, CHANNEL > SEGMENT). Channels and segments
+ * Sidebar tree: DEVICE > (SD card, FIXTURE > SPAN). Fixtures and spans
  * come from each device's config file; none are shown if it could not be read.
  */
 export class BledDeviceTree extends HTMLElement {
@@ -66,7 +67,7 @@ export class BledDeviceTree extends HTMLElement {
   _renderDevice(dev) {
     const id = dev.id;
     const deviceKey = `d:${id}`;
-    const channels = dev.config?.channels ?? [];
+    const fixtures = dev.config?.fixtures ?? [];
     const parts = [];
 
     parts.push(this._node({
@@ -81,23 +82,37 @@ export class BledDeviceTree extends HTMLElement {
       children.push(this._node({
         label: 'SD card', selection: { deviceId: id, kind: 'sdcard' }, depth: 1, icon: '▤',
       }));
-      for (const ch of channels) {
-        const channelKey = `${deviceKey}:c:${ch.index}`;
+
+      for (const fix of fixtures) {
+        const fixtureKey = `${deviceKey}:f:${fix.index}`;
+        const hasSpans = fix.spans && fix.spans.length > 1;
         children.push(this._node({
-          label: ch.name,
-          selection: { deviceId: id, kind: 'channel', channel: ch.index },
-          depth: 1, key: channelKey, hasChildren: ch.segments.length > 0, icon: '≡',
+          label: `${fix.name} (${fix.totalPixels} px)`,
+          selection: { deviceId: id, kind: 'fixture', fixture: fix.index },
+          depth: 1, key: fixtureKey, hasChildren: hasSpans, icon: '💡',
         }));
-        if (!this.collapsed.has(channelKey)) {
-          for (const seg of ch.segments) {
+        if (hasSpans && !this.collapsed.has(fixtureKey)) {
+          for (const sp of fix.spans) {
             children.push(this._node({
-              label: seg.name,
-              selection: { deviceId: id, kind: 'segment', channel: ch.index, segment: seg.index },
+              label: `Ch ${sp.channel}: ${sp.start}..${sp.start + sp.length - 1} (${sp.length} px)`,
+              selection: { deviceId: id, kind: 'span', fixture: fix.index, span: sp.index },
               depth: 2, icon: '▪',
             }));
           }
         }
       }
+
+      // Legacy fallback if channels exist but no fixtures
+      if (fixtures.length === 0 && dev.config?.channels?.length > 0) {
+        for (const ch of dev.config.channels) {
+          children.push(this._node({
+            label: `${ch.name} (${ch.length} px)`,
+            selection: { deviceId: id, kind: 'channel', channel: ch.index },
+            depth: 1, icon: '≡',
+          }));
+        }
+      }
+
       parts.push(`<ul role="group">${children.join('')}</ul>`);
     }
     return parts.join('');

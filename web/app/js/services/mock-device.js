@@ -3,10 +3,8 @@ import { BleDevice } from './ble.js';
 const enc = new TextEncoder();
 let counter = 0;
 
-const configJson = (name, channels) => enc.encode(JSON.stringify({ name, channels }));
-
-const section = (name, start, mode) => ({ name, start, mode });
-const linear = (length) => ({ LinearArray: { length } });
+const fixture = (name, layout, spans) => ({ name, layout, spans });
+const span = (channel, start, length) => ({ channel, start, length });
 
 /** In-memory stand-in for a device, enabled with `?mock` in the page URL. */
 export class MockBleDevice extends BleDevice {
@@ -23,18 +21,26 @@ export class MockBleDevice extends BleDevice {
     this.files = new Map();
     this.activeConfig = null;
     if (raw.mockIndex % 2 === 1) {
-      const cfg = configJson(`Mock ${raw.mockIndex}`, [
-        { name: 'Roof', sections: [
-          section('Left', 0, linear(10)),
-          section('Right', 10, linear(14)),
-        ]},
-        { name: 'Desk', sections: [
-          section('Onboard', 0, { SinglePixel: {} }),
-          section('Strip', 1, linear(30)),
-          section('Spare', 31, { Inop: { length: 4 } }),
-        ]},
-        { name: 'Empty', sections: [] },
-      ]);
+      const cfg = enc.encode(
+        JSON.stringify({
+          name: `Mock ${raw.mockIndex}`,
+          fixtures: [
+            fixture('Roof', { linear_array: {} }, [
+              span(0, 0, 10),
+              span(0, 10, 14),
+            ]),
+            fixture('Onboard', { linear_array: {} }, [
+              span(0, 24, 1),
+              span(1, 0, 1),
+              span(2, 0, 1),
+              span(3, 0, 1),
+            ]),
+            fixture('Desk', { linear_array: {} }, [
+              span(1, 1, 30),
+            ]),
+          ],
+        })
+      );
       this.files.set('/config.json', cfg);
       this.files.set('/effects.json', enc.encode(JSON.stringify({ effects: ['rainbow', 'chase', 'breathe'] })));
       this.activeConfig = cfg;
@@ -44,7 +50,7 @@ export class MockBleDevice extends BleDevice {
   async connect() {
     this.server = { connected: true };
     await this.loadConfig();
-    const totalPixels = this.config?.channels.reduce((sum, ch) => sum + ch.length, 0) ?? 0;
+    const totalPixels = this.config?.channelLengths?.reduce((sum, len) => sum + len, 0) ?? 0;
     if (this.buffer.length < totalPixels * 3) {
       this.buffer = new Uint8Array(totalPixels * 3);
     }
@@ -56,7 +62,13 @@ export class MockBleDevice extends BleDevice {
   }
 
   async readDeviceInfo() {
-    return { git_revision: 'mock0123', boot_reason: 'Normal', uptime_ms: Date.now() - this.bootTime };
+    return {
+      git_revision: 'mock0123',
+      boot_reason: 'Normal',
+      uptime_ms: Date.now() - this.bootTime,
+      led_buffer_capacity: 16384,
+      channel_count: 4,
+    };
   }
 
   async rebootDevice() {
@@ -132,12 +144,8 @@ export class MockBleDevice extends BleDevice {
     return entries;
   }
 
-  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
-    let channelOffset = 0;
-    for (const ch of this.config?.channels ?? []) {
-      if (ch.index === channel) break;
-      channelOffset += ch.length;
-    }
+  async setSpanPixels(channel, start, count, r, g, b, autoCommit = true) {
+    const channelOffset = this.config?.channelOffsets?.[channel] ?? 0;
     const byteOffset = (channelOffset + start) * 3;
     const rawData = new Uint8Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -153,12 +161,20 @@ export class MockBleDevice extends BleDevice {
     this._log(`(mock) set Ch ${channel} start ${start} count ${count} RGB(${r},${g},${b})${autoCommit ? ' + commit' : ''}`, 'success');
   }
 
-  async commitChannels(channels) {
-    this._log(`(mock) committed channels [${channels.join(', ')}]`, 'success');
+  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
+    return this.setSpanPixels(channel, start, count, r, g, b, autoCommit);
+  }
+
+  async commit() {
+    this._log('(mock) committed / rendered LEDs', 'success');
+  }
+
+  async commitChannels(_channels = []) {
+    return this.commit();
   }
 
   async readBufferInfo() {
-    return { capacity: 4096, size: this.buffer.length };
+    return { capacity: 16384, size: this.buffer.length };
   }
 
   async readBuffer(size, onProgress = null) {

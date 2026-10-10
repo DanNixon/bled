@@ -5,7 +5,7 @@ import { log } from './logger.js';
 const GATT_OPERATIONS = [
   'readDeviceInfo', 'rebootDevice',
   'statFile', 'readFile', 'writeFile', 'deleteFile', 'listDirectory',
-  'setChannelPixels', 'commitChannels',
+  'setChannelPixels', 'setFixturePixels', 'setSpanPixels', 'commit', 'commitChannels',
   'readBufferInfo', 'readBuffer', 'readBufferRange', 'writeBuffer',
 ];
 
@@ -14,42 +14,169 @@ export const CONFIG_PATH = '/config.json';
 const toBytes = (v) => (v instanceof Uint8Array ? v : new Uint8Array(v));
 
 /**
- * Length in pixels of a section, derived from its (externally tagged) mode,
- * e.g. `{ LinearArray: { length: 12 } }`, `{ SinglePixel: {} }`.
- */
-export function sectionLength(mode) {
-  if (!mode || typeof mode !== 'object') return 0;
-  const [variant, body] = Object.entries(mode)[0] ?? [];
-  if (variant === 'SinglePixel') return 1;
-  const len = body && Number(body.length);
-  return Number.isFinite(len) ? len : 0;
-}
-
-/**
  * Turn the raw decoded DeviceConfig into the shape the UI uses:
- * `{ name, channels: [{ index, name, length, segments: [{ index, name, start, length }] }] }`
+ * {
+ *   name,
+ *   fixtures: [{
+ *     index,
+ *     name,
+ *     layoutName,
+ *     layout,
+ *     totalPixels,
+ *     totalBytes,
+ *     byteOffset,
+ *     spans: [{ index, channel, start, length, byteOffset, byteLength }]
+ *   }],
+ *   channelLengths: [number],
+ *   channelOffsets: [number],
+ *   channels: [{ index, name, length, byteOffset, byteLength }]
+ * }
  */
 export function normaliseConfig(raw) {
-  const channels = (raw.channels ?? []).map((ch, index) => {
-    const segments = (ch.sections ?? [])
-      .map((s) => ({ name: s.name, start: Number(s.start), length: sectionLength(s.mode) }))
-      .filter((s) => s.length > 0)
-      .sort((a, b) => a.start - b.start)
-      .map((s, i) => ({ ...s, index: i }));
-    const length = segments.reduce((end, s) => Math.max(end, s.start + s.length), 0);
-    return { index, name: ch.name, length, segments };
+  if (!raw) return { name: 'unknown', fixtures: [], channelLengths: [], channelOffsets: [], channels: [] };
+
+  const rawFixtures = raw.fixtures ?? [];
+
+  // Determine maximum channel index used
+  let maxChannel = -1;
+  for (const fix of rawFixtures) {
+    for (const span of fix.spans ?? []) {
+      const ch = Number(span.channel);
+      if (ch > maxChannel) maxChannel = ch;
+    }
+  }
+  const channelCount = Math.max(maxChannel + 1, 4);
+
+  // Calculate maximum (start + length) for each channel
+  const channelLengths = new Array(channelCount).fill(0);
+  for (const fix of rawFixtures) {
+    for (const span of fix.spans ?? []) {
+      const ch = Number(span.channel);
+      const end = Number(span.start) + Number(span.length);
+      if (ch >= 0 && ch < channelCount) {
+        channelLengths[ch] = Math.max(channelLengths[ch], end);
+      }
+    }
+  }
+
+  // Calculate cumulative channel byte offsets
+  const channelOffsets = new Array(channelCount).fill(0);
+  let cursor = 0;
+  for (let i = 0; i < channelCount; i++) {
+    channelOffsets[i] = cursor;
+    cursor += channelLengths[i] * 3;
+  }
+
+  // Normalise fixtures and spans
+  const fixtures = rawFixtures.map((fix, fIndex) => {
+    let layoutName = 'Linear';
+    if (fix.layout) {
+      if (typeof fix.layout === 'string') {
+        layoutName = fix.layout.replace('_', ' ');
+      } else if (typeof fix.layout === 'object') {
+        const key = Object.keys(fix.layout)[0] || '';
+        layoutName = key.replace('_', ' ');
+      }
+      layoutName = layoutName.charAt(0).toUpperCase() + layoutName.slice(1);
+    }
+
+    const spans = (fix.spans ?? []).map((span, sIndex) => {
+      const ch = Number(span.channel);
+      const start = Number(span.start);
+      const length = Number(span.length);
+      const chOffset = channelOffsets[ch] ?? 0;
+      const byteOffset = chOffset + start * 3;
+      const byteLength = length * 3;
+      return {
+        index: sIndex,
+        channel: ch,
+        start,
+        length,
+        byteOffset,
+        byteLength,
+      };
+    });
+
+    const totalPixels = spans.reduce((sum, s) => sum + s.length, 0);
+    const totalBytes = totalPixels * 3;
+    const byteOffset = spans.length > 0 ? spans[0].byteOffset : 0;
+
+    return {
+      index: fIndex,
+      name: fix.name || `Fixture ${fIndex}`,
+      layoutName,
+      layout: fix.layout,
+      totalPixels,
+      totalBytes,
+      byteOffset,
+      spans,
+    };
   });
-  return { name: raw.name, channels };
+
+  // Construct channels array for UI/debugging
+  const channels = channelLengths.map((len, ch) => ({
+    index: ch,
+    name: `Channel ${ch}`,
+    length: len,
+    byteOffset: channelOffsets[ch],
+    byteLength: len * 3,
+  }));
+
+  return {
+    name: raw.name || 'unnamed',
+    fixtures,
+    channelLengths,
+    channelOffsets,
+    channels,
+  };
 }
 
 /**
  * Calculates start pixel, pixel count, byte offset, and byte length in the
- * device LED buffer for a channel or segment.
+ * device LED buffer for a target fixture or span.
  */
-export function getChannelBufferRange(channels, channelIndex, segment = null) {
+export function getBufferRange(config, target) {
+  if (!config || !target) {
+    return { startPixel: 0, pixelCount: 0, byteOffset: 0, byteLength: 0 };
+  }
+
+  const { fixture, span } = target;
+  if (span) {
+    return {
+      startPixel: span.start,
+      pixelCount: span.length,
+      byteOffset: span.byteOffset,
+      byteLength: span.byteLength,
+    };
+  }
+
+  if (fixture) {
+    return {
+      startPixel: 0,
+      pixelCount: fixture.totalPixels,
+      byteOffset: fixture.byteOffset,
+      byteLength: fixture.totalBytes,
+      multiSpan: fixture.spans.length > 1,
+    };
+  }
+
+  return { startPixel: 0, pixelCount: 0, byteOffset: 0, byteLength: 0 };
+}
+
+/**
+ * Calculates start pixel, pixel count, byte offset, and byte length in the
+ * device LED buffer for a channel or segment (backward compatibility helper).
+ */
+export function getChannelBufferRange(channelsOrConfig, channelIndex, segment = null) {
+  if (channelsOrConfig && !Array.isArray(channelsOrConfig) && channelsOrConfig.fixtures) {
+    return getBufferRange(channelsOrConfig, {
+      fixture: channelsOrConfig.fixtures[channelIndex],
+      span: segment,
+    });
+  }
   let channelOffset = 0;
   let targetChannel = null;
-  for (const ch of channels ?? []) {
+  for (const ch of channelsOrConfig ?? []) {
     if (ch.index === channelIndex) {
       targetChannel = ch;
       break;
@@ -184,8 +311,9 @@ export class BleDevice extends EventTarget {
     try {
       const bytes = await this.readConfig();
       this.config = normaliseConfig(bled.decode_device_config(bytes));
+      const fixtureCount = this.config.fixtures?.length ?? 0;
       this._log(
-        `Loaded config "${this.config.name}" with ${this.config.channels.length} channel(s).`,
+        `Loaded config "${this.config.name}" with ${fixtureCount} fixture(s).`,
         'success'
       );
     } catch (err) {
@@ -203,7 +331,7 @@ export class BleDevice extends EventTarget {
     const dataView = await this.chars.info.readValue();
     const rawBytes = new Uint8Array(dataView.buffer);
     const info = bled.decode_device_info(rawBytes);
-    this._log(`Device Info: rev=${info.git_revision}, boot=${info.boot_reason}, uptime=${info.uptime_ms} ms`, 'success');
+    this._log(`Device Info: rev=${info.git_revision}, boot=${info.boot_reason}, uptime=${info.uptime_ms} ms, cap=${info.led_buffer_capacity} B, channels=${info.channel_count}`, 'success');
     return info;
   }
 
@@ -430,13 +558,9 @@ export class BleDevice extends EventTarget {
 
   // --- LED Pixels & Commit ---
 
-  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
-    let channelOffset = 0;
-    for (const ch of this.config?.channels ?? []) {
-      if (ch.index === channel) break;
-      channelOffset += ch.length;
-    }
-    const byteOffset = (channelOffset + start) * 3;
+  async setSpanPixels(channel, start, count, r, g, b, autoCommit = true) {
+    const channelOffset = this.config?.channelOffsets?.[channel] ?? 0;
+    const byteOffset = channelOffset + start * 3;
     const rawData = new Uint8Array(count * 3);
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
@@ -457,17 +581,53 @@ export class BleDevice extends EventTarget {
     this._log(`Updated LED buffer for Ch ${channel}.`, 'success');
 
     if (autoCommit) {
-      const commitBytes = bled.encode_commit(new Uint8Array([channel]));
-      await this.chars.commit.writeValueWithResponse(commitBytes);
-      this._log(`Rendered/committed channel ${channel}.`, 'success');
+      await this.commit();
     }
   }
 
-  async commitChannels(channels) {
-    this._log(`Committing channels [${channels.join(', ')}]...`);
-    const commitBytes = bled.encode_commit(new Uint8Array(channels));
+  async setFixturePixels(fixtureIndex, start, count, r, g, b, autoCommit = true) {
+    const fixture = this.config?.fixtures?.[fixtureIndex];
+    if (!fixture) {
+      throw new Error(`Fixture index ${fixtureIndex} not found in config`);
+    }
+
+    // Distribute pixels across the fixture's spans
+    let remainingStart = start;
+    let remainingCount = count;
+
+    for (const span of fixture.spans) {
+      if (remainingCount <= 0) break;
+      if (remainingStart >= span.length) {
+        remainingStart -= span.length;
+        continue;
+      }
+
+      const spanStart = span.start + remainingStart;
+      const spanCount = Math.min(remainingCount, span.length - remainingStart);
+      remainingStart = 0;
+      remainingCount -= spanCount;
+
+      await this.setSpanPixels(span.channel, spanStart, spanCount, r, g, b, false);
+    }
+
+    if (autoCommit) {
+      await this.commit();
+    }
+  }
+
+  async setChannelPixels(channel, start, count, r, g, b, autoCommit = true) {
+    return this.setSpanPixels(channel, start, count, r, g, b, autoCommit);
+  }
+
+  async commit() {
+    this._log("Committing / rendering LED buffer...");
+    const commitBytes = bled.encode_commit();
     await this.chars.commit.writeValueWithResponse(commitBytes);
-    this._log(`Successfully committed channels: ${channels.join(', ')}`, 'success');
+    this._log("Successfully rendered LEDs.", 'success');
+  }
+
+  async commitChannels(_channels = []) {
+    return this.commit();
   }
 
   // --- LED Data Buffer ---

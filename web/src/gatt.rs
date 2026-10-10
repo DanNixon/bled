@@ -68,12 +68,6 @@ pub fn led_data_uuid() -> String {
     bled_core::ble::LED_BUFFER_DATA_UUID.to_string()
 }
 
-/// Maximum number of LED channels addressable on one device.
-#[wasm_bindgen]
-pub fn max_channel_count() -> usize {
-    bled_core::MAX_CHANNEL_COUNT
-}
-
 /// Maximum length of an attribute value in bytes.
 #[wasm_bindgen]
 pub fn max_attribute_value_len() -> usize {
@@ -83,7 +77,37 @@ pub fn max_attribute_value_len() -> usize {
 /// Maximum path length in bytes for File IO operations.
 #[wasm_bindgen]
 pub fn max_path_len() -> usize {
-    bled_core::MAX_PATH_LEN
+    bled_core::api::MAX_PATH_LEN
+}
+
+/// Maximum length of any device or fixture name in bytes.
+#[wasm_bindgen]
+pub fn max_name_len() -> usize {
+    bled_core::config::MAX_NAME_LEN
+}
+
+/// Maximum number of fixtures configurable on a single device.
+#[wasm_bindgen]
+pub fn max_fixture_count() -> usize {
+    bled_core::config::MAX_FIXTURE_COUNT
+}
+
+/// Maximum number of spans configurable in a single fixture.
+#[wasm_bindgen]
+pub fn max_span_per_fixture_count() -> usize {
+    bled_core::config::MAX_SPAN_PER_FIXTURE_COUNT
+}
+
+/// Maximum allowable size of the config file in bytes when encoded as JSON.
+#[wasm_bindgen]
+pub fn max_config_json_size() -> usize {
+    bled_core::config::MAX_CONFIG_JSON_SIZE
+}
+
+/// Maximum allowable size of the config file in bytes when encoded as CBOR.
+#[wasm_bindgen]
+pub fn max_config_cbor_size() -> usize {
+    bled_core::config::MAX_CONFIG_CBOR_SIZE
 }
 
 /// Git revision of the build.

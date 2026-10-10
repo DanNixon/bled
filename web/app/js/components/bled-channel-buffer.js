@@ -1,24 +1,26 @@
-import { getChannelBufferRange } from '../services/ble.js';
+import { getBufferRange } from '../services/ble.js';
 import { log } from '../services/logger.js';
 import { escapeHtml, formatBytes, renderHexDump } from '../utils/formatters.js';
 
-function getBufferFilename(device, channel, segment) {
+function getBufferFilename(device, target) {
   const sanitize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
   const devName = sanitize(device?.displayName || 'device');
-  const chName = sanitize(channel?.name || `ch${channel?.index ?? 0}`);
-  if (segment) {
-    const segName = sanitize(segment?.name || `seg${segment?.index ?? 0}`);
-    return `${devName}_${chName}_${segName}_buffer.bin`;
+  if (target?.fixture) {
+    const fixName = sanitize(target.fixture.name);
+    if (target.span) {
+      return `${devName}_${fixName}_ch${target.span.channel}_s${target.span.start}_buffer.bin`;
+    }
+    return `${devName}_${fixName}_buffer.bin`;
   }
+  const chName = sanitize(target?.channel?.name || `ch${target?.channel?.index ?? 0}`);
   return `${devName}_${chName}_buffer.bin`;
 }
 
-/** LED buffer save/load controls for a specific channel or segment. */
+/** LED buffer save/load controls for a specific fixture, span, or channel. */
 export class BledChannelBuffer extends HTMLElement {
   constructor() {
     super();
-    this.channel = null;
-    this.segment = null;
+    this.target = null;
     this.readBufferCache = null;
     this.stagedFileData = null;
     this.stagedFileName = '';
@@ -30,7 +32,7 @@ export class BledChannelBuffer extends HTMLElement {
       <div class="card">
         <div class="card-header">
           <div>
-            <span class="card-title">Channel Buffer</span>
+            <span class="card-title">Buffer Data</span>
             <span id="targetSubtitle" class="card-subtitle" style="display: block;"></span>
           </div>
         </div>
@@ -69,7 +71,7 @@ export class BledChannelBuffer extends HTMLElement {
         <!-- Load Buffer Data -->
         <div style="border-top: 1px solid var(--card-border); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
           <label>Load Buffer Data</label>
-          <span class="card-subtitle">Upload binary LED buffer data (.bin) to this channel/segment</span>
+          <span class="card-subtitle">Upload binary LED buffer data (.bin) to this target</span>
           <div class="form-row">
             <div class="form-group" style="flex: 1;">
               <input type="file" id="bufFileInput" accept=".bin,application/octet-stream" style="padding: 0.35rem 0.5rem; font-size: 0.75rem;">
@@ -79,7 +81,7 @@ export class BledChannelBuffer extends HTMLElement {
           <pre id="loadHexPreview" style="display: none; background: var(--code-bg); border: 1px solid var(--card-border); border-radius: 4px; padding: 0.5rem; font-size: 0.75rem; max-height: 120px; overflow: auto; color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"></pre>
           <div class="form-row" style="justify-content: space-between; align-items: center; margin-top: 0.25rem;">
             <label style="display: flex; align-items: center; gap: 0.375rem; cursor: pointer;">
-              <input type="checkbox" id="autoCommitCheck" checked> Auto-commit channel on write
+              <input type="checkbox" id="autoCommitCheck" checked> Auto-commit on write
             </label>
             <button id="btnWriteBuffer" class="btn btn-primary btn-sm" disabled>Upload to LED Buffer</button>
           </div>
@@ -114,16 +116,14 @@ export class BledChannelBuffer extends HTMLElement {
   }
 
   /**
-   * Set target channel and optional segment to save/load.
-   * `channel` is `{ index, name, length, segments }`, `segment` is `{ index, name, start, length }` or null.
+   * Set target fixture, span, or channel to save/load.
    */
-  setTarget({ channel, segment = null }) {
+  setTarget(target) {
     if (!this.targetSubtitle) {
-      this._pendingTarget = { channel, segment };
+      this._pendingTarget = target;
       return;
     }
-    this.channel = channel;
-    this.segment = segment;
+    this.target = target;
     this.readBufferCache = null;
     this.stagedFileData = null;
     this.stagedFileName = '';
@@ -138,27 +138,51 @@ export class BledChannelBuffer extends HTMLElement {
     this.bufFileInput.value = '';
     this.btnWriteBuffer.disabled = true;
 
-    const range = getChannelBufferRange(this.device?.config?.channels, channel.index, segment);
-    this._currentTargetRange = range;
+    const { fixture, span, channel, segment } = target;
+    let range = { startPixel: 0, pixelCount: 0, byteOffset: 0, byteLength: 0 };
 
-    const { startPixel, pixelCount, byteOffset, byteLength } = range;
-
-    if (segment) {
-      this.targetSubtitle.textContent =
-        `${channel.name} / ${segment.name}: pixels ${segment.start}–${segment.start + segment.length - 1} (global: ${startPixel}–${startPixel + pixelCount - 1})`;
-    } else {
-      this.targetSubtitle.textContent =
-        `${channel.name}: entire channel (${pixelCount} pixels, global: ${startPixel}–${startPixel + pixelCount - 1})`;
+    if (fixture) {
+      if (span) {
+        range = {
+          startPixel: span.start,
+          pixelCount: span.length,
+          byteOffset: span.byteOffset,
+          byteLength: span.byteLength,
+        };
+        this.targetSubtitle.textContent =
+          `${fixture.name} / Span (Ch ${span.channel}): pixels ${span.start}–${span.start + span.length - 1} (buffer: ${range.byteOffset}–${range.byteOffset + range.byteLength - 1})`;
+      } else {
+        range = {
+          startPixel: 0,
+          pixelCount: fixture.totalPixels,
+          byteOffset: fixture.byteOffset,
+          byteLength: fixture.totalBytes,
+        };
+        this.targetSubtitle.textContent =
+          `${fixture.name}: entire fixture (${fixture.totalPixels} px, ${fixture.spans.length} span${fixture.spans.length === 1 ? '' : 's'})`;
+      }
+    } else if (channel) {
+      range = getBufferRange(this.device?.config, { channel, segment });
+      if (segment) {
+        this.targetSubtitle.textContent =
+          `${channel.name} / ${segment.name}: pixels ${segment.start}–${segment.start + segment.length - 1}`;
+      } else {
+        this.targetSubtitle.textContent =
+          `${channel.name}: entire channel (${channel.length} pixels)`;
+      }
     }
 
-    if (pixelCount === 0) {
+    this._currentTargetRange = range;
+    const { byteOffset, byteLength, pixelCount } = range;
+
+    if (pixelCount === 0 || byteLength === 0) {
       this.bufRange.textContent = '—';
       this.bufSize.textContent = '0 B';
       this.bufPixels.textContent = '0 px';
       this.btnReadBuffer.disabled = true;
       this.btnSaveBuffer.disabled = true;
       this.bufFileInput.disabled = true;
-      this.fileNotice.textContent = 'Channel has 0 configured pixels.';
+      this.fileNotice.textContent = 'Target has 0 configured pixels.';
       this.fileNotice.style.display = 'block';
     } else {
       this.bufRange.textContent = `${byteOffset} – ${byteOffset + byteLength - 1}`;
@@ -186,16 +210,14 @@ export class BledChannelBuffer extends HTMLElement {
       this.readHexPreview.textContent = renderHexDump(combined, 512);
       this.readHexPreview.style.display = 'block';
 
-      const targetDesc = this.segment
-        ? `${this.channel.name} / ${this.segment.name}`
-        : this.channel.name;
+      const targetDesc = this.target?.fixture?.name || this.target?.channel?.name || 'target';
       log(`Read ${combined.length} bytes (${pixelCount} pixels) from ${targetDesc} at offset ${byteOffset}.`, 'success');
 
       setTimeout(() => { this.bufProgressWrap.style.display = 'none'; }, 400);
       return combined;
     } catch (err) {
       this.bufProgressWrap.style.display = 'none';
-      log(`Failed reading channel buffer: ${err.message}`, 'error');
+      log(`Failed reading target buffer: ${err.message}`, 'error');
     }
   }
 
@@ -207,7 +229,7 @@ export class BledChannelBuffer extends HTMLElement {
     const blob = new Blob([this.readBufferCache], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const filename = getBufferFilename(this.device, this.channel, this.segment);
+    const filename = getBufferFilename(this.device, this.target);
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -272,21 +294,18 @@ export class BledChannelBuffer extends HTMLElement {
         this.bufProgressBar.style.width = `${pct}%`;
       });
 
-      const targetDesc = this.segment
-        ? `${this.channel.name} / ${this.segment.name}`
-        : this.channel.name;
-
+      const targetDesc = this.target?.fixture?.name || this.target?.channel?.name || 'target';
       log(`Uploaded ${toUpload.length} bytes to ${targetDesc} at buffer offset ${byteOffset}.`, 'success');
 
       if (this.autoCommitCheck.checked) {
-        await this.device.commitChannels([this.channel.index]);
-        log(`Rendered/committed channel "${this.channel.name}".`, 'success');
+        await this.device.commit();
+        log(`Rendered/committed LED buffer.`, 'success');
       }
 
       setTimeout(() => { this.bufProgressWrap.style.display = 'none'; }, 400);
     } catch (err) {
       this.bufProgressWrap.style.display = 'none';
-      log(`Failed writing to channel buffer: ${err.message}`, 'error');
+      log(`Failed writing to target buffer: ${err.message}`, 'error');
     }
   }
 }

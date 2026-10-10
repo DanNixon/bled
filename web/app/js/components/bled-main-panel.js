@@ -78,14 +78,23 @@ export class BledMainPanel extends HTMLElement {
   _render() {
     let sel = devices.selection;
     const dev = devices.selectedDevice;
+
+    let fixture = null;
+    let span = null;
     let channel = null;
     let segment = null;
 
     if (sel && dev) {
-      if (sel.kind === 'channel' || sel.kind === 'segment') {
-        channel = dev.config?.channels[sel.channel] ?? null;
-        segment = sel.kind === 'segment' ? channel?.segments[sel.segment] ?? null : null;
-        // Config was reloaded and no longer has this item.
+      if (sel.kind === 'fixture' || sel.kind === 'span') {
+        fixture = dev.config?.fixtures?.[sel.fixture] ?? null;
+        span = sel.kind === 'span' ? fixture?.spans?.[sel.span] ?? null : null;
+        if (!fixture || (sel.kind === 'span' && !span)) {
+          devices.select({ deviceId: dev.id, kind: 'device' });
+          return;
+        }
+      } else if (sel.kind === 'channel' || sel.kind === 'segment') {
+        channel = dev.config?.channels?.[sel.channel] ?? null;
+        segment = sel.kind === 'segment' ? channel?.segments?.[sel.segment] ?? null : null;
         if (!channel || (sel.kind === 'segment' && !segment)) {
           devices.select({ deviceId: dev.id, kind: 'device' });
           return;
@@ -104,6 +113,15 @@ export class BledMainPanel extends HTMLElement {
         case 'sdcard':
           visible = [this._view(dev, 'files')];
           break;
+        case 'fixture':
+        case 'span': {
+          const pixels = this._view(dev, 'pixels');
+          pixels.setPreset({ fixture, span });
+          const chBuffer = this._view(dev, 'channelBuffer');
+          chBuffer.setTarget({ fixture, span });
+          visible = [pixels, chBuffer];
+          break;
+        }
         default: {
           const pixels = this._view(dev, 'pixels');
           pixels.setPreset({ channel, segment });
