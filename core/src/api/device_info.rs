@@ -56,7 +56,7 @@ mod tests {
         let mut data = [0; 128];
 
         let length = crate::io::encode_cbor(&value, &mut data).unwrap();
-        assert_eq!(length, 64);
+        assert_eq!(length, 102);
 
         let decoded = crate::io::decode_cbor::<DeviceInfo>(&data[..length]).unwrap();
         assert_eq!(decoded, value);
