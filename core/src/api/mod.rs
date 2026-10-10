@@ -1,7 +1,6 @@
 //! Domain types used by the bled API.
 
 mod channel;
-mod channel_mask;
 mod config_control;
 mod device_info;
 mod file_io_control;
@@ -9,7 +8,6 @@ mod led_buffer_control;
 mod pixel;
 
 pub use channel::*;
-pub use channel_mask::*;
 pub use config_control::*;
 pub use device_info::*;
 pub use file_io_control::*;

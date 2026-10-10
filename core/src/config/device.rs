@@ -1,10 +1,8 @@
-use crate::{
-    api::MAX_CHANNEL_COUNT,
-    config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, Span},
-};
+use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, Span};
 use getset::Getters;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -19,29 +17,63 @@ pub struct DeviceConfig {
 
 impl DeviceConfig {
     /// Gets the required length of output channels.
-    pub fn channel_lengths(&self) -> [usize; MAX_CHANNEL_COUNT] {
-        let mut lengths = [0; MAX_CHANNEL_COUNT];
+    pub fn channel_lengths<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+    ) -> Option<[usize; OUTPUT_CHANNEL_COUNT]> {
+        let mut lengths = [0; OUTPUT_CHANNEL_COUNT];
 
         for fixture in &self.fixtures {
             for span in fixture.spans() {
                 let channel = usize::from(*span.channel().as_ref());
                 let end = (*span.start() as usize).saturating_add(*span.length() as usize);
-                lengths[channel] = lengths[channel].max(end);
+                match lengths.get_mut(channel) {
+                    Some(l) => {
+                        *l = (*l).max(end);
+                    }
+                    None => {
+                        return None;
+                    }
+                }
             }
         }
 
-        lengths
+        Some(lengths)
     }
 
     /// Validates the device config.
-    pub fn validate(&self) -> Result<(), ()> {
-        let overlaps = |first: &Span, second: &Span| -> Result<bool, ()> {
+    pub fn validate<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+    ) -> Result<(), DeviceConfigValidationError> {
+        for fixture in &self.fixtures {
+            for span in fixture.spans() {
+                let channel = u8::from(*span.channel().as_ref());
+                if usize::from(channel) >= OUTPUT_CHANNEL_COUNT {
+                    return Err(DeviceConfigValidationError::InvalidOutputChannel {
+                        channel,
+                        output_channel_count: OUTPUT_CHANNEL_COUNT,
+                    });
+                }
+
+                span.start()
+                    .checked_add(*span.length())
+                    .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
+            }
+        }
+
+        // Check for overlapping spans.
+        let overlaps = |first: &Span, second: &Span| -> Result<bool, DeviceConfigValidationError> {
             if first.channel() != second.channel() {
                 return Ok(false);
             }
 
-            let first_end = first.start().checked_add(*first.length()).ok_or(())?;
-            let second_end = second.start().checked_add(*second.length()).ok_or(())?;
+            let first_end = first
+                .start()
+                .checked_add(*first.length())
+                .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
+            let second_end = second
+                .start()
+                .checked_add(*second.length())
+                .ok_or(DeviceConfigValidationError::SpanEndOverflow)?;
 
             Ok(*first.start() < second_end && *second.start() < first_end)
         };
@@ -51,7 +83,7 @@ impl DeviceConfig {
                 // Compare against earlier spans in the same fixture.
                 for previous in fixture.spans().iter().take(span_index) {
                     if overlaps(span, previous)? {
-                        return Err(());
+                        return Err(DeviceConfigValidationError::OverlappingSpans);
                     }
                 }
 
@@ -59,7 +91,7 @@ impl DeviceConfig {
                 for previous_fixture in self.fixtures.iter().take(fixture_index) {
                     for previous in previous_fixture.spans() {
                         if overlaps(span, previous)? {
-                            return Err(());
+                            return Err(DeviceConfigValidationError::OverlappingSpans);
                         }
                     }
                 }
@@ -70,9 +102,29 @@ impl DeviceConfig {
     }
 }
 
+/// Error returned when a device configuration is invalid.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum DeviceConfigValidationError {
+    /// A span references an output channel that is not available.
+    #[error("output channel {channel} is invalid (count: {output_channel_count})")]
+    InvalidOutputChannel {
+        channel: u8,
+        output_channel_count: usize,
+    },
+
+    /// A span's end index cannot be represented.
+    #[error("span end index overflows")]
+    SpanEndOverflow,
+
+    /// Two spans on the same output channel overlap.
+    #[error("spans overlap")]
+    OverlappingSpans,
+}
+
 #[cfg(test)]
 mod tests {
-    use super::DeviceConfig;
+    use super::{DeviceConfig, DeviceConfigValidationError};
 
     fn config(json: &str) -> DeviceConfig {
         serde_json_core::from_slice(json.as_bytes()).unwrap().0
@@ -82,7 +134,7 @@ mod tests {
     fn empty_configuration_has_zero_length_channels() {
         let device = config(r#"{"name":"test","fixtures":[]}"#);
 
-        assert_eq!(device.channel_lengths().as_slice(), &[0; 8]);
+        assert_eq!(device.channel_lengths::<4>().unwrap().as_slice(), &[0; 4]);
     }
 
     #[test]
@@ -105,15 +157,15 @@ mod tests {
         );
 
         assert_eq!(
-            device.channel_lengths().as_slice(),
-            &[5, 7, 0, 7, 0, 0, 0, 0]
+            device.channel_lengths::<4>().unwrap().as_slice(),
+            &[5, 7, 0, 7]
         );
     }
 
     #[test]
     fn empty_configuration_is_valid() {
         assert_eq!(
-            config(r#"{"name":"test","fixtures":[]}"#).validate(),
+            config(r#"{"name":"test","fixtures":[]}"#).validate::<4>(),
             Ok(())
         );
     }
@@ -130,7 +182,7 @@ mod tests {
             }"#,
         );
 
-        assert_eq!(device.validate(), Ok(()));
+        assert_eq!(device.validate::<4>(), Ok(()));
     }
 
     #[test]
@@ -145,7 +197,10 @@ mod tests {
             }"#,
         );
 
-        assert_eq!(device.validate(), Err(()));
+        assert_eq!(
+            device.validate::<4>(),
+            Err(DeviceConfigValidationError::OverlappingSpans)
+        );
     }
 
     #[test]
@@ -160,7 +215,10 @@ mod tests {
             }"#,
         );
 
-        assert_eq!(device.validate(), Err(()));
+        assert_eq!(
+            device.validate::<4>(),
+            Err(DeviceConfigValidationError::OverlappingSpans)
+        );
     }
 
     #[test]
@@ -175,7 +233,7 @@ mod tests {
             }"#,
         );
 
-        assert_eq!(device.validate(), Ok(()));
+        assert_eq!(device.validate::<4>(), Ok(()));
     }
 
     #[test]
@@ -190,6 +248,46 @@ mod tests {
             }"#,
         );
 
-        assert_eq!(device.validate(), Err(()));
+        assert_eq!(
+            device.validate::<4>(),
+            Err(DeviceConfigValidationError::SpanEndOverflow)
+        );
+    }
+
+    #[test]
+    fn span_on_unavailable_output_channel_is_invalid() {
+        let device = config(
+            r#"{
+                "name":"test",
+                "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
+                    {"channel":4,"start":0,"length":1}
+                ]}]
+            }"#,
+        );
+
+        assert_eq!(
+            device.validate::<4>(),
+            Err(DeviceConfigValidationError::InvalidOutputChannel {
+                channel: 4,
+                output_channel_count: 4,
+            })
+        );
+    }
+
+    #[test]
+    fn single_span_with_overflowing_end_is_invalid() {
+        let device = config(
+            r#"{
+                "name":"test",
+                "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
+                    {"channel":0,"start":4294967295,"length":1}
+                ]}]
+            }"#,
+        );
+
+        assert_eq!(
+            device.validate::<4>(),
+            Err(DeviceConfigValidationError::SpanEndOverflow)
+        );
     }
 }
