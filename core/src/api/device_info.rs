@@ -1,34 +1,37 @@
 use getset::Getters;
+use heapless::String;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct DeviceInfo {
-    git_revision: heapless::String<32>,
+    git_revision: String<32>,
     boot_reason: BootReason,
     uptime_ms: u64,
+    led_buffer_capacity: u64,
 }
 
 impl DeviceInfo {
     #[must_use]
     pub fn new(
-        git_revision: heapless::String<32>,
+        git_revision: String<32>,
         boot_reason: BootReason,
         uptime_ms: u64,
+        led_buffer_capacity: u64,
     ) -> Self {
         Self {
             git_revision,
             boot_reason,
             uptime_ms,
+            led_buffer_capacity,
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum BootReason {
-    #[default]
     Normal,
     WatchdogForced,
     WatchdogTimeout,
@@ -44,6 +47,7 @@ mod tests {
             heapless::String::try_from("a1b2c3d4").unwrap(),
             BootReason::WatchdogTimeout,
             42_000,
+            16 * 1024,
         );
         let mut data = [0; 128];
 
