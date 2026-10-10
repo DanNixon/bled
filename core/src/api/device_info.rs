@@ -10,6 +10,7 @@ pub struct DeviceInfo {
     boot_reason: BootReason,
     uptime_ms: u64,
     led_buffer_capacity: u64,
+    channel_count: u8,
 }
 
 impl DeviceInfo {
@@ -19,12 +20,14 @@ impl DeviceInfo {
         boot_reason: BootReason,
         uptime_ms: u64,
         led_buffer_capacity: u64,
+        channel_count: u8,
     ) -> Self {
         Self {
             git_revision,
             boot_reason,
             uptime_ms,
             led_buffer_capacity,
+            channel_count,
         }
     }
 }
@@ -48,6 +51,7 @@ mod tests {
             BootReason::WatchdogTimeout,
             42_000,
             16 * 1024,
+            4,
         );
         let mut data = [0; 128];
 
