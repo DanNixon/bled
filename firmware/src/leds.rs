@@ -1,8 +1,8 @@
 use bled_core::{
-    ChannelConfig, ChannelMask, ChannelPartOps, MAX_CHANNEL_COUNT, RGB8,
+    RGB8,
     pixel_data::{PixelDataBuffer, PixelDataChannelSize},
 };
-use defmt::{info, unwrap};
+use defmt::{debug, info, unwrap};
 use embassy_rp::{
     pio::Pio,
     pio_programs::ws2812::{PioWs2812, PioWs2812Program},
@@ -22,7 +22,7 @@ static CHANNEL_DATA: Mutex<CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY>>
     Mutex::new(PixelDataBuffer::new());
 
 static DRAW_MUTEX: Mutex<CriticalSectionRawMutex, ()> = Mutex::new(());
-static DRAW_REQUEST: Channel<CriticalSectionRawMutex, ChannelMask, 1> = Channel::new();
+static DRAW_REQUEST: Channel<CriticalSectionRawMutex, (), 1> = Channel::new();
 static DRAW_COMPLETE: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 
 pub(crate) async fn channel_data()
@@ -31,10 +31,12 @@ pub(crate) async fn channel_data()
 }
 
 /// Renders the selected channels and returns after the physical write completes.
-pub(crate) async fn draw(mask: ChannelMask) {
+pub(crate) async fn draw() {
+    debug!("Draw requested");
     let _guard = DRAW_MUTEX.lock().await;
-    DRAW_REQUEST.send(mask).await;
+    DRAW_REQUEST.send(()).await;
     DRAW_COMPLETE.wait().await;
+    debug!("Draw complete");
 }
 
 #[embassy_executor::task]
@@ -91,9 +93,7 @@ pub(super) async fn task(
         let data = CHANNEL_DATA.lock().await;
 
         for channel in 0..4 {
-            if mask.contains_index(channel)
-                && let Ok(pixels) = data.try_channel::<RGB8>(channel)
-            {
+            if let Ok(pixels) = data.try_channel::<RGB8>(channel) {
                 match channel {
                     0 => channel_0.write(pixels.iter().copied()).await.unwrap(),
                     1 => channel_1.write(pixels.iter().copied()).await.unwrap(),

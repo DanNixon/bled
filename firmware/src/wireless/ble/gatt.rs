@@ -8,12 +8,13 @@ use crate::{
     sdcard::SdCardStorage,
 };
 use bled_core::{
-    ChannelMask, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
+    api::{ConfigControl, FileIoControl, LedBufferControl},
     ble::{
         COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
         FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
         RESET_UUID, SERVICE_UUID,
     },
+    config::DeviceConfig,
 };
 use defmt::{debug, error, info, warn};
 use trouble_host::{
@@ -371,21 +372,8 @@ async fn process_file_io_data_write<'stack, P: PacketPool>(
 async fn process_commit<'stack, P: PacketPool>(
     event: WriteEvent<'stack, '_, P>,
 ) -> Result<Reply<'stack, P>, Error> {
-    match event.with_data(|offset, data| {
-        if offset != 0 {
-            Err(AttErrorCode::INVALID_OFFSET)
-        } else {
-            bled_core::io::decode_cbor::<ChannelMask>(data)
-                .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
-        }
-    }) {
-        Ok(mask) => {
-            leds::draw(mask).await;
-            debug!("led draw 0x{:x}", mask.bits());
-            event.accept_unprocessed()
-        }
-        Err(err) => event.reject(err),
-    }
+    leds::draw().await;
+    event.accept_unprocessed()
 }
 
 async fn process_led_buffer_data_read<'stack, P: PacketPool>(

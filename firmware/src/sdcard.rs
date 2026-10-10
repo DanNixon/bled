@@ -1,6 +1,6 @@
 use crate::SdCardResources;
 use aligned::{A4, Aligned};
-use bled_core::{DirEntry, DirEntryType, MAX_PATH_LEN};
+use bled_core::api::{DirEntry, DirEntryType, MAX_PATH_LEN};
 use defmt::{Format, info, unwrap, warn};
 use embassy_rp::{
     gpio::{Input, Level, Output, Pull},

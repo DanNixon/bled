@@ -1,7 +1,5 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
-use bled_core::{
-    ChannelConfig, ChannelSectionConfig, ChannelSectionMode, DeviceConfig, MAX_CONFIG_JSON_SIZE,
-};
+use bled_core::config::{DeviceConfig, MAX_CONFIG_JSON_SIZE};
 use defmt::{error, info, warn};
 use exfat_slim::blocking::error::ExFatError;
 use heapless::Vec;
