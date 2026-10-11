@@ -1,0 +1,8 @@
+[files]
+extend-exclude = [
+  "*.kicad_mod",
+  "*.kicad_sym",
+  "*.kicad_sch",
+  "*.kicad_pcb",
+  "web/app/vendor/iro.min.js",
+]
