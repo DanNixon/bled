@@ -1,8 +1,5 @@
 import { devices } from '../services/devices.js';
-import { MockBleDevice } from '../services/mock-device.js';
 import { log } from '../services/logger.js';
-
-const MOCK_ENABLED = new URLSearchParams(location.search).has('mock');
 
 export class BledHeader extends HTMLElement {
   connectedCallback() {
@@ -14,7 +11,6 @@ export class BledHeader extends HTMLElement {
         </div>
         <div class="conn-group">
           <button id="btnConnect" class="btn btn-primary">Connect device</button>
-          ${MOCK_ENABLED ? '<button id="btnMock" class="btn btn-secondary">Add mock device</button>' : ''}
         </div>
       </header>
       <div id="noBleAlert" class="alert" style="display:none;">
@@ -24,7 +20,6 @@ export class BledHeader extends HTMLElement {
     `;
 
     this.btnConnect = this.querySelector('#btnConnect');
-    this.btnMock = this.querySelector('#btnMock');
     this.noBleAlert = this.querySelector('#noBleAlert');
     this.gitRevContainer = this.querySelector('#gitRevContainer');
 
@@ -49,16 +44,6 @@ export class BledHeader extends HTMLElement {
         }
       }
     };
-
-    if (this.btnMock) {
-      this.btnMock.onclick = async () => {
-        try {
-          await devices.connectRaw(MockBleDevice.create(), MockBleDevice);
-        } catch (err) {
-          log(`Mock connection failed: ${err.message}`, 'error');
-        }
-      };
-    }
   }
 
   setGitRevision(revision) {

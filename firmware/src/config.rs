@@ -1,16 +1,33 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
 use bled_core::{
-    ChannelConfig, ChannelSectionConfig, ChannelSectionMode, DeviceConfig, MAX_CONFIG_JSON_SIZE,
+    ChannelNumber,
+    config::{DeviceConfig, Fixture, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan},
 };
 use defmt::{error, info, warn};
+use embassy_sync::once_lock::OnceLock;
 use exfat_slim::blocking::error::ExFatError;
-use heapless::Vec;
+
+static CONFIG: OnceLock<DeviceConfig> = OnceLock::new();
+
+#[inline(never)]
+pub(crate) async fn init(sd: &SdCardStorage) {
+    let config = boot_time_load(sd).await;
+    CONFIG
+        .init(config)
+        .expect("device config initialized more than once");
+}
+
+pub(crate) fn get() -> &'static DeviceConfig {
+    CONFIG
+        .try_get()
+        .expect("device config accessed before initialization")
+}
 
 /// File name of the config file on the SD card.
 const CONFIG_PATH: &str = "/config.json";
 
 #[inline(never)]
-pub(super) async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
+async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
     let config = match load_config(sd).await {
         Ok(Some(config)) => config,
         Ok(None) => {
@@ -21,7 +38,7 @@ pub(super) async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {
         }
         Err(_) => {
             error!(
-                "Config failed to load or parse; using default config without overwriting SD file"
+                "Config failed to load, parse, or validate; using default config without overwriting SD file"
             );
             default_config()
         }
@@ -35,7 +52,13 @@ async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
     match sd.read_file(CONFIG_PATH, &mut bytes).await {
         Ok(len) => match bled_core::io::decode_json::<DeviceConfig>(&bytes[..len]) {
-            Ok(config) => Ok(Some(config)),
+            Ok(config) => match config.validate::<{ crate::leds::CHANNEL_COUNT }>() {
+                Ok(()) => Ok(Some(config)),
+                Err(e) => {
+                    warn!("Invalid config loaded from SD card: {}", e);
+                    Err(())
+                }
+            },
             Err(e) => {
                 warn!("Failed to parse config loaded from SD card: {}", e);
                 Err(())
@@ -50,7 +73,7 @@ async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
 }
 
 #[inline(never)]
-pub(crate) async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bool {
+async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bool {
     info!("Saving config");
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
     match bled_core::io::encode_json(config, &mut bytes) {
@@ -64,28 +87,21 @@ pub(crate) async fn save_config(sd: &SdCardStorage, config: &DeviceConfig) -> bo
 
 #[inline(never)]
 fn default_config() -> DeviceConfig {
-    let strip_config: Vec<_, _> = [
-        ChannelSectionConfig::new(
-            "onboard".try_into().unwrap(),
-            0,
-            ChannelSectionMode::single_pixel(),
-        ),
-        ChannelSectionConfig::new(
-            "test".try_into().unwrap(),
-            1,
-            ChannelSectionMode::linear_array(12),
-        ),
-    ]
-    .into();
-
-    DeviceConfig::new(
-        "bled-default".try_into().unwrap(),
+    let onboard_leds = Fixture::new(
+        "onboard".try_into().unwrap(),
+        PixelLayout::LinearArray(LinearArray::default()),
         [
-            ChannelConfig::new("a".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("b".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("c".try_into().unwrap(), strip_config.clone()),
-            ChannelConfig::new("d".try_into().unwrap(), strip_config),
+            PixelSpan::new(ChannelNumber::new(0), 0, 1),
+            PixelSpan::new(ChannelNumber::new(1), 0, 1),
+            PixelSpan::new(ChannelNumber::new(2), 0, 1),
+            PixelSpan::new(ChannelNumber::new(3), 0, 1),
         ]
-        .into(),
-    )
+        .try_into()
+        .unwrap(),
+    );
+
+    DeviceConfig {
+        name: "bled-default".try_into().unwrap(),
+        fixtures: [onboard_leds].into(),
+    }
 }

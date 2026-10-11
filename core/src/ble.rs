@@ -2,9 +2,10 @@
 
 use uuid::{Uuid, uuid};
 
+/// The maximum length of a GATT attribute value.
 pub const MAX_ATTRIBUTE_VALUE_LEN: usize = 512;
 
-/// LED control GATT service UUID
+/// LED control GATT service UUID.
 pub const SERVICE_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000101");
 
 /// Device Info GATT characteristic UUID (read-only).
@@ -27,7 +28,6 @@ pub const COMMIT_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000140");
 
 /// LED buffer control GATT characteristic UUID (write-only).
 pub const LED_BUFFER_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000141");
-
 /// LED buffer data GATT characteristic UUID (read/write).
 pub const LED_BUFFER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000142");
 

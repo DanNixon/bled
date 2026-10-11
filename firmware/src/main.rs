@@ -10,7 +10,7 @@ mod status;
 mod wireless;
 
 use crate::sdcard::SdCardStorage;
-use bled_core::{BootReason, ChannelMask, DeviceInfo};
+use bled_core::api::{BootReason, DeviceInfo};
 use defmt::{error, info, unwrap};
 use defmt_rtt as _;
 use embassy_executor::Spawner;
@@ -102,17 +102,12 @@ async fn main(spawner: Spawner) {
         control.gpio_set(0, false).await;
     }
 
-    let config = config::boot_time_load(&sd).await;
+    config::init(&sd).await;
 
-    spawner.spawn(unwrap!(wireless::ble::task(
-        bt,
-        bt_address,
-        config.clone(),
-        sd.clone()
-    )));
+    spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
 
-    spawner.spawn(unwrap!(leds::task(r.led, config.channels)));
-    leds::draw(ChannelMask::all()).await;
+    spawner.spawn(unwrap!(leds::task(r.led)));
+    leds::draw().await;
 
     spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
 }
@@ -122,6 +117,8 @@ fn device_info() -> DeviceInfo {
         git_version::git_version!().try_into().unwrap(),
         boot_reason(),
         Instant::now().as_millis(),
+        leds::LED_MEMORY.try_into().unwrap(),
+        leds::CHANNEL_COUNT.try_into().unwrap(),
     )
 }
 
