@@ -1,10 +1,19 @@
-default: build
+default: check
 
 build:
     wasm-pack build --target web --out-dir app/pkg
 
 test:
     cargo test
+
+fmt:
+    cargo fmt
+
+clippy:
+    cargo clippy -- -D warnings
+
+check: clippy test
+    cargo fmt --check
 
 serve: build
     python3 -m http.server 8080 --directory app

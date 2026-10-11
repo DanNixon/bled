@@ -11,9 +11,7 @@
         just
 
         # Code formatting tools
-        treefmt
         alejandra
-        mdl
         typos
 
         # Rust toolchain

@@ -8,94 +8,25 @@ on:
   pull_request:
 
 jobs:
-  formatting:
-    name: Formatting
-    runs-on: ubuntu-slim
-
-    steps:
-      - uses: actions/checkout@v7
-      - uses: DeterminateSystems/nix-installer-action@v23
-
-      - name: Format
-        run: nix develop --command treefmt --fail-on-change
-
-  core:
-    name: Core crate
-    needs:
-      - formatting
+  ci:
+    name: CI
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7
       - uses: DeterminateSystems/nix-installer-action@v23
 
-      - name: Clippy
-        run: |
-          set -x
-          cd ./core
-          nix develop --command cargo clippy -- -Dwarnings
-
-      - name: Tests
-        run: |
-          set -x
-          cd ./core
-          nix develop --command cargo test
-
-  firmware:
-    name: Firmware
-    needs:
-      - core
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-      - uses: DeterminateSystems/nix-installer-action@v23
-
-      - name: Clippy
-        run: |
-          set -x
-          cd ./firmware
-          nix develop --command just clippy
+      - name: Check
+        run: nix develop --command just check
 
       - name: Build
-        run: |
-          set -x
-          cd ./firmware
-          nix develop --command just
-
-  web:
-    name: Web
-    needs:
-      - core
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v7
-      - uses: DeterminateSystems/nix-installer-action@v23
-
-      - name: Clippy
-        run: |
-          set -x
-          cd ./web
-          nix develop --command cargo clippy -- -Dwarnings
-
-      - name: Tests
-        run: |
-          set -x
-          cd ./web
-          nix develop --command just test
-
-      - name: Build
-        run: |
-          set -x
-          cd ./web
-          nix develop --command just
+        run: nix develop --command just build
 
   web-deploy:
     name: Deploy web UI
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
-      - web
+      - ci
     runs-on: ubuntu-latest
 
     permissions:
@@ -119,7 +50,7 @@ jobs:
         run: |
           set -x
           cd ./web
-          nix develop --command just
+          nix develop --command just build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
