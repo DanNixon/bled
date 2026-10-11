@@ -20,6 +20,7 @@ use embassy_rp::{
     pio,
 };
 use embassy_time::{Duration, Instant};
+use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 use portable_atomic as _;
 
@@ -70,8 +71,15 @@ embassy_rp::bind_interrupts!(struct Irqs {
                  dma::InterruptHandler<DMA_CH5>;
 });
 
+#[global_allocator]
+static HEAP: Heap = Heap::empty();
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
+    unsafe {
+        embedded_alloc::init!(HEAP, 32 * 1024);
+    }
+
     let p = embassy_rp::init(Default::default());
     let r = split_resources!(p);
 
