@@ -1,5 +1,5 @@
 import { log } from '../services/logger.js';
-import { formatUptime } from '../utils/formatters.js';
+import { formatBytes, formatUptime } from '../utils/formatters.js';
 
 /** Version information for a device. Set `.device` before attaching. */
 export class BledDeviceInfo extends HTMLElement {
@@ -31,6 +31,14 @@ export class BledDeviceInfo extends HTMLElement {
             <div class="info-box-label">Uptime</div>
             <div id="infoUptime" class="info-box-value">—</div>
           </div>
+          <div class="info-box">
+            <div class="info-box-label">Output Channels</div>
+            <div id="infoChannelCount" class="info-box-value">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Buffer Capacity</div>
+            <div id="infoBufferCapacity" class="info-box-value">—</div>
+          </div>
         </div>
       </div>
     `;
@@ -40,6 +48,8 @@ export class BledDeviceInfo extends HTMLElement {
     this.infoGitRev = this.querySelector('#infoGitRev');
     this.infoBootReason = this.querySelector('#infoBootReason');
     this.infoUptime = this.querySelector('#infoUptime');
+    this.infoChannelCount = this.querySelector('#infoChannelCount');
+    this.infoBufferCapacity = this.querySelector('#infoBufferCapacity');
 
     this.querySelector('#btnRefreshInfo').onclick = () => this.refresh();
     this.querySelector('#btnReloadConfig').onclick = () => this.device.loadConfig();
@@ -61,7 +71,7 @@ export class BledDeviceInfo extends HTMLElement {
     if (device.configError) {
       this.configWarning.style.display = 'block';
       this.configWarning.textContent =
-        `Could not read active config: ${device.configError}. No channels are available until it can be read.`;
+        `Could not read active config: ${device.configError}. No fixtures are available until it can be read.`;
     } else {
       this.configWarning.style.display = 'none';
     }
@@ -73,6 +83,8 @@ export class BledDeviceInfo extends HTMLElement {
       this.infoGitRev.textContent = info.git_revision;
       this.infoBootReason.textContent = info.boot_reason;
       this.infoUptime.textContent = formatUptime(info.uptime_ms);
+      this.infoChannelCount.textContent = info.channel_count != null ? String(info.channel_count) : '—';
+      this.infoBufferCapacity.textContent = info.led_buffer_capacity != null ? formatBytes(info.led_buffer_capacity) : '—';
     } catch (err) {
       log(`Failed reading Device Info: ${err.message}`, 'error');
     }

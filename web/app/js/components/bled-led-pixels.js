@@ -2,7 +2,7 @@ import { log } from '../services/logger.js';
 
 /**
  * Colour picker and pixel controls for one device. Set `.device` before
- * attaching, then call `setPreset()` whenever a channel or segment is selected.
+ * attaching, then call `setPreset()` whenever a fixture, span, or channel is selected.
  */
 export class BledLedPixels extends HTMLElement {
   connectedCallback() {
@@ -16,9 +16,9 @@ export class BledLedPixels extends HTMLElement {
         </div>
 
         <div class="form-row">
-          <div class="form-group" style="flex: 1;">
-            <label for="pixelChannel">Channel</label>
-            <select id="pixelChannel" disabled></select>
+          <div class="form-group" style="flex: 2;">
+            <label for="pixelTargetDisplay">Target</label>
+            <input type="text" id="pixelTargetDisplay" readonly style="background: var(--card-bg-subtle, rgba(0,0,0,0.15)); color: var(--text-primary); cursor: default;">
           </div>
           <div class="form-group" style="flex: 1;">
             <label for="pixelStart">Start Pixel</label>
@@ -73,7 +73,7 @@ export class BledLedPixels extends HTMLElement {
 
         <div class="form-row" style="justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 0.75rem;">
           <label style="display: flex; align-items: center; gap: 0.375rem; cursor: pointer;">
-            <input type="checkbox" id="autoCommitCheck" checked> Auto-commit channel on write
+            <input type="checkbox" id="autoCommitCheck" checked> Auto-commit on write
           </label>
           <button id="btnSetColours" class="btn btn-primary">Set Colours</button>
         </div>
@@ -82,7 +82,7 @@ export class BledLedPixels extends HTMLElement {
 
     // Elements
     this.pixelTarget = this.querySelector('#pixelTarget');
-    this.pixelChannel = this.querySelector('#pixelChannel');
+    this.pixelTargetDisplay = this.querySelector('#pixelTargetDisplay');
     this.pixelStart = this.querySelector('#pixelStart');
     this.pixelCount = this.querySelector('#pixelCount');
     this.colorPreview = this.querySelector('#colorPreview');
@@ -107,29 +107,34 @@ export class BledLedPixels extends HTMLElement {
     this.colorG.addEventListener('keydown', onEnterKey);
     this.colorB.addEventListener('keydown', onEnterKey);
 
-    // Channel options come from the device config, if it could be read.
-    for (const ch of this.device.config?.channels ?? []) {
-      const opt = document.createElement('option');
-      opt.value = String(ch.index);
-      opt.textContent = ch.name;
-      this.pixelChannel.appendChild(opt);
+    if (this._pendingPreset) {
+      this.setPreset(this._pendingPreset);
+      this._pendingPreset = null;
     }
-
-    if (this._pendingPreset) this.setPreset(this._pendingPreset);
   }
 
   async applyColours() {
-    const ch = parseInt(this.pixelChannel.value, 10);
     const start = parseInt(this.pixelStart.value, 10);
     const count = parseInt(this.pixelCount.value, 10);
     const r = parseInt(this.colorR.value, 10);
     const g = parseInt(this.colorG.value, 10);
     const b = parseInt(this.colorB.value, 10);
 
-    if (Number.isNaN(ch) || Number.isNaN(start) || Number.isNaN(count) || count < 1) return;
+    if (Number.isNaN(start) || Number.isNaN(count) || count < 1) return;
 
     try {
-      await this.device.setChannelPixels(ch, start, count, r, g, b, this.autoCommitCheck.checked);
+      const autoCommit = this.autoCommitCheck.checked;
+      if (this._currentTarget?.fixture) {
+        const { fixture, span } = this._currentTarget;
+        if (span) {
+          await this.device.setSpanPixels(span.channel, span.start + start, count, r, g, b, autoCommit);
+        } else {
+          await this.device.setFixturePixels(fixture.index, start, count, r, g, b, autoCommit);
+        }
+      } else if (this._currentTarget?.channel) {
+        const ch = this._currentTarget.channel.index;
+        await this.device.setChannelPixels(ch, start, count, r, g, b, autoCommit);
+      }
     } catch (err) {
       log(`Set colours failed: ${err.message}`, 'error');
     }
@@ -137,24 +142,45 @@ export class BledLedPixels extends HTMLElement {
 
   /**
    * Preset the pixel controls.
-   * `channel` is a config channel `{ index, name, length }`, `segment` an
-   * optional `{ name, start, length }`. Without a segment the whole channel is used.
+   * Target can be `{ fixture, span }` or legacy `{ channel, segment }`.
    */
-  setPreset({ channel, segment = null }) {
-    if (!this.pixelChannel) {
-      this._pendingPreset = { channel, segment };
+  setPreset(target) {
+    if (!this.pixelTargetDisplay) {
+      this._pendingPreset = target;
       return;
     }
-    const start = segment ? segment.start : 0;
-    const count = segment ? segment.length : channel.length;
 
-    this.pixelChannel.value = String(channel.index);
-    this.pixelStart.value = start;
-    this.pixelCount.value = Math.max(1, count);
-    this.pixelTarget.textContent = segment
-      ? `${channel.name} / ${segment.name}: pixels ${start}-${start + count - 1}`
-      : `${channel.name}: entire channel (${channel.length} pixels)`;
-    this.btnSetColours.disabled = count < 1;
+    const { fixture, span, channel, segment } = target;
+    this._currentTarget = target;
+
+    if (fixture) {
+      if (span) {
+        const desc = `${fixture.name} — Ch ${span.channel} [${span.start}..${span.start + span.length - 1}] (${span.length} px)`;
+        this.pixelTarget.textContent = desc;
+        this.pixelTargetDisplay.value = `${fixture.name} / Span (Ch ${span.channel})`;
+        this.pixelStart.value = 0;
+        this.pixelCount.value = Math.max(1, span.length);
+        this.btnSetColours.disabled = span.length < 1;
+      } else {
+        const desc = `${fixture.name}: entire fixture (${fixture.totalPixels} px, ${fixture.layoutName})`;
+        this.pixelTarget.textContent = desc;
+        this.pixelTargetDisplay.value = fixture.name;
+        this.pixelStart.value = 0;
+        this.pixelCount.value = Math.max(1, fixture.totalPixels);
+        this.btnSetColours.disabled = fixture.totalPixels < 1;
+      }
+    } else if (channel) {
+      const start = segment ? segment.start : 0;
+      const count = segment ? segment.length : channel.length;
+      const desc = segment
+        ? `${channel.name} / ${segment.name}: pixels ${start}-${start + count - 1}`
+        : `${channel.name}: entire channel (${channel.length} pixels)`;
+      this.pixelTarget.textContent = desc;
+      this.pixelTargetDisplay.value = segment ? `${channel.name} / ${segment.name}` : channel.name;
+      this.pixelStart.value = start;
+      this.pixelCount.value = Math.max(1, count);
+      this.btnSetColours.disabled = count < 1;
+    }
   }
 
   _initColorPicker() {

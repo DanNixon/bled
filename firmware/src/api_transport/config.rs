@@ -1,4 +1,7 @@
-use bled_core::{ConfigStatResponse, DeviceConfig, MAX_CONFIG_CBOR_SIZE};
+use bled_core::{
+    api::ConfigStatResponse,
+    config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
+};
 use defmt::{Format, info};
 
 #[derive(Debug, Format)]

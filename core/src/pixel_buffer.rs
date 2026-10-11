@@ -1,16 +1,11 @@
-use crate::{LedBufferInformation, MAX_CHANNEL_COUNT};
+use crate::api::LedBufferInformation;
 use bytemuck::{AnyBitPattern, NoUninit, Pod};
 use core::ops::Range;
-use heapless::Vec;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum PixelDataBufferError {
-    /// The number of channels provided to reshape exceeds the maximum channel count.
-    #[error("too many channels (provided: {provided}, capacity: {capacity})")]
-    TooManyChannels { provided: usize, capacity: usize },
-
     /// The total required buffer size exceeds the allocated capacity.
     #[error("required buffer size ({required}) exceeds capacity ({capacity})")]
     BufferOverflow { required: usize, capacity: usize },
@@ -27,22 +22,21 @@ pub enum PixelDataBufferError {
     TypeCastFailed,
 }
 
-pub struct PixelDataBuffer<const LEN: usize> {
-    ranges: Vec<Range<usize>, { MAX_CHANNEL_COUNT }>,
+pub struct PixelDataBuffer<const LEN: usize, const CHANNEL_COUNT: usize> {
+    ranges: [Range<usize>; CHANNEL_COUNT],
     data: [u8; LEN],
 }
 
-impl<const LEN: usize> Default for PixelDataBuffer<LEN> {
+impl<const LEN: usize, const CHANNEL_COUNT: usize> Default for PixelDataBuffer<LEN, CHANNEL_COUNT> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<const LEN: usize> PixelDataBuffer<LEN> {
-    #[must_use]
+impl<const LEN: usize, const CHANNEL_COUNT: usize> PixelDataBuffer<LEN, CHANNEL_COUNT> {
     pub const fn new() -> Self {
         Self {
-            ranges: Vec::new(),
+            ranges: [const { 0..0 }; CHANNEL_COUNT],
             data: [0u8; LEN],
         }
     }
@@ -73,17 +67,8 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
 
     pub fn try_reshape(
         &mut self,
-        sizes: &[PixelDataChannelSize],
+        sizes: [PixelDataChannelSize; CHANNEL_COUNT],
     ) -> Result<(), PixelDataBufferError> {
-        self.ranges.clear();
-
-        if sizes.len() > self.ranges.capacity() {
-            return Err(PixelDataBufferError::TooManyChannels {
-                provided: sizes.len(),
-                capacity: self.ranges.capacity(),
-            });
-        }
-
         let mut required = 0usize;
         for size in sizes {
             let Some(bytes) = size.bytes() else {
@@ -109,11 +94,11 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
         }
 
         let mut cursor = 0;
-        for size in sizes.iter() {
+        for (index, size) in sizes.iter().enumerate() {
             let a = cursor;
             let b = cursor + size.bytes().unwrap_or(0);
 
-            self.ranges.push(a..b).unwrap();
+            self.ranges[index] = a..b;
             cursor = b;
         }
 
@@ -127,16 +112,17 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
         let r = self
             .ranges
             .get(channel)
+            .filter(|_| channel < CHANNEL_COUNT)
             .ok_or(PixelDataBufferError::InvalidChannel {
                 channel,
-                channel_count: self.ranges.len(),
+                channel_count: CHANNEL_COUNT,
             })?;
         let s = self
             .data
             .get(r.start..r.end)
             .ok_or(PixelDataBufferError::InvalidChannel {
                 channel,
-                channel_count: self.ranges.len(),
+                channel_count: CHANNEL_COUNT,
             })?;
         bytemuck::try_cast_slice(s).map_err(|_| PixelDataBufferError::TypeCastFailed)
     }
@@ -148,16 +134,17 @@ impl<const LEN: usize> PixelDataBuffer<LEN> {
         let r = self
             .ranges
             .get(channel)
+            .filter(|_| channel < CHANNEL_COUNT)
             .ok_or(PixelDataBufferError::InvalidChannel {
                 channel,
-                channel_count: self.ranges.len(),
+                channel_count: CHANNEL_COUNT,
             })?;
         let s = self
             .data
             .get_mut(r.start..r.end)
             .ok_or(PixelDataBufferError::InvalidChannel {
                 channel,
-                channel_count: self.ranges.len(),
+                channel_count: CHANNEL_COUNT,
             })?;
         bytemuck::try_cast_slice_mut(s).map_err(|_| PixelDataBufferError::TypeCastFailed)
     }
@@ -198,17 +185,17 @@ impl PixelDataChannelSize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rgb::RGB8;
+    use crate::RGB8;
 
     #[test]
     fn buffer_reshape_and_channel_access() {
-        let mut buffer = PixelDataBuffer::<32>::new();
+        let mut buffer = PixelDataBuffer::<32, 2>::new();
         let sizes = [
             PixelDataChannelSize::new::<RGB8>(2),
             PixelDataChannelSize::new::<RGB8>(3),
         ];
 
-        assert_eq!(buffer.try_reshape(&sizes), Ok(()));
+        assert_eq!(buffer.try_reshape(sizes), Ok(()));
         let ch0 = buffer.try_channel_mut::<RGB8>(0).unwrap();
         assert_eq!(ch0.len(), 2);
         ch0[0] = RGB8::new(1, 2, 3);
@@ -230,14 +217,14 @@ mod tests {
 
     #[test]
     fn buffer_reshape_overflow() {
-        let mut buffer = PixelDataBuffer::<10>::new();
+        let mut buffer = PixelDataBuffer::<10, 2>::new();
         let sizes = [
             PixelDataChannelSize::new::<RGB8>(2), // 6 bytes
             PixelDataChannelSize::new::<RGB8>(2), // 6 bytes -> total 12 > 10
         ];
 
         assert_eq!(
-            buffer.try_reshape(&sizes),
+            buffer.try_reshape(sizes),
             Err(PixelDataBufferError::BufferOverflow {
                 required: 12,
                 capacity: 10,
@@ -247,14 +234,14 @@ mod tests {
 
     #[test]
     fn buffer_reshape_size_multiplication_overflow() {
-        let mut buffer = PixelDataBuffer::<10>::new();
+        let mut buffer = PixelDataBuffer::<10, 1>::new();
         let size = PixelDataChannelSize::new::<RGB8>(usize::MAX);
         assert_eq!(size.count(), usize::MAX);
         assert_eq!(size.bytes_per_pixel(), 3);
         assert_eq!(size.bytes(), None);
 
         assert_eq!(
-            buffer.try_reshape(&[size]),
+            buffer.try_reshape([size]),
             Err(PixelDataBufferError::BufferOverflow {
                 required: usize::MAX,
                 capacity: 10,
@@ -264,19 +251,19 @@ mod tests {
 
     #[test]
     fn buffer_channel_out_of_bounds() {
-        let buffer = PixelDataBuffer::<32>::new();
+        let buffer = PixelDataBuffer::<32, 2>::new();
         assert_eq!(
             buffer.try_channel::<RGB8>(2),
             Err(PixelDataBufferError::InvalidChannel {
                 channel: 2,
-                channel_count: 0,
+                channel_count: 2,
             })
         );
     }
 
     #[test]
     fn buffer_capacity_size_info() {
-        let mut buffer = PixelDataBuffer::<64>::new();
+        let mut buffer = PixelDataBuffer::<64, 2>::new();
         assert_eq!(buffer.capacity(), 64);
         assert_eq!(buffer.size(), 0);
         assert_eq!(buffer.info().capacity(), &64u32);
@@ -286,7 +273,7 @@ mod tests {
             PixelDataChannelSize::new::<RGB8>(5),  // 15 bytes
             PixelDataChannelSize::new::<RGB8>(10), // 30 bytes
         ];
-        buffer.try_reshape(&sizes).unwrap();
+        buffer.try_reshape(sizes).unwrap();
         assert_eq!(buffer.capacity(), 64);
         assert_eq!(buffer.size(), 45);
         assert_eq!(buffer.info().capacity(), &64u32);

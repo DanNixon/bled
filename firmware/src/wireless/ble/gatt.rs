@@ -8,7 +8,7 @@ use crate::{
     sdcard::SdCardStorage,
 };
 use bled_core::{
-    ChannelMask, ConfigControl, DeviceConfig, FileIoControl, LedBufferControl,
+    api::{ConfigControl, FileIoControl, LedBufferControl},
     ble::{
         COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
         FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
@@ -62,11 +62,10 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
     sd: SdCardStorage,
-    config: &DeviceConfig,
 ) {
     let mut file_io = FileIoSession::new(sd);
     let mut led_buffer = LedBufferSession::new();
-    let mut config = ConfigSession::new(config);
+    let mut config = ConfigSession::new(crate::config::get());
 
     let reason = loop {
         match conn.next().await {
@@ -371,21 +370,8 @@ async fn process_file_io_data_write<'stack, P: PacketPool>(
 async fn process_commit<'stack, P: PacketPool>(
     event: WriteEvent<'stack, '_, P>,
 ) -> Result<Reply<'stack, P>, Error> {
-    match event.with_data(|offset, data| {
-        if offset != 0 {
-            Err(AttErrorCode::INVALID_OFFSET)
-        } else {
-            bled_core::io::decode_cbor::<ChannelMask>(data)
-                .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
-        }
-    }) {
-        Ok(mask) => {
-            leds::draw(mask).await;
-            debug!("led draw 0x{:x}", mask.bits());
-            event.accept_unprocessed()
-        }
-        Err(err) => event.reject(err),
-    }
+    leds::draw().await;
+    event.accept_unprocessed()
 }
 
 async fn process_led_buffer_data_read<'stack, P: PacketPool>(

@@ -34,11 +34,6 @@ class DeviceRegistry extends EventTarget {
   /** Ask the user to pick a device and connect to it. Resolves to the BleDevice. */
   async addDevice() {
     const raw = await BleDevice.choose();
-    return this.connectRaw(raw);
-  }
-
-  /** Connect to an already-chosen device (or a mock) and add it to the tree. */
-  async connectRaw(raw, DeviceClass = BleDevice) {
     const existing = this.devices.get(raw.id);
     if (existing) {
       log(`"${existing.displayName}" is already connected.`);
@@ -46,7 +41,7 @@ class DeviceRegistry extends EventTarget {
       return existing;
     }
 
-    const dev = new DeviceClass(raw);
+    const dev = new BleDevice(raw);
     this.pending++;
     this._changed();
     try {
