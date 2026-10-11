@@ -568,7 +568,9 @@ fn write_volume_label(device: &mut SdBlockDevice, label: &str) -> Result<(), For
 
     // find the first free slot: end-of-directory (0x00) or unused (0x01..=0x7f) entry
     let Some(slot) = sector
-        .chunks_exact(ENTRY_LEN)
+        .as_chunks::<ENTRY_LEN>()
+        .0
+        .iter()
         .position(|entry| entry[0] < 0x80)
     else {
         warn!("no free directory entry for the volume label");

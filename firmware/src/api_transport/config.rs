@@ -6,7 +6,7 @@ use defmt::{Format, info};
 
 #[derive(Debug, Format)]
 pub(crate) enum Error {
-    EncodeError,
+    Encode,
     IndexOutOfBounds,
     NotReading,
 }
@@ -50,8 +50,7 @@ impl<'a> ConfigSession<'a> {
         info!("Prepare config stat response");
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
-        let bytes =
-            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+        let bytes = bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::Encode)?;
 
         self.mode = ConfigMode::Stat {
             response: ConfigStatResponse::new(bytes as u32),
@@ -64,8 +63,7 @@ impl<'a> ConfigSession<'a> {
         info!("Prepare read config response at offset {}", offset);
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
-        let bytes =
-            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+        let bytes = bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::Encode)?;
 
         if offset > bytes {
             return Err(Error::IndexOutOfBounds);
@@ -85,8 +83,7 @@ impl<'a> ConfigSession<'a> {
         };
 
         let mut buf = [0u8; MAX_CONFIG_CBOR_SIZE];
-        let bytes =
-            bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::EncodeError)?;
+        let bytes = bled_core::io::encode_cbor(self.config, &mut buf).map_err(|_| Error::Encode)?;
 
         if offset >= bytes {
             return Ok(0);

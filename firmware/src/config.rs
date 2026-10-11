@@ -96,8 +96,7 @@ fn default_config() -> DeviceConfig {
             PixelSpan::new(ChannelNumber::new(2), 0, 1),
             PixelSpan::new(ChannelNumber::new(3), 0, 1),
         ]
-        .try_into()
-        .unwrap(),
+        .into(),
     );
 
     DeviceConfig {

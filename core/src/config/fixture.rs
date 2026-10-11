@@ -10,7 +10,7 @@ pub struct Fixture {
     /// Human-readable fixture name.
     name: String<{ MAX_NAME_LEN }>,
 
-    /// Layout of the pixels in theis fixture.
+    /// Layout of the pixels in this fixture.
     layout: PixelLayout,
 
     /// Physical pixel spans that make up this fixture.

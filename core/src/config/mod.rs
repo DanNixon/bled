@@ -9,7 +9,7 @@ pub use layouts::*;
 pub use span::*;
 
 /// Maximum length of any name.
-/// Shoudl never be more than the maximum length of an allowable BLE device name.
+/// Should never be more than the maximum length of an allowable BLE device name.
 pub const MAX_NAME_LEN: usize = 16;
 
 /// Maximum number of pixels that may be configured on a single device.
