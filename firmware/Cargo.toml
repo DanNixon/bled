@@ -46,6 +46,7 @@ smart-leds = "0.4.0"
 static_cell = "2.1.0"
 trouble-host = { version = "0.8.0", features = ["defmt", "scan", "gatt", "derive", "security"] }
 embedded-alloc = "0.7.0"
+wasmi = { version = "2.0.0", default-features = false }
 
 [patch.crates-io]
 cyw43 = { version = "0.7.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}

@@ -24,6 +24,9 @@ use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 use portable_atomic as _;
 
+// TODO
+use wasmi as _;
+
 assign_resources::assign_resources! {
     wireless: WirelessResources {
         pio: PIO0,
