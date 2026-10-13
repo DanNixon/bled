@@ -1,4 +1,9 @@
+use crate::{api::MAX_PATH_LEN, config::MAX_NAME_LEN};
+use heapless::String;
 use nutype::nutype;
+
+pub type NameString = String<{ MAX_NAME_LEN }>;
+pub type PathString = String<{ MAX_PATH_LEN }>;
 
 pub use rgb::RGB8;
 

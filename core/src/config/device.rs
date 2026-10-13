@@ -1,20 +1,24 @@
-use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, PixelSpan};
+use crate::{
+    NameString, PathString,
+    config::{Fixture, MAX_FIXTURE_COUNT, PixelSpan},
+};
 use getset::Getters;
-use heapless::{String, Vec};
+use heapless::Vec;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
-// TODO: add startup effect to device config
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct DeviceConfig {
     /// Human-readable device name.
-    pub name: String<{ MAX_NAME_LEN }>,
+    pub name: NameString,
 
     /// Light fixtures controlled by this device.
     pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
+
+    /// Filename of the effect manifest to load on boot.
+    pub default_effect: Option<PathString>,
 }
 
 impl DeviceConfig {

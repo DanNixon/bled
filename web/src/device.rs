@@ -72,7 +72,8 @@ mod tests {
                         { "channel": 1, "start": 0, "length": 1 }
                     ]
                 }
-            ]
+            ],
+            "defaultEffect": null
         }"#;
 
         let decoded = internal_decode_device_config(json.as_bytes()).unwrap();
@@ -80,6 +81,7 @@ mod tests {
         assert_eq!(decoded.fixtures().len(), 1);
         assert_eq!(decoded.fixtures()[0].name().as_str(), "onboard");
         assert_eq!(decoded.fixtures()[0].spans().len(), 2);
+        assert!(decoded.default_effect().is_none());
     }
 
     #[test]
@@ -94,6 +96,7 @@ mod tests {
         let config = DeviceConfig {
             name: "dev-cbor".try_into().unwrap(),
             fixtures: [fixture].into(),
+            default_effect: None,
         };
 
         let mut buffer = [0u8; 512];

@@ -33,8 +33,8 @@
 //! 2. Receive a CBOR encoded `DirEntry` from the `FILE_IO_DATA` characteristic.
 //! 3. Repeat from step 1, incrementing the index until an empty buffer is returned.
 
+use crate::PathString;
 use getset::Getters;
-use heapless::String;
 use serde::{Deserialize, Serialize};
 
 pub const MAX_PATH_LEN: usize = 64;
@@ -44,34 +44,22 @@ pub const MAX_PATH_LEN: usize = 64;
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum FileIoControl {
     /// Read a chunk from the specified file at the given offset.
-    Read {
-        path: String<MAX_PATH_LEN>,
-        offset: u32,
-    },
+    Read { path: PathString, offset: u32 },
 
     /// Write a chunk to the specified file at the given offset.
-    Write {
-        path: String<MAX_PATH_LEN>,
-        offset: u32,
-    },
+    Write { path: PathString, offset: u32 },
 
     /// Read a directory entry at the given index from the specified directory.
-    ReadDir {
-        path: String<MAX_PATH_LEN>,
-        index: u32,
-    },
+    ReadDir { path: PathString, index: u32 },
 
     /// Stat the specified file.
-    Stat { path: String<MAX_PATH_LEN> },
+    Stat { path: PathString },
 
     /// Create the specified file and preallocate the specified size.
-    Create {
-        path: String<MAX_PATH_LEN>,
-        size: u32,
-    },
+    Create { path: PathString, size: u32 },
 
     /// Delete the specified file.
-    Delete { path: String<MAX_PATH_LEN> },
+    Delete { path: PathString },
 
     /// Resets the read/write state machine. Will not roll back any in-progress write.
     Reset,
@@ -82,14 +70,14 @@ pub enum FileIoControl {
 #[getset(get = "pub")]
 pub struct DirEntry {
     /// Name of the file or directory.
-    name: String<MAX_PATH_LEN>,
+    name: PathString,
 
     kind: DirEntryType,
 }
 
 impl DirEntry {
     #[must_use]
-    pub fn new(name: String<MAX_PATH_LEN>, kind: DirEntryType) -> Self {
+    pub fn new(name: PathString, kind: DirEntryType) -> Self {
         Self { name, kind }
     }
 }

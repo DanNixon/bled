@@ -166,7 +166,6 @@ dependencies = [
  "exfat-slim",
  "getset",
  "git-version",
- "heapless 0.9.3",
  "mbr-nostd",
  "panic-probe",
  "portable-atomic",

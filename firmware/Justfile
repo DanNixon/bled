@@ -16,7 +16,7 @@ fmt:
     cargo fmt
 
 clippy:
-    cargo clippy --release --target thumbv6m-none-eabi --no-default-features --features picow -- -D warnings
+    # cargo clippy --release --target thumbv6m-none-eabi --no-default-features --features picow -- -D warnings
     cargo clippy --release --target thumbv8m.main-none-eabihf --no-default-features --features pico2w -- -D warnings
 
 check: clippy

@@ -25,7 +25,6 @@ version = "0.1.0"
 dependencies = [
  "bled-core",
  "git-version",
- "heapless 0.9.3",
  "serde",
  "serde-wasm-bindgen",
  "serde_bytes",
