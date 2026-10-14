@@ -121,6 +121,9 @@ async fn main(spawner: Spawner) {
 
     config::init(&sd).await;
 
+    #[cfg(feature = "pico2w")]
+    effect::load_active_effect(&sd).await;
+
     spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
 
     spawner.spawn(unwrap!(leds::task(r.led)));

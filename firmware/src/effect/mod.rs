@@ -13,7 +13,12 @@
 //! fixture and then by span.
 
 use alloc::vec::Vec;
-use bled_core::config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE};
+use bled_core::{
+    config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
+    effect::EffectManifest,
+};
+use defmt::{error, warn};
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -29,7 +34,85 @@ pub const MAX_MEMORY_BYTES: usize = 64 * 1024;
 pub const FUEL_PER_CALL: u64 = 1_000_000;
 
 const MAX_TABLE_ELEMENTS: usize = 1024;
+const MAX_EFFECT_MANIFEST_BYTES: usize = 1024;
+const MAX_WASM_MODULE_BYTES: usize = 64 * 1024;
 const INVALID_IMPORT_RESULT: i32 = -1;
+
+static ACTIVE_EFFECT: Mutex<CriticalSectionRawMutex, Option<EffectInstance>> = Mutex::new(None);
+
+/// Loads the effect selected by the device configuration, replacing any active effect.
+pub(crate) async fn load_active_effect(sd: &crate::sdcard::SdCardStorage) {
+    unload_active_effect().await;
+
+    let Some(manifest_path) = crate::config::get().default_effect.as_ref() else {
+        info!("No default effect configured");
+        return;
+    };
+
+    let mut manifest_bytes = [0; MAX_EFFECT_MANIFEST_BYTES];
+    let manifest_len = match sd
+        .read_file(manifest_path.as_str(), &mut manifest_bytes)
+        .await
+    {
+        Ok(len) => len,
+        Err(e) => {
+            warn!("Failed to read effect manifest: {}", e);
+            return;
+        }
+    };
+    let manifest =
+        match bled_core::io::decode_json::<EffectManifest>(&manifest_bytes[..manifest_len]) {
+            Ok(manifest) => manifest,
+            Err(e) => {
+                warn!("Failed to parse effect manifest: {}", e);
+                return;
+            }
+        };
+
+    let module_path = manifest.wasm_module();
+    let module_size = match sd.stat_file(module_path.as_str()).await {
+        Ok(size) => match usize::try_from(size) {
+            Ok(size) if size <= MAX_WASM_MODULE_BYTES => size,
+            _ => {
+                warn!(
+                    "Effect Wasm module exceeds the {} byte limit",
+                    MAX_WASM_MODULE_BYTES
+                );
+                return;
+            }
+        },
+        Err(e) => {
+            warn!("Failed to stat effect Wasm module: {}", e);
+            return;
+        }
+    };
+
+    let mut wasm_bytes = Vec::new();
+    if wasm_bytes.try_reserve_exact(module_size).is_err() {
+        error!("Failed to allocate memory for effect Wasm module");
+        return;
+    }
+    wasm_bytes.resize(module_size, 0);
+    match sd.read_file(module_path.as_str(), &mut wasm_bytes).await {
+        Ok(len) => wasm_bytes.truncate(len),
+        Err(e) => {
+            warn!("Failed to read effect Wasm module: {}", e);
+            return;
+        }
+    }
+
+    match EffectInstance::load(&wasm_bytes, crate::config::get()) {
+        Ok(effect) => {
+            *ACTIVE_EFFECT.lock().await = Some(effect);
+        }
+        Err(_) => error!("Failed to initialize configured effect"),
+    }
+}
+
+/// Drops the active effect, if one is loaded.
+pub(crate) async fn unload_active_effect() {
+    *ACTIVE_EFFECT.lock().await = None;
+}
 
 fn encode_device_config(config: &DeviceConfig) -> Result<(Vec<u8>, i32), EffectError> {
     let pixel_count = config.fixtures().iter().try_fold(0u32, |count, fixture| {
@@ -91,7 +174,7 @@ pub enum EffectError {
     ConfigurationTooLarge,
     /// A requested host-side allocation failed.
     AllocationFailed,
-    /// The effect has trapped or has been deinitialized and cannot be called.
+    /// The effect has trapped or otherwise become inactive and cannot be called.
     Inactive,
 }
 
@@ -114,8 +197,7 @@ struct BufferDescriptors {
 ///
 /// Calls are synchronous and require `&mut self`, which serializes command
 /// delivery and animation steps. Dropping this value always destroys the Wasm
-/// instance; [`Self::deinit`] may be called first when the guest exports
-/// `led_deinit`.
+/// instance.
 pub struct EffectInstance {
     store: Store<HostState>,
     memory: Memory,
@@ -127,7 +209,6 @@ pub struct EffectInstance {
     input_ptr: TypedFunc<(), i32>,
     input_capacity: TypedFunc<(), i32>,
     apply_input: TypedFunc<(i32, i32), i32>,
-    deinit: Option<TypedFunc<(), ()>>,
     buffers: BufferDescriptors,
     frame: Vec<u8>,
     active: bool,
@@ -258,15 +339,6 @@ impl EffectInstance {
         let apply_input = instance
             .get_typed_func::<(i32, i32), i32>(&store, "led_apply_input")
             .map_err(EffectError::Wasm)?;
-        let deinit = if instance.get_export(&store, "led_deinit").is_some() {
-            Some(
-                instance
-                    .get_typed_func::<(), ()>(&store, "led_deinit")
-                    .map_err(EffectError::Wasm)?,
-            )
-        } else {
-            None
-        };
 
         let mut effect = Self {
             store,
@@ -279,7 +351,6 @@ impl EffectInstance {
             input_ptr,
             input_capacity,
             apply_input,
-            deinit,
             buffers: BufferDescriptors {
                 frame_ptr: 0,
                 frame_len: 0,
@@ -422,17 +493,6 @@ impl EffectInstance {
     /// Returns the logical number of RGB pixels in this effect's framebuffer.
     pub fn pixel_count(&self) -> u32 {
         self.buffers.frame_len / 3
-    }
-
-    /// Calls the optional `led_deinit` export. Dropping the instance remains
-    /// safe and does not require this method to be called.
-    pub fn deinit(&mut self) -> Result<(), EffectError> {
-        self.ensure_active()?;
-        if let Some(deinit) = self.deinit {
-            call_guest(&mut self.store, &mut self.active, &deinit, ())?;
-        }
-        self.active = false;
-        Ok(())
     }
 
     fn read_buffer_descriptors(&mut self) -> Result<BufferDescriptors, EffectError> {
