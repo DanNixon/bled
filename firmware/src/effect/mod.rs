@@ -17,7 +17,7 @@ use bled_core::{
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
     effect::EffectManifest,
 };
-use defmt::{error, warn};
+use defmt::{error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,

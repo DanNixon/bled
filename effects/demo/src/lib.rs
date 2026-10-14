@@ -1,7 +1,10 @@
 #![no_std]
 
 use bled_core::{config::DeviceConfig, config::MAX_CONFIG_CBOR_SIZE, io::decode_cbor};
-use core::ptr::{addr_of_mut, write_bytes};
+use core::{
+    panic::PanicInfo,
+    ptr::{addr_of_mut, write_bytes},
+};
 
 const ABI_VERSION: i32 = 1;
 const MAX_PIXELS: u32 = 4096;
@@ -13,6 +16,11 @@ const ERROR_INVALID_LAYOUT: i32 = -3;
 const ERROR_PIXEL_COUNT: i32 = -4;
 const ERROR_TOO_MANY_PIXELS: i32 = -5;
 const ERROR_NOT_INITIALIZED: i32 = -6;
+
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    loop {}
+}
 
 #[link(wasm_import_module = "led_v1")]
 unsafe extern "C" {
