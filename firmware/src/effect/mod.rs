@@ -233,7 +233,7 @@ impl EffectInstance {
         let mut config = Config::default();
         config
             .consume_fuel(true)
-            .wasm_sign_extension(false)
+            .wasm_sign_extension(true)
             .wasm_saturating_float_to_int(false)
             .wasm_multi_value(false)
             .wasm_multi_memory(false)

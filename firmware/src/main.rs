@@ -76,7 +76,7 @@ embassy_rp::bind_interrupts!(struct Irqs {
 });
 
 #[cfg(feature = "pico2w")]
-const HEAP_SIZE: usize = 128 * 1024;
+const HEAP_SIZE: usize = 192 * 1024;
 #[cfg(not(feature = "pico2w"))]
 const HEAP_SIZE: usize = 32 * 1024;
 
