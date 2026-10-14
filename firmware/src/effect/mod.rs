@@ -8,15 +8,12 @@
 //! 8-bit LED drive values (not necessarily sRGB); any host gamma policy should
 //! be applied consistently regardless of the pattern.
 //!
-//! The immutable layout descriptor passed to `led_v1.layout_read` uses this
-//! compact format (all integers little-endian): `BLD1`, fixture count (`u8`),
-//! then one record per fixture: layout kind (`0` linear, `1` circular), pixel
-//! count (`u32`), sweep in degrees (`f32`, zero for linear layouts), span count
-//! (`u8`), and spans (`channel: u8`, `start: u32`, `length: u32`). Logical pixel
-//! order follows fixture order and then span order.
+//! The CBOR-encoded [`DeviceConfig`] is exposed to guests through
+//! `led_v1.layout_size` and `led_v1.layout_read`. Logical pixels are ordered by
+//! fixture and then by span.
 
 use alloc::vec::Vec;
-use bled_core::config::{DeviceConfig, PixelLayout};
+use bled_core::config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE};
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -34,83 +31,26 @@ pub const FUEL_PER_CALL: u64 = 1_000_000;
 const MAX_TABLE_ELEMENTS: usize = 1024;
 const INVALID_IMPORT_RESULT: i32 = -1;
 
-/// Layout metadata and logical pixel count for an effect instance.
-#[derive(Debug, Clone, PartialEq)]
-pub struct LayoutDescriptor {
-    bytes: Vec<u8>,
-    pixel_count: u32,
-}
+fn encode_device_config(config: &DeviceConfig) -> Result<(Vec<u8>, i32), EffectError> {
+    let pixel_count = config.fixtures().iter().try_fold(0u32, |count, fixture| {
+        fixture
+            .spans()
+            .iter()
+            .try_fold(count, |count, span| count.checked_add(*span.length()))
+    });
+    let pixel_count = pixel_count.ok_or(EffectError::ConfigurationTooLarge)?;
+    let pixel_count = i32::try_from(pixel_count).map_err(|_| EffectError::ConfigurationTooLarge)?;
 
-impl LayoutDescriptor {
-    /// Encodes the configured fixtures using the `BLD1` format documented by
-    /// this module. Pixels are ordered by fixture, then by span.
-    pub fn from_device_config(config: &DeviceConfig) -> Result<Self, EffectError> {
-        let fixture_count = config.fixtures().len();
-        let mut encoded_len = 5usize;
-        let mut pixel_count = 0u32;
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(MAX_CONFIG_CBOR_SIZE)
+        .map_err(|_| EffectError::AllocationFailed)?;
+    bytes.resize(MAX_CONFIG_CBOR_SIZE, 0);
+    let length = bled_core::io::encode_cbor(config, &mut bytes)
+        .map_err(|_| EffectError::ConfigurationTooLarge)?;
+    bytes.truncate(length);
 
-        for fixture in config.fixtures() {
-            encoded_len = encoded_len
-                .checked_add(10)
-                .and_then(|len| len.checked_add(fixture.spans().len().checked_mul(9)?))
-                .ok_or(EffectError::LayoutTooLarge)?;
-
-            for span in fixture.spans() {
-                pixel_count = pixel_count
-                    .checked_add(*span.length())
-                    .ok_or(EffectError::LayoutTooLarge)?;
-            }
-        }
-
-        if pixel_count > i32::MAX as u32 || encoded_len > i32::MAX as usize {
-            return Err(EffectError::LayoutTooLarge);
-        }
-
-        let mut bytes = Vec::new();
-        bytes
-            .try_reserve_exact(encoded_len)
-            .map_err(|_| EffectError::AllocationFailed)?;
-        bytes.extend_from_slice(b"BLD1");
-        bytes.push(u8::try_from(fixture_count).map_err(|_| EffectError::LayoutTooLarge)?);
-
-        for fixture in config.fixtures() {
-            let (kind, sweep_degrees) = match fixture.layout() {
-                PixelLayout::LinearArray(_) => (0, 0.0f32),
-                PixelLayout::CircularArray(circular) => (1, *circular.degrees()),
-            };
-            let fixture_pixels = fixture
-                .spans()
-                .iter()
-                .try_fold(0u32, |count, span| count.checked_add(*span.length()));
-            let fixture_pixels = fixture_pixels.ok_or(EffectError::LayoutTooLarge)?;
-
-            bytes.push(kind);
-            bytes.extend_from_slice(&fixture_pixels.to_le_bytes());
-            bytes.extend_from_slice(&sweep_degrees.to_bits().to_le_bytes());
-            bytes.push(
-                u8::try_from(fixture.spans().len()).map_err(|_| EffectError::LayoutTooLarge)?,
-            );
-
-            for span in fixture.spans() {
-                bytes.push(*span.channel().as_ref());
-                bytes.extend_from_slice(&span.start().to_le_bytes());
-                bytes.extend_from_slice(&span.length().to_le_bytes());
-            }
-        }
-
-        debug_assert_eq!(bytes.len(), encoded_len);
-        Ok(Self { bytes, pixel_count })
-    }
-
-    /// Returns the logical pixel count used by `led_v1.pixel_count`.
-    pub const fn pixel_count(&self) -> u32 {
-        self.pixel_count
-    }
-
-    /// Returns the immutable encoded layout bytes exposed by `layout_read`.
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.bytes
-    }
+    Ok((bytes, pixel_count))
 }
 
 /// Result of advancing an effect by one frame.
@@ -147,8 +87,8 @@ pub enum EffectError {
     OverlappingBuffers,
     /// The guest changed a buffer descriptor after initialization.
     UnstableBufferDescriptor,
-    /// The layout descriptor or pixel count cannot be represented by this ABI.
-    LayoutTooLarge,
+    /// The CBOR configuration or logical pixel count cannot be represented by this ABI.
+    ConfigurationTooLarge,
     /// A requested host-side allocation failed.
     AllocationFailed,
     /// The effect has trapped or has been deinitialized and cannot be called.
@@ -157,7 +97,7 @@ pub enum EffectError {
 
 #[derive(Debug)]
 struct HostState {
-    layout: Vec<u8>,
+    config: Vec<u8>,
     pixel_count: i32,
     limits: StoreLimits,
 }
@@ -198,7 +138,8 @@ impl EffectInstance {
     ///
     /// This method follows the ABI lifecycle through the mandatory initial
     /// zero-time step and stores that first RGB8 frame in host-owned memory.
-    pub fn load(wasm_bytes: &[u8], layout: LayoutDescriptor) -> Result<Self, EffectError> {
+    pub fn load(wasm_bytes: &[u8], device_config: &DeviceConfig) -> Result<Self, EffectError> {
+        let (config_bytes, pixel_count) = encode_device_config(device_config)?;
         if contains_start_section(wasm_bytes)? {
             return Err(EffectError::StartFunctionNotAllowed);
         }
@@ -221,12 +162,10 @@ impl EffectInstance {
         let engine = Engine::new(&config);
         let module = Module::new(&engine, wasm_bytes).map_err(EffectError::Wasm)?;
 
-        let pixel_count =
-            i32::try_from(layout.pixel_count).map_err(|_| EffectError::LayoutTooLarge)?;
         let mut store = Store::new(
             &engine,
             HostState {
-                layout: layout.bytes,
+                config: config_bytes,
                 pixel_count,
                 limits: StoreLimitsBuilder::new()
                     .memory_size(MAX_MEMORY_BYTES)
@@ -247,7 +186,7 @@ impl EffectInstance {
             .map_err(EffectError::Linker)?;
         linker
             .func_wrap("led_v1", "layout_size", |caller: Caller<'_, HostState>| {
-                i32::try_from(caller.data().layout.len()).unwrap_or(INVALID_IMPORT_RESULT)
+                i32::try_from(caller.data().config.len()).unwrap_or(INVALID_IMPORT_RESULT)
             })
             .map_err(EffectError::Linker)?;
         linker
@@ -264,7 +203,7 @@ impl EffectInstance {
                     let Some(dst_end) = dst_start.checked_add(byte_count) else {
                         return INVALID_IMPORT_RESULT;
                     };
-                    if src_end > caller.data().layout.len() {
+                    if src_end > caller.data().config.len() {
                         return INVALID_IMPORT_RESULT;
                     }
                     let Some(Extern::Memory(memory)) = caller.get_export("memory") else {
@@ -275,7 +214,7 @@ impl EffectInstance {
                         return INVALID_IMPORT_RESULT;
                     }
                     memory_bytes[dst_start..dst_end]
-                        .copy_from_slice(&host.layout[src_start..src_end]);
+                        .copy_from_slice(&host.config[src_start..src_end]);
                     i32::try_from(byte_count).unwrap_or(INVALID_IMPORT_RESULT)
                 },
             )
@@ -369,7 +308,7 @@ impl EffectInstance {
         }
 
         effect.buffers = effect.read_buffer_descriptors()?;
-        effect.validate_buffer_descriptors(layout.pixel_count)?;
+        effect.validate_buffer_descriptors(pixel_count as u32)?;
         effect
             .frame
             .try_reserve_exact(effect.buffers.frame_len as usize)
