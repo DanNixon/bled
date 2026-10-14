@@ -105,7 +105,12 @@ pub(crate) async fn load_active_effect(sd: &crate::sdcard::SdCardStorage) {
         Ok(effect) => {
             *ACTIVE_EFFECT.lock().await = Some(effect);
         }
-        Err(_) => error!("Failed to initialize configured effect"),
+        Err(e) => {
+            error!(
+                "Failed to initialize configured effect: {}",
+                defmt::Debug2Format(&e)
+            )
+        }
     }
 }
 
@@ -232,7 +237,7 @@ impl EffectInstance {
             .wasm_saturating_float_to_int(false)
             .wasm_multi_value(false)
             .wasm_multi_memory(false)
-            .wasm_bulk_memory(false)
+            .wasm_bulk_memory(true)
             .wasm_reference_types(false)
             .wasm_tail_call(false)
             .wasm_extended_const(false)
