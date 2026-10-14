@@ -6,8 +6,7 @@ extern crate alloc;
 mod api_transport;
 mod buttons;
 mod config;
-#[cfg(feature = "pico2w")]
-pub mod effect;
+mod effect;
 mod leds;
 mod sdcard;
 mod status;
@@ -75,10 +74,7 @@ embassy_rp::bind_interrupts!(struct Irqs {
                  dma::InterruptHandler<DMA_CH5>;
 });
 
-#[cfg(feature = "pico2w")]
 const HEAP_SIZE: usize = 192 * 1024;
-#[cfg(not(feature = "pico2w"))]
-const HEAP_SIZE: usize = 32 * 1024;
 
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
@@ -121,7 +117,7 @@ async fn main(spawner: Spawner) {
 
     config::init(&sd).await;
 
-    #[cfg(feature = "pico2w")]
+    // TODO
     effect::load_active_effect(&sd).await;
 
     spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
