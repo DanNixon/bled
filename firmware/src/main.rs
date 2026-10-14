@@ -117,13 +117,14 @@ async fn main(spawner: Spawner) {
 
     config::init(&sd).await;
 
-    // TODO
     effect::load_active_effect(&sd).await;
 
     spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
 
     spawner.spawn(unwrap!(leds::task(r.led)));
     leds::draw().await;
+
+    spawner.spawn(unwrap!(effect::task()));
 
     spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
 }

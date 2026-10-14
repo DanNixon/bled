@@ -14,11 +14,13 @@
 
 use alloc::vec::Vec;
 use bled_core::{
+    RGB8,
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
     effect::EffectManifest,
 };
 use defmt::{error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
+use embassy_time::{Duration, Instant, Ticker};
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -117,6 +119,108 @@ pub(crate) async fn load_active_effect(sd: &crate::sdcard::SdCardStorage) {
 /// Drops the active effect, if one is loaded.
 pub(crate) async fn unload_active_effect() {
     *ACTIVE_EFFECT.lock().await = None;
+}
+
+/// Advances the loaded effect and publishes each changed frame to the LEDs.
+#[embassy_executor::task]
+pub(crate) async fn task() -> ! {
+    const FRAME_INTERVAL: Duration = Duration::from_millis(16);
+
+    let start = Instant::now();
+    let mut previous_step = start;
+    let mut ticker = Ticker::every(FRAME_INTERVAL);
+
+    if render_active_frame().await {
+        crate::leds::draw().await;
+    }
+
+    loop {
+        ticker.next().await;
+        let now = Instant::now();
+        let elapsed_us = now.duration_since(start).as_micros();
+        let dt_us = now
+            .duration_since(previous_step)
+            .as_micros()
+            .min(u64::from(u32::MAX)) as u32;
+        previous_step = now;
+
+        let step_result = {
+            let mut active_effect = ACTIVE_EFFECT.lock().await;
+            match active_effect.as_mut() {
+                Some(effect) => match effect.step(elapsed_us, dt_us) {
+                    Ok(result) => Some(result),
+                    Err(error) => {
+                        warn!(
+                            "Active effect failed while stepping: {}",
+                            defmt::Debug2Format(&error)
+                        );
+                        *active_effect = None;
+                        None
+                    }
+                },
+                None => None,
+            }
+        };
+
+        if step_result == Some(StepResult::FrameReady) && render_active_frame().await {
+            crate::leds::draw().await;
+        }
+    }
+}
+
+async fn render_active_frame() -> bool {
+    let active_effect = ACTIVE_EFFECT.lock().await;
+    let Some(effect) = active_effect.as_ref() else {
+        return false;
+    };
+    let frame = effect.frame();
+    let mut channel_data = crate::leds::data().await;
+    let mut frame_offset = 0usize;
+
+    for fixture in crate::config::get().fixtures() {
+        for span in fixture.spans() {
+            let channel = usize::from(*span.channel().as_ref());
+            let start = *span.start() as usize;
+            let length = *span.length() as usize;
+            let Some(end) = start.checked_add(length) else {
+                warn!("Effect span index overflow while rendering frame");
+                return false;
+            };
+            let Some(frame_byte_count) = length.checked_mul(3) else {
+                warn!("Effect span length overflow while rendering frame");
+                return false;
+            };
+            let Some(frame_end) = frame_offset.checked_add(frame_byte_count) else {
+                warn!("Effect frame offset overflow while rendering frame");
+                return false;
+            };
+            let Some(source) = frame.get(frame_offset..frame_end) else {
+                warn!("Effect frame is shorter than the configured pixel layout");
+                return false;
+            };
+
+            let Ok(channel_pixels) = channel_data.try_channel_mut::<RGB8>(channel) else {
+                warn!("Effect references an unavailable LED output channel");
+                return false;
+            };
+            let Some(destination) = channel_pixels.get_mut(start..end) else {
+                warn!("Effect span exceeds the LED output channel buffer");
+                return false;
+            };
+
+            let (rgb_pixels, _) = source.as_chunks::<3>();
+            for (pixel, rgb) in destination.iter_mut().zip(rgb_pixels) {
+                *pixel = RGB8::new(rgb[0], rgb[1], rgb[2]);
+            }
+            frame_offset = frame_end;
+        }
+    }
+
+    if frame_offset != frame.len() {
+        warn!("Effect frame length does not match the configured pixel layout");
+        return false;
+    }
+    true
 }
 
 fn encode_device_config(config: &DeviceConfig) -> Result<(Vec<u8>, i32), EffectError> {
