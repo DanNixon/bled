@@ -15,7 +15,7 @@ bench = false
 [features]
 default = ["picow"]
 picow = ["embassy-rp/rp2040"]
-pico2w = ["embassy-rp/rp235xa"]
+pico2w = ["embassy-rp/rp235xa", "dep:wasmi"]
 
 [dependencies]
 aligned = "0.4.2"
@@ -32,6 +32,7 @@ embassy-futures = "0.1.2"
 embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl"] }
 embassy-sync = "0.8.0"
 embassy-time = { version = "0.5.0", features = ["defmt"] }
+embedded-alloc = "0.7.0"
 embedded-hal-bus = "0.3.0"
 embedded-sdmmc = { version = "0.10.0", default-features = false, features = ["defmt-log"] }
 exfat-slim = { version = "0.7.0", default-features = false, features = ["defmt"] }
@@ -44,8 +45,7 @@ portable-atomic = { version = "1.10.0", default-features = false, features = ["c
 smart-leds = "0.4.0"
 static_cell = "2.1.0"
 trouble-host = { version = "0.8.0", features = ["defmt", "gatt", "derive", "security"] }
-embedded-alloc = "0.7.0"
-wasmi = { version = "2.0.0", default-features = false }
+wasmi = { version = "2.0.0", default-features = false, features = ["validate"], optional = true }
 
 [patch.crates-io]
 cyw43 = { version = "0.7.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}

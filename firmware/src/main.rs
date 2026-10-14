@@ -1,9 +1,13 @@
 #![no_std]
 #![no_main]
 
+extern crate alloc;
+
 mod api_transport;
 mod buttons;
 mod config;
+#[cfg(feature = "pico2w")]
+pub mod effect;
 mod leds;
 mod sdcard;
 mod status;
@@ -23,9 +27,6 @@ use embassy_time::{Duration, Instant};
 use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 use portable_atomic as _;
-
-// TODO
-use wasmi as _;
 
 assign_resources::assign_resources! {
     wireless: WirelessResources {
@@ -74,13 +75,18 @@ embassy_rp::bind_interrupts!(struct Irqs {
                  dma::InterruptHandler<DMA_CH5>;
 });
 
+#[cfg(feature = "pico2w")]
+const HEAP_SIZE: usize = 128 * 1024;
+#[cfg(not(feature = "pico2w"))]
+const HEAP_SIZE: usize = 32 * 1024;
+
 #[global_allocator]
 static HEAP: Heap = Heap::empty();
 
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     unsafe {
-        embedded_alloc::init!(HEAP, 32 * 1024);
+        embedded_alloc::init!(HEAP, HEAP_SIZE);
     }
 
     let p = embassy_rp::init(Default::default());
