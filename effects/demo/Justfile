@@ -1,0 +1,12 @@
+default: check
+
+build:
+    cargo build --release --target wasm32-unknown-unknown
+    cp target/wasm32-unknown-unknown/release/bled_effect_demo.wasm out/demo.wasm
+
+fmt:
+    cargo fmt
+
+check:
+    cargo fmt --check
+    cargo check --target wasm32-unknown-unknown
