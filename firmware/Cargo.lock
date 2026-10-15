@@ -185,6 +185,7 @@ dependencies = [
  "heapless 0.9.3",
  "minicbor",
  "minicbor-serde",
+ "num_enum",
  "nutype",
  "rgb",
  "serde",

@@ -1,41 +1,81 @@
-/// Current WebAssembly effects ABI version.
+//! WASM ABI for a BLED effect.
+
+/// ABI version.
 pub const VERSION: i32 = 1;
 
+/// Imports from the host to the guest.
 pub mod import {
-    /// Name of the Wasm module that provides host imports.
     pub const MODULE: &str = "bled_v1";
 
-    /// Host import returning the byte length of the CBOR-encoded device layout.
-    pub const LAYOUT_SIZE: &str = "layout_size";
+    /// Function returning the byte length of the CBOR-encoded device layout.
+    /// `bled_layout_size() -> i32`
+    pub const LAYOUT_SIZE: &str = "bled_layout_size";
 
-    /// Host import copying a range of the CBOR-encoded layout into guest memory.
-    pub const LAYOUT_READ: &str = "layout_read";
+    /// Function copying a range of the CBOR-encoded layout into guest memory.
+    /// Returns the number of bytes copied.
+    /// `bled_layout_read(offset: i32, dest_ptr: i32, length: i32) -> i32`
+    pub const LAYOUT_READ: &str = "bled_layout_read";
 }
 
+/// Exports from the guest to the host.
 pub mod export {
-    /// Guest export returning the ABI version.
+    use num_enum::IntoPrimitive;
+
+    /// Function returning the ABI version.
+    /// `bled_abi_version() -> i32`
     pub const ABI_VERSION: &str = "bled_abi_version";
 
-    /// Guest export initializing the effect; zero indicates success.
+    /// Function initializing the effect.
+    /// Returns `InitResult`.
+    /// `bled_init() -> i32`
     pub const INIT: &str = "bled_init";
 
-    /// Guest export advancing the effect by one frame.
-    pub const STEP: &str = "bled_step";
-    /// `led_step` result indicating that the framebuffer has not changed.
-    pub const STEP_UNCHANGED: i32 = -1;
+    /// The result of a call to `bled_init`.
+    #[derive(Debug, Clone, PartialEq, IntoPrimitive)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[repr(i32)]
+    pub enum InitResult {
+        Success = 0,
+        OtherError = -1,
+        LayoutParseError = -2,
+        FrameBufferError = -3,
+    }
 
-    /// Guest export returning the framebuffer pointer.
+    /// Function defining the desired time between frames.
+    /// The host will attempt, but not guarentee, to call `bled_step` at this interval.
+    /// This interval may change between steps.
+    /// Returns the step time in milliseconds.
+    /// `bled_step_time() -> i32`
+    pub const STEP_TIME: &str = "bled_step_time";
+
+    /// Function advancing the effect by one frame.
+    /// Returns `StepResult`, indicating if the frame buffer has changed.
+    /// `bled_step(time_ms: i32) -> i32`
+    pub const STEP: &str = "bled_step";
+
+    /// The result of a call to `bled_step`.
+    #[derive(Debug, Clone, PartialEq, IntoPrimitive)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[repr(i32)]
+    pub enum StepResult {
+        Error = -1,
+        Unchanged = 0,
+        Changed = 1,
+    }
+
+    /// Function returning the pointer to the guest framebuffer.
+    /// `bled_frame_ptr() -> i32`
     pub const FRAME_PTR: &str = "bled_frame_ptr";
 
-    /// Guest export returning the framebuffer byte length.
+    /// Function returning the length of the guest framebuffer in bytes.
+    /// `bled_frame_len() -> i32`
     pub const FRAME_LEN: &str = "bled_frame_len";
 
-    /// Guest export returning the input buffer pointer.
-    pub const INPUT_PTR: &str = "bled_input_ptr";
+    /// Function returning the guest's parameter buffer pointer.
+    /// `bled_parameter_ptr() -> i32`
+    pub const PARAMETER_PTR: &str = "bled_parameter_ptr";
 
-    /// Guest export returning the input buffer capacity in bytes.
-    pub const INPUT_CAPACITY: &str = "bled_input_capacity";
-
-    /// Guest export applying an input message previously copied into its input buffer.
-    pub const APPLY_INPUT: &str = "bled_apply_input";
+    /// Function returning the guest's parameter buffer capacity in bytes.
+    /// `bled_parameter_capacity() -> i32`
+    pub const PARAMETER_CAPACITY: &str = "bled_parameter_capacity";
 }

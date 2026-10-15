@@ -20,7 +20,7 @@ use bled_core::{
 };
 use defmt::{error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
-use embassy_time::{Duration, Instant, Ticker};
+use embassy_time::{Instant, Timer};
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -121,18 +121,18 @@ pub(crate) async fn unload_active_effect() {
 /// Advances the loaded effect and publishes each changed frame to the LEDs.
 #[embassy_executor::task]
 pub(crate) async fn task() -> ! {
-    const FRAME_INTERVAL: Duration = Duration::from_millis(16);
+    const DEFAULT_STEP_DELAY_MS: u64 = 16;
 
     let start = Instant::now();
     let mut previous_step = start;
-    let mut ticker = Ticker::every(FRAME_INTERVAL);
+    let mut delay_ms = DEFAULT_STEP_DELAY_MS;
 
     if render_active_frame().await {
         crate::leds::draw().await;
     }
 
     loop {
-        ticker.next().await;
+        Timer::after_millis(delay_ms).await;
         let now = Instant::now();
         let elapsed_us = now.duration_since(start).as_micros();
         let dt_us = now
@@ -159,8 +159,11 @@ pub(crate) async fn task() -> ! {
             }
         };
 
-        if step_result == Some(StepResult::FrameReady) && render_active_frame().await {
-            crate::leds::draw().await;
+        if let Some(StepResult::FrameReady { time_to_next }) = step_result {
+            delay_ms = time_to_next as u64;
+            if render_active_frame().await {
+                crate::leds::draw().await;
+            }
         }
     }
 }
