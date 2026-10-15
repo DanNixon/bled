@@ -16,7 +16,7 @@ use alloc::vec::Vec;
 use bled_core::{
     RGB8,
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
-    effect::EffectManifest,
+    effect::{EffectManifest, abi},
 };
 use defmt::{error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
@@ -25,9 +25,6 @@ use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
 };
-
-/// Current WebAssembly effects ABI version.
-pub const ABI_VERSION: i32 = 1;
 
 /// Maximum linear memory available to an effect instance.
 pub const MAX_MEMORY_BYTES: usize = 64 * 1024;
@@ -249,7 +246,10 @@ fn encode_device_config(config: &DeviceConfig) -> Result<(Vec<u8>, i32), EffectE
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StepResult {
     /// A new frame is ready and has been copied into the host-owned buffer.
-    FrameReady,
+    FrameReady {
+        /// Time in milliseconds until the next step is required.
+        time_to_next: i32,
+    },
     /// The guest reports that the frame has not changed.
     Unchanged,
 }
@@ -290,7 +290,6 @@ pub enum EffectError {
 #[derive(Debug)]
 struct HostState {
     config: Vec<u8>,
-    pixel_count: i32,
     limits: StoreLimits,
 }
 
@@ -356,7 +355,6 @@ impl EffectInstance {
             &engine,
             HostState {
                 config: config_bytes,
-                pixel_count,
                 limits: StoreLimitsBuilder::new()
                     .memory_size(MAX_MEMORY_BYTES)
                     .table_elements(MAX_TABLE_ELEMENTS)
@@ -370,19 +368,18 @@ impl EffectInstance {
 
         let mut linker = Linker::<HostState>::new(&engine);
         linker
-            .func_wrap("led_v1", "pixel_count", |caller: Caller<'_, HostState>| {
-                caller.data().pixel_count
-            })
-            .map_err(EffectError::Linker)?;
-        linker
-            .func_wrap("led_v1", "layout_size", |caller: Caller<'_, HostState>| {
-                i32::try_from(caller.data().config.len()).unwrap_or(INVALID_IMPORT_RESULT)
-            })
+            .func_wrap(
+                abi::import::MODULE,
+                abi::import::LAYOUT_SIZE,
+                |caller: Caller<'_, HostState>| {
+                    i32::try_from(caller.data().config.len()).unwrap_or(INVALID_IMPORT_RESULT)
+                },
+            )
             .map_err(EffectError::Linker)?;
         linker
             .func_wrap(
-                "led_v1",
-                "layout_read",
+                abi::import::MODULE,
+                abi::import::LAYOUT_READ,
                 |mut caller: Caller<'_, HostState>, src_offset: i32, dst_ptr: i32, length: i32| {
                     let src_start = src_offset as u32 as usize;
                     let dst_start = dst_ptr as u32 as usize;
@@ -425,28 +422,28 @@ impl EffectInstance {
         }
 
         let abi_version = instance
-            .get_typed_func::<(), i32>(&store, "led_abi_version")
+            .get_typed_func::<(), i32>(&store, abi::export::ABI_VERSION)
             .map_err(EffectError::Wasm)?;
         let init = instance
-            .get_typed_func::<(), i32>(&store, "led_init")
+            .get_typed_func::<(), i32>(&store, abi::export::INIT)
             .map_err(EffectError::Wasm)?;
         let step = instance
-            .get_typed_func::<(i32, i32, i32), i32>(&store, "led_step")
+            .get_typed_func::<(i32, i32, i32), i32>(&store, abi::export::STEP)
             .map_err(EffectError::Wasm)?;
         let frame_ptr = instance
-            .get_typed_func::<(), i32>(&store, "led_frame_ptr")
+            .get_typed_func::<(), i32>(&store, abi::export::FRAME_PTR)
             .map_err(EffectError::Wasm)?;
         let frame_len = instance
-            .get_typed_func::<(), i32>(&store, "led_frame_len")
+            .get_typed_func::<(), i32>(&store, abi::export::FRAME_LEN)
             .map_err(EffectError::Wasm)?;
         let input_ptr = instance
-            .get_typed_func::<(), i32>(&store, "led_input_ptr")
+            .get_typed_func::<(), i32>(&store, abi::export::INPUT_PTR)
             .map_err(EffectError::Wasm)?;
         let input_capacity = instance
-            .get_typed_func::<(), i32>(&store, "led_input_capacity")
+            .get_typed_func::<(), i32>(&store, abi::export::INPUT_CAPACITY)
             .map_err(EffectError::Wasm)?;
         let apply_input = instance
-            .get_typed_func::<(i32, i32), i32>(&store, "led_apply_input")
+            .get_typed_func::<(i32, i32), i32>(&store, abi::export::APPLY_INPUT)
             .map_err(EffectError::Wasm)?;
 
         let mut effect = Self {
@@ -476,7 +473,7 @@ impl EffectInstance {
             &effect.abi_version,
             (),
         )?;
-        if version != ABI_VERSION {
+        if version != abi::VERSION {
             effect.active = false;
             return Err(EffectError::AbiVersionMismatch(version));
         }
@@ -505,7 +502,7 @@ impl EffectInstance {
             effect.active = false;
             return Err(EffectError::PatternError(initial_step));
         }
-        if initial_step > 1 {
+        if initial_step > abi::export::STEP_UNCHANGED {
             effect.active = false;
             return Err(EffectError::InvalidBuffer);
         }
@@ -539,7 +536,7 @@ impl EffectInstance {
             self.active = false;
             return Err(EffectError::PatternError(status));
         }
-        if status > 1 {
+        if status > abi::export::STEP_UNCHANGED {
             self.active = false;
             return Err(EffectError::InvalidBuffer);
         }
@@ -547,12 +544,14 @@ impl EffectInstance {
             self.active = false;
             return Err(error);
         }
-        if status == 0 {
+        if status >= 1 {
             if let Err(error) = self.copy_frame() {
                 self.active = false;
                 return Err(error);
             }
-            Ok(StepResult::FrameReady)
+            Ok(StepResult::FrameReady {
+                time_to_next: status,
+            })
         } else {
             Ok(StepResult::Unchanged)
         }

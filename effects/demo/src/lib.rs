@@ -1,12 +1,11 @@
 #![no_std]
 
-use bled_core::{config::DeviceConfig, config::MAX_CONFIG_CBOR_SIZE, io::decode_cbor};
+use bled_core::{config::DeviceConfig, config::MAX_CONFIG_CBOR_SIZE, effect::abi, io::decode_cbor};
 use core::{
     panic::PanicInfo,
     ptr::{addr_of_mut, write_bytes},
 };
 
-const ABI_VERSION: i32 = 1;
 const MAX_PIXELS: u32 = 4096;
 const FRAME_BYTES: usize = MAX_PIXELS as usize * 3;
 const FRAME_INTERVAL_US: u64 = 250_000;
@@ -19,7 +18,7 @@ const ERROR_NOT_INITIALIZED: i32 = -6;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+    core::arch::wasm32::unreachable();
 }
 
 #[link(wasm_import_module = "led_v1")]
@@ -37,7 +36,7 @@ static mut READY: bool = false;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn led_abi_version() -> i32 {
-    ABI_VERSION
+    abi::VERSION
 }
 
 #[unsafe(no_mangle)]
@@ -96,13 +95,17 @@ pub extern "C" fn led_step(time_lo: i32, time_hi: i32, _dt_us: i32) -> i32 {
     if pixel_count == 0 {
         let is_initial_frame = unsafe { LAST_PIXEL == u32::MAX };
         unsafe { LAST_PIXEL = 0 };
-        return if is_initial_frame { 0 } else { 1 };
+        return if is_initial_frame {
+            10
+        } else {
+            abi::export::STEP_UNCHANGED
+        };
     }
 
     let elapsed_us = ((time_hi as u32 as u64) << 32) | time_lo as u32 as u64;
     let current_pixel = ((elapsed_us / FRAME_INTERVAL_US) % pixel_count as u64) as u32;
     if unsafe { LAST_PIXEL == current_pixel } {
-        return 1;
+        return abi::export::STEP_UNCHANGED;
     }
 
     unsafe {
@@ -113,7 +116,8 @@ pub extern "C" fn led_step(time_lo: i32, time_hi: i32, _dt_us: i32) -> i32 {
         frame_ptr.add(current_pixel as usize * 3 + 2).write(255);
         LAST_PIXEL = current_pixel;
     }
-    0
+
+    10
 }
 
 #[unsafe(no_mangle)]
