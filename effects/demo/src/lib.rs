@@ -4,7 +4,7 @@ use bled_core::{
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
     effect::abi::{
         self,
-        export::{InitResult, StepResult},
+        export::{COMMAND_CAPACITY, InitResult, PARAMETER_CAPACITY, StepResult},
     },
 };
 use core::{
@@ -28,6 +28,9 @@ unsafe extern "C" {
 
 static mut FRAME: [u8; FRAME_BYTES] = [0; FRAME_BYTES];
 static mut LAYOUT: [u8; MAX_CONFIG_CBOR_SIZE] = [0; MAX_CONFIG_CBOR_SIZE];
+
+static mut COMMAND: [u8; COMMAND_CAPACITY] = [0; COMMAND_CAPACITY];
+static mut PARAMETER: [u8; PARAMETER_CAPACITY] = [0; PARAMETER_CAPACITY];
 
 static mut LOGICAL_PIXEL_COUNT: u32 = 0;
 static mut LAST_PIXEL: u32 = u32::MAX;
@@ -128,11 +131,11 @@ pub extern "C" fn bled_frame_len() -> i32 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn bled_parameter_ptr() -> i32 {
-    0
+pub extern "C" fn bled_command_ptr() -> i32 {
+    addr_of_mut!(COMMAND) as usize as i32
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn bled_parameter_capacity() -> i32 {
-    0
+pub extern "C" fn bled_parameter_ptr() -> i32 {
+    addr_of_mut!(PARAMETER) as usize as i32
 }

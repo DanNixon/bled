@@ -7,11 +7,11 @@ pub const VERSION: i32 = 1;
 pub mod import {
     pub const MODULE: &str = "bled_v1";
 
-    /// Function returning the byte length of the CBOR-encoded device layout.
+    /// Function returning the byte length of the CBOR encoded device layout.
     /// `bled_layout_size() -> i32`
     pub const LAYOUT_SIZE: &str = "bled_layout_size";
 
-    /// Function copying a range of the CBOR-encoded layout into guest memory.
+    /// Function copying a range of the CBOR encoded layout into guest memory.
     /// Returns the number of bytes copied.
     /// `bled_layout_read(offset: i32, dest_ptr: i32, length: i32) -> i32`
     pub const LAYOUT_READ: &str = "bled_layout_read";
@@ -71,11 +71,20 @@ pub mod export {
     /// `bled_frame_len() -> i32`
     pub const FRAME_LEN: &str = "bled_frame_len";
 
+    /// Function returning the guest's command buffer pointer.
+    /// `bled_command_ptr() -> i32`
+    pub const COMMAND_PTR: &str = "bled_command_ptr";
+
+    /// Capacity of the command buffer.
+    /// The host must be able to copy this much regardless of how much the guest actually uses.
+    pub const COMMAND_CAPACITY: usize = 8;
+
     /// Function returning the guest's parameter buffer pointer.
     /// `bled_parameter_ptr() -> i32`
     pub const PARAMETER_PTR: &str = "bled_parameter_ptr";
 
-    /// Function returning the guest's parameter buffer capacity in bytes.
-    /// `bled_parameter_capacity() -> i32`
-    pub const PARAMETER_CAPACITY: &str = "bled_parameter_capacity";
+    /// Length capacity of the parameter memory.
+    /// The host must be able to copy this much regardless of how much the guest actually uses.
+    /// (convineintly the maximum size of a GATT attribute value)
+    pub const PARAMETER_CAPACITY: usize = 512;
 }

@@ -110,8 +110,8 @@ pub struct EffectInstance {
     step: TypedFunc<(i32,), i32>,
     frame_ptr: TypedFunc<(), i32>,
     frame_len: TypedFunc<(), i32>,
+    command_ptr: TypedFunc<(), i32>,
     parameter_ptr: TypedFunc<(), i32>,
-    parameter_capacity: TypedFunc<(), i32>,
     buffers: BufferDescriptors,
     frame: Vec<u8>,
     active: bool,
@@ -234,11 +234,11 @@ impl EffectInstance {
         let frame_len = instance
             .get_typed_func::<(), i32>(&store, abi::export::FRAME_LEN)
             .map_err(EffectError::Wasm)?;
+        let command_ptr = instance
+            .get_typed_func::<(), i32>(&store, abi::export::COMMAND_PTR)
+            .map_err(EffectError::Wasm)?;
         let parameter_ptr = instance
             .get_typed_func::<(), i32>(&store, abi::export::PARAMETER_PTR)
-            .map_err(EffectError::Wasm)?;
-        let parameter_capacity = instance
-            .get_typed_func::<(), i32>(&store, abi::export::PARAMETER_CAPACITY)
             .map_err(EffectError::Wasm)?;
 
         let mut effect = Self {
@@ -250,8 +250,8 @@ impl EffectInstance {
             step,
             frame_ptr,
             frame_len,
+            command_ptr,
             parameter_ptr,
-            parameter_capacity,
             buffers: BufferDescriptors {
                 frame_ptr: 0,
                 frame_len: 0,
