@@ -47,7 +47,7 @@ impl DeviceConfig {
     }
 
     /// Gets the required length of all output channles (e.g. for calculating required buffer size)
-    pub fn total_lengths<const OUTPUT_CHANNEL_COUNT: usize>(&self) -> usize {
+    pub fn total_length<const OUTPUT_CHANNEL_COUNT: usize>(&self) -> usize {
         let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>();
         channel_lengths.map_or(0, |l| l.into_iter().sum())
     }
@@ -173,7 +173,7 @@ mod tests {
             device.channel_lengths::<4>().unwrap().as_slice(),
             &[5, 7, 0, 7]
         );
-        assert_eq!(device.total_lengths::<4>(), 19);
+        assert_eq!(device.total_length::<4>(), 19);
     }
 
     #[test]

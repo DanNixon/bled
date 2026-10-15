@@ -20,7 +20,7 @@ const INVALID_IMPORT_RESULT: i32 = -1;
 
 fn encode_device_config(config: &DeviceConfig) -> Result<(Vec<u8>, i32), EffectError> {
     let pixel_count = config
-        .total_lengths::<{ CHANNEL_COUNT }>()
+        .total_length::<{ CHANNEL_COUNT }>()
         .try_into()
         .unwrap();
 

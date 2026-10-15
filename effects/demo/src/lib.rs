@@ -6,7 +6,6 @@ use bled_core::{
         self,
         export::{InitResult, StepResult},
     },
-    io::decode_cbor,
 };
 use core::{
     panic::PanicInfo,
@@ -15,7 +14,6 @@ use core::{
 
 const MAX_PIXELS: u32 = 4096;
 const FRAME_BYTES: usize = MAX_PIXELS as usize * 3;
-const FRAME_INTERVAL_US: u64 = 250_000;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -24,9 +22,8 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[link(wasm_import_module = "bled_v1")]
 unsafe extern "C" {
-    fn pixel_count() -> i32;
-    fn layout_size() -> i32;
-    fn layout_read(src_offset: i32, dst_ptr: i32, length: i32) -> i32;
+    fn bled_layout_size() -> i32;
+    fn bled_layout_read(src_offset: i32, dst_ptr: i32, length: i32) -> i32;
 }
 
 static mut FRAME: [u8; FRAME_BYTES] = [0; FRAME_BYTES];
@@ -43,19 +40,19 @@ pub extern "C" fn bled_abi_version() -> i32 {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn bled_init() -> i32 {
-    let size = unsafe { layout_size() };
+    let size = unsafe { bled_layout_size() };
     if size <= 0 || size as usize > MAX_CONFIG_CBOR_SIZE {
         return InitResult::LayoutParseError.into();
     }
 
     let layout_ptr = addr_of_mut!(LAYOUT).cast::<u8>();
-    let bytes_read = unsafe { layout_read(0, layout_ptr as usize as i32, size) };
+    let bytes_read = unsafe { bled_layout_read(0, layout_ptr as usize as i32, size) };
     if bytes_read != size {
         return InitResult::LayoutParseError.into();
     }
 
     let layout_bytes = unsafe { core::slice::from_raw_parts(layout_ptr, size as usize) };
-    let config = match decode_cbor::<DeviceConfig>(layout_bytes) {
+    let config = match bled_core::io::decode_cbor::<DeviceConfig>(layout_bytes) {
         Ok(config) => config,
         Err(_) => return InitResult::LayoutParseError.into(),
     };
@@ -70,8 +67,8 @@ pub extern "C" fn bled_init() -> i32 {
         return InitResult::LayoutParseError.into();
     };
 
-    let host_pixel_count = unsafe { pixel_count() };
-    if host_pixel_count < 0 || configured_pixel_count != host_pixel_count as u32 {
+    let host_pixel_count = config.total_length::<4>();
+    if configured_pixel_count != host_pixel_count.try_into().unwrap() {
         return InitResult::FrameBufferError.into();
     }
     if configured_pixel_count > MAX_PIXELS {
@@ -94,26 +91,18 @@ pub extern "C" fn bled_step_time() -> i32 {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn bled_step(time_lo: i32, time_hi: i32, _dt_us: i32) -> i32 {
-    let (pixel_count, ready) = unsafe { (LOGICAL_PIXEL_COUNT, READY) };
+pub extern "C" fn bled_step(_time_ms: i32) -> i32 {
+    let (pixel_count, ready, last_pixel) = unsafe { (LOGICAL_PIXEL_COUNT, READY, LAST_PIXEL) };
+    if pixel_count == 0 {
+        return StepResult::Unchanged.into();
+    }
     if !ready {
         return StepResult::Error.into();
     }
 
-    if pixel_count == 0 {
-        let is_initial_frame = unsafe { LAST_PIXEL == u32::MAX };
-        unsafe { LAST_PIXEL = 0 };
-        return if is_initial_frame {
-            StepResult::Changed.into()
-        } else {
-            StepResult::Unchanged.into()
-        };
-    }
-
-    let elapsed_us = ((time_hi as u32 as u64) << 32) | time_lo as u32 as u64;
-    let current_pixel = ((elapsed_us / FRAME_INTERVAL_US) % pixel_count as u64) as u32;
-    if unsafe { LAST_PIXEL == current_pixel } {
-        return StepResult::Unchanged.into();
+    let mut current_pixel = last_pixel.saturating_add(1);
+    if current_pixel >= pixel_count {
+        current_pixel = 0;
     }
 
     unsafe {
