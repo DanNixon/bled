@@ -75,16 +75,17 @@ pub mod export {
     /// `bled_command_ptr() -> i32`
     pub const COMMAND_PTR: &str = "bled_command_ptr";
 
-    /// Capacity of the command buffer.
-    /// The host must be able to copy this much regardless of how much the guest actually uses.
-    pub const COMMAND_CAPACITY: usize = 8;
+    /// Function returning the guest's command buffer size.
+    /// Must be less than 512 bytes.
+    /// `bled_command_len() -> i32`
+    pub const COMMAND_LEN: &str = "bled_command_len";
 
     /// Function returning the guest's parameter buffer pointer.
     /// `bled_parameter_ptr() -> i32`
     pub const PARAMETER_PTR: &str = "bled_parameter_ptr";
 
-    /// Length capacity of the parameter memory.
-    /// The host must be able to copy this much regardless of how much the guest actually uses.
-    /// (convineintly the maximum size of a GATT attribute value)
-    pub const PARAMETER_CAPACITY: usize = 512;
+    /// Function returning the guest's parameter buffer size.
+    /// Must be less than 512 bytes.
+    /// `bled_parameter_len() -> i32`
+    pub const PARAMETER_LEN: &str = "bled_parameter_len";
 }
