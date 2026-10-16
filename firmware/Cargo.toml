@@ -32,6 +32,7 @@ embassy-futures = "0.1.2"
 embassy-rp = { version = "0.10.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl"] }
 embassy-sync = "0.8.0"
 embassy-time = { version = "0.5.0", features = ["defmt"] }
+embassy-usb = { version = "0.6.0", features = ["defmt"] }
 embedded-hal-bus = "0.3.0"
 embedded-sdmmc = { version = "0.10.0", default-features = false, features = ["defmt-log"] }
 exfat-slim = { version = "0.7.0", default-features = false, features = ["defmt"] }
@@ -47,12 +48,13 @@ static_cell = "2.1.0"
 trouble-host = { version = "0.8.0", features = ["defmt", "scan", "gatt", "derive", "security"] }
 
 [patch.crates-io]
-cyw43 = { version = "0.7.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
-cyw43-pio = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
-embassy-rp = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
-embassy-sync = { version = "0.8.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
-embassy-executor = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
-embassy-time = { version = "0.5.1", git = "https://github.com/embassy-rs/embassy.git", rev = "3cd51e6d8eb6aff8b0d64d9e56a75a538bcfc65a"}
+cyw43 = { version = "0.7.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+cyw43-pio = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+embassy-rp = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+embassy-sync = { version = "0.8.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+embassy-executor = { version = "0.10.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+embassy-time = { version = "0.5.1", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
+embassy-usb = { version = "0.6.0", git = "https://github.com/embassy-rs/embassy.git", rev = "2add3add84745a4aa0c9bac6b0ecb43a820d4b54"}
 trouble-host = { git = "https://github.com/embassy-rs/trouble.git", rev = "2e4432b0fa4ec66a02c0e767145e2757c1bcd243"}
 
 [profile.release]

@@ -53,33 +53,33 @@ pub(super) async fn task(r: super::LedResources) -> ! {
     let mut channel_0 = PioWs2812::new(
         &mut pio.common,
         pio.sm0,
+        r.channel_0_pin,
         r.channel_0_dma,
         crate::Irqs,
-        r.channel_0_pin,
         &program,
     );
     let mut channel_1 = PioWs2812::new(
         &mut pio.common,
         pio.sm1,
+        r.channel_1_pin,
         r.channel_1_dma,
         crate::Irqs,
-        r.channel_1_pin,
         &program,
     );
     let mut channel_2 = PioWs2812::new(
         &mut pio.common,
         pio.sm2,
+        r.channel_2_pin,
         r.channel_2_dma,
         crate::Irqs,
-        r.channel_2_pin,
         &program,
     );
     let mut channel_3 = PioWs2812::new(
         &mut pio.common,
         pio.sm3,
+        r.channel_3_pin,
         r.channel_3_dma,
         crate::Irqs,
-        r.channel_3_pin,
         &program,
     );
 
