@@ -1,5 +1,6 @@
 //! Remote file I/O operations, command encoding, and write slicing.
 
+use bled_core::PathString;
 use wasm_bindgen::prelude::*;
 
 /// A sliced chunk of file write data and its associated control packet.
@@ -13,9 +14,7 @@ pub struct FileWriteChunk {
 }
 
 /// Converts a path string slice into a fixed-capacity heapless string, validating bounds.
-fn to_heapless_path(
-    path: &str,
-) -> Result<heapless::String<{ bled_core::api::MAX_PATH_LEN }>, String> {
+fn to_heapless_path(path: &str) -> Result<PathString, String> {
     if path.is_empty() {
         return Err("remote path cannot be empty".to_string());
     }
@@ -29,9 +28,7 @@ fn to_heapless_path(
 
 /// Converts a directory path string slice into a fixed-capacity heapless string, validating bounds.
 /// Empty path is normalized to "/".
-fn to_heapless_dir_path(
-    path: &str,
-) -> Result<heapless::String<{ bled_core::api::MAX_PATH_LEN }>, String> {
+fn to_heapless_dir_path(path: &str) -> Result<PathString, String> {
     let p = if path.is_empty() { "/" } else { path };
     p.try_into().map_err(|_| {
         format!(

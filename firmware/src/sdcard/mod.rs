@@ -2,12 +2,14 @@ pub(crate) mod block_device;
 
 pub(super) use block_device::*;
 
-use bled_core::api::{DirEntry, DirEntryType, MAX_PATH_LEN};
+use bled_core::{
+    PathString,
+    api::{DirEntry, DirEntryType},
+};
 use defmt::{Format, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use exfat_slim::blocking::error::ExFatError;
 pub(crate) use exfat_slim::blocking::file::{File, OpenOptions};
-use heapless::String;
 use static_cell::StaticCell;
 
 pub(crate) type DirectoryIterator = exfat_slim::blocking::directory::DirectoryIterator<512>;
@@ -247,9 +249,9 @@ impl SdCardStorage {
         let mut name_buf = [0u8; exfat_slim::blocking::directory::MAX_NAME_LEN];
         match dir.next_entry(fs, &mut name_buf) {
             Ok(Some(entry)) => {
-                let mut heapless_name = String::<MAX_PATH_LEN>::new();
+                let mut heapless_name = PathString::new();
                 for c in entry.name.chars() {
-                    if heapless_name.len() + c.len_utf8() > MAX_PATH_LEN {
+                    if heapless_name.len() + c.len_utf8() > heapless_name.capacity() {
                         break;
                     }
                     let _ = heapless_name.push(c);

@@ -1,9 +1,12 @@
 #![no_std]
 #![no_main]
 
+extern crate alloc;
+
 mod api_transport;
 mod buttons;
 mod config;
+mod effect;
 mod leds;
 mod sdcard;
 mod status;
@@ -21,6 +24,7 @@ use embassy_rp::{
     pio,
 };
 use embassy_time::{Duration, Instant};
+use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 use portable_atomic as _;
 
@@ -71,8 +75,17 @@ embassy_rp::bind_interrupts!(struct Irqs {
                  dma::InterruptHandler<DMA_CH5>;
 });
 
+const HEAP_SIZE: usize = 192 * 1024;
+
+#[global_allocator]
+static HEAP: Heap = Heap::empty();
+
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
+    unsafe {
+        embedded_alloc::init!(HEAP, HEAP_SIZE);
+    }
+
     let p = embassy_rp::init(Default::default());
     let r = split_resources!(p);
 
@@ -126,10 +139,14 @@ async fn main(spawner: Spawner) {
 
         config::init(&sd).await;
 
+        effect::load_active_effect(&sd).await;
+
         spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
 
         spawner.spawn(unwrap!(leds::task(r.led)));
         leds::draw().await;
+
+        spawner.spawn(unwrap!(effect::task()));
 
         spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
     }

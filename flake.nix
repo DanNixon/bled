@@ -20,6 +20,7 @@
         probe-rs-tools
         elf2uf2-rs
         wasm-pack
+        binaryen
 
         # PCB tools
         kikit

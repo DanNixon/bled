@@ -1,7 +1,9 @@
 use crate::sdcard::{DirectoryIterator, File, FsError, OpenOptions, SdCardStorage};
-use bled_core::api::{DirEntry, FileStatResponse, MAX_PATH_LEN};
+use bled_core::{
+    PathString,
+    api::{DirEntry, FileStatResponse},
+};
 use defmt::{Format, debug, info};
-use heapless::String;
 
 #[derive(Debug, Format)]
 pub(crate) enum ReadChunkError {
@@ -26,19 +28,19 @@ pub(crate) enum FileIoMode {
     },
 
     Reading {
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         offset: usize,
         file: File,
     },
 
     Writing {
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         offset: usize,
         file: File,
     },
 
     ReadingDir {
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         next_index: usize,
         dir: DirectoryIterator,
         current_entry: Option<DirEntry>,
@@ -78,7 +80,7 @@ impl FileIoSession {
         &self.mode
     }
 
-    pub(crate) async fn prepare_stat(&mut self, path: String<MAX_PATH_LEN>) -> Result<(), FsError> {
+    pub(crate) async fn prepare_stat(&mut self, path: PathString) -> Result<(), FsError> {
         info!("Prepare stat file response for {}", path);
 
         self.reset().await;
@@ -93,7 +95,7 @@ impl FileIoSession {
 
     pub(crate) async fn prepare_read_dir(
         &mut self,
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         index: usize,
     ) -> Result<(), FsError> {
         info!("Prepare read dir response for {} at index {}", path, index);
@@ -141,7 +143,7 @@ impl FileIoSession {
 
     pub(crate) async fn prepare_read(
         &mut self,
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         offset: usize,
     ) -> Result<(), FsError> {
         info!(
@@ -196,7 +198,7 @@ impl FileIoSession {
 
     pub(crate) async fn create_file(
         &mut self,
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         size: usize,
     ) -> Result<(), FsError> {
         info!("Creating file: {} (size = {})", path, size);
@@ -208,7 +210,7 @@ impl FileIoSession {
 
     pub(crate) async fn prepare_write(
         &mut self,
-        path: String<MAX_PATH_LEN>,
+        path: PathString,
         offset: usize,
     ) -> Result<(), FsError> {
         info!(
