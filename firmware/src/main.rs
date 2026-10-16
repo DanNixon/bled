@@ -7,9 +7,10 @@ mod config;
 mod leds;
 mod sdcard;
 mod status;
+mod usb;
 mod wireless;
 
-use crate::sdcard::SdCardStorage;
+use crate::sdcard::{SdBlockDevice, SdCardStorage};
 use bled_core::api::{BootReason, DeviceInfo};
 use defmt::{error, info, unwrap};
 use defmt_rtt as _;
@@ -83,7 +84,8 @@ async fn main(spawner: Spawner) {
     let mut button_events = buttons::button_events_subscriber();
     buttons::init(r.buttons, spawner);
 
-    let sd = SdCardStorage::new(r.sdcard);
+    let mut sd = SdBlockDevice::new(r.sdcard);
+
     if buttons::is_held_at_boot(
         &mut button_events,
         buttons::Button::A,
@@ -102,14 +104,35 @@ async fn main(spawner: Spawner) {
         control.gpio_set(0, false).await;
     }
 
-    config::init(&sd).await;
+    let mut usb_builder = usb::init(p.USB);
 
-    spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
+    // Present SD card as USB MSC if button B is held at boot, otherwise run normally
+    if buttons::is_held_at_boot(
+        &mut button_events,
+        buttons::Button::B,
+        Duration::from_millis(100),
+    )
+    .await
+    {
+        // Status LED on when in MSC mode
+        control.gpio_set(0, true).await;
 
-    spawner.spawn(unwrap!(leds::task(r.led)));
-    leds::draw().await;
+        let msc = usb::msc::init(&mut usb_builder);
+        spawner.spawn(unwrap!(usb::msc::task(msc, sd)));
 
-    spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
+        spawner.spawn(unwrap!(usb::task(usb_builder)));
+    } else {
+        let sd = SdCardStorage::new(sd);
+
+        config::init(&sd).await;
+
+        spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
+
+        spawner.spawn(unwrap!(leds::task(r.led)));
+        leds::draw().await;
+
+        spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
+    }
 }
 
 fn device_info() -> DeviceInfo {
