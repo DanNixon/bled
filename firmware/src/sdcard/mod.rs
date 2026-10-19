@@ -23,16 +23,21 @@ pub(crate) enum ReadFileError {
 
 #[derive(Clone)]
 pub(crate) struct SdCardStorage {
-    fs: &'static Mutex<CriticalSectionRawMutex, Option<FileSystem>>,
+    fs: &'static Mutex<CriticalSectionRawMutex, FileSystem>,
 }
 
-static SD_FS: StaticCell<Mutex<CriticalSectionRawMutex, Option<FileSystem>>> = StaticCell::new();
+static SD_FS: StaticCell<Mutex<CriticalSectionRawMutex, FileSystem>> = StaticCell::new();
 
 impl SdCardStorage {
     pub(super) fn new(sdcard: SdBlockDevice) -> SdCardStorage {
         let fs = FileSystem::new(sdcard);
-        let fs = SD_FS.init(Mutex::new(Some(fs)));
+        let fs = SD_FS.init(Mutex::new(fs));
         SdCardStorage { fs }
+    }
+
+    async fn with_filesystem<T>(&self, operation: impl FnOnce(&mut FileSystem) -> T) -> T {
+        let mut fs = self.fs.lock().await;
+        operation(&mut fs)
     }
 
     #[inline(never)]
@@ -41,49 +46,56 @@ impl SdCardStorage {
         filename: &str,
         bytes: &mut [u8],
     ) -> Result<usize, ReadFileError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
+        self.with_filesystem(
+            |fs| match fs.open(filename, OpenOptions::new().read(true)) {
+                Ok(mut file) => {
+                    let len = file.metadata().len() as usize;
+                    if len > bytes.len() {
+                        warn!(
+                            "file {} is too large ({} > {} bytes)",
+                            filename,
+                            len,
+                            bytes.len()
+                        );
+                        let _ = file.close(fs);
+                        return Err(ReadFileError::FileTooLarge {
+                            len,
+                            capacity: bytes.len(),
+                        });
+                    }
 
-        match fs.open(filename, OpenOptions::new().read(true)) {
-            Ok(mut file) => {
-                let len = file.metadata().len() as usize;
-                if len > bytes.len() {
-                    warn!(
-                        "file {} is too large ({} > {} bytes)",
-                        filename,
-                        len,
-                        bytes.len()
-                    );
-                    Err(ReadFileError::FileTooLarge {
-                        len,
-                        capacity: bytes.len(),
-                    })
-                } else {
-                    match file.read(fs, &mut bytes[..len]) {
-                        Ok(_) => Ok(len),
+                    let read_result = match file.read(fs, &mut bytes[..len]) {
+                        Ok(Some(n)) => Ok(n),
+                        Ok(None) => Ok(0),
                         Err(e) => {
                             warn!("failed to read file {}: {}", filename, e);
                             Err(ReadFileError::Read(e))
                         }
+                    };
+                    let close_result = file.close(fs).map_err(ReadFileError::Read);
+                    match (read_result, close_result) {
+                        (Ok(bytes_read), Ok(())) => Ok(bytes_read),
+                        (Err(error), _) | (_, Err(error)) => Err(error),
                     }
                 }
-            }
-            Err(e) => {
-                warn!("failed to open file {}: {}", filename, e);
-                Err(ReadFileError::Open(e))
-            }
-        }
+                Err(e) => {
+                    warn!("failed to open file {}: {}", filename, e);
+                    Err(ReadFileError::Open(e))
+                }
+            },
+        )
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn write_file(&self, filename: &str, bytes: &[u8]) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        fs.write(filename, bytes).map_err(|e| {
-            warn!("failed to write file {}: {}", filename, e);
-            e
+        self.with_filesystem(|fs| {
+            fs.write(filename, bytes).map_err(|e| {
+                warn!("failed to write file {}: {}", filename, e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
@@ -92,24 +104,24 @@ impl SdCardStorage {
         filename: &str,
         options: OpenOptions,
     ) -> Result<File, FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        fs.open(filename, options).map_err(|e| {
-            warn!("failed to open file {}: {}", filename, e);
-            e
+        self.with_filesystem(|fs| {
+            fs.open(filename, options).map_err(|e| {
+                warn!("failed to open file {}: {}", filename, e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn seek_file(&self, file: &mut File, offset: u64) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        file.seek(fs, offset).map_err(|e| {
-            warn!("failed to seek in file {}: {}", offset, e);
-            e
+        self.with_filesystem(|fs| {
+            file.seek(fs, offset).map_err(|e| {
+                warn!("failed to seek in file {}: {}", offset, e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
@@ -118,124 +130,113 @@ impl SdCardStorage {
         file: &mut File,
         buf: &mut [u8],
     ) -> Result<usize, FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        match file.read(fs, buf) {
+        self.with_filesystem(|fs| match file.read(fs, buf) {
             Ok(Some(n)) => Ok(n),
             Ok(None) => Ok(0),
             Err(e) => {
                 warn!("failed to read from file: {}", e);
                 Err(e)
             }
-        }
+        })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn write_open_file(&self, file: &mut File, buf: &[u8]) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        file.write(fs, buf).map_err(|e| {
-            warn!("failed to write to file: {}", e);
-            e
+        self.with_filesystem(|fs| {
+            file.write(fs, buf).map_err(|e| {
+                warn!("failed to write to file: {}", e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn close_file(&self, file: File) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        file.close(fs).map_err(|e| {
-            warn!("failed to close file: {}", e);
-            e
+        self.with_filesystem(|fs| {
+            file.close(fs).map_err(|e| {
+                warn!("failed to close file: {}", e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn stat_file(&self, filename: &str) -> Result<u64, FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        match fs.open(filename, OpenOptions::new().read(true).write(true)) {
-            Ok(file) => Ok(file.metadata().len()),
-            Err(e) => {
-                warn!("failed to open file {}: {}", filename, e);
-                Err(e)
+        self.with_filesystem(|fs| {
+            match fs.open(filename, OpenOptions::new().read(true).write(true)) {
+                Ok(file) => {
+                    let len = file.metadata().len();
+                    file.close(fs).map_err(|e| {
+                        warn!("failed to close file after stat {}: {}", filename, e);
+                        e
+                    })?;
+                    Ok(len)
+                }
+                Err(e) => {
+                    warn!("failed to open file {}: {}", filename, e);
+                    Err(e)
+                }
             }
-        }
+        })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn create_file(&self, filename: &str, size: u64) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
+        let mut file = self
+            .open_file(
+                filename,
+                OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .truncate(true)
+                    .create(true),
+            )
+            .await?;
 
-        match fs.open(
-            filename,
-            OpenOptions::new()
-                .read(true)
-                .write(true)
-                .truncate(true)
-                .create(true),
-        ) {
-            Ok(mut file) => {
-                let size = size as usize;
+        const CHUNK_SIZE: usize = 512;
+        let zeros = [0u8; CHUNK_SIZE];
+        let mut remaining = size as usize;
 
-                const CHUNK_SIZE: usize = 512;
-                let zeros = [0u8; CHUNK_SIZE];
-
-                let mut remaining = size;
-
-                // Write zeros to the file up to the requested size
-                while remaining != 0 {
-                    let chunk_len = remaining.min(CHUNK_SIZE);
-
-                    file.write(fs, &zeros[..chunk_len]).map_err(|e| {
-                        warn!("failed to write to file {}: {}", filename, e);
-                        e
-                    })?;
-
-                    remaining -= chunk_len;
-
-                    embassy_futures::yield_now().await;
-                }
-
-                file.close(fs).map_err(|e| {
-                    warn!("failed to close file {}: {}", filename, e);
-                    e
-                })?;
-
-                Ok(())
+        let write_result: Result<(), FsError> = async {
+            while remaining != 0 {
+                let chunk_len = remaining.min(CHUNK_SIZE);
+                self.write_open_file(&mut file, &zeros[..chunk_len]).await?;
+                remaining -= chunk_len;
+                embassy_futures::yield_now().await;
             }
-            Err(e) => {
-                warn!("failed to open file {}: {}", filename, e);
-                Err(e)
-            }
+            Ok(())
         }
+        .await;
+
+        let close_result = self.close_file(file).await;
+        write_result?;
+        close_result
     }
 
     #[inline(never)]
     pub(crate) async fn delete_file(&self, filename: &str) -> Result<(), FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        fs.remove_file(filename).map_err(|e| {
-            warn!("failed to delete file {}: {}", filename, e);
-            e
+        self.with_filesystem(|fs| {
+            fs.remove_file(filename).map_err(|e| {
+                warn!("failed to delete file {}: {}", filename, e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
     pub(crate) async fn open_dir(&self, path: &str) -> Result<DirectoryIterator, FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        fs.read_dir(path).map_err(|e| {
-            warn!("failed to open dir {}: {}", path, e);
-            e
+        self.with_filesystem(|fs| {
+            fs.read_dir(path).map_err(|e| {
+                warn!("failed to open dir {}: {}", path, e);
+                e
+            })
         })
+        .await
     }
 
     #[inline(never)]
@@ -243,35 +244,35 @@ impl SdCardStorage {
         &self,
         dir: &mut DirectoryIterator,
     ) -> Result<Option<DirEntry>, FsError> {
-        let mut guard = self.fs.lock().await;
-        let fs = guard.as_mut().unwrap();
-
-        let mut name_buf = [0u8; exfat_slim::blocking::directory::MAX_NAME_LEN];
-        match dir.next_entry(fs, &mut name_buf) {
-            Ok(Some(entry)) => {
-                let mut heapless_name = PathString::new();
-                for c in entry.name.chars() {
-                    if heapless_name.len() + c.len_utf8() > heapless_name.capacity() {
-                        break;
+        self.with_filesystem(|fs| {
+            let mut name_buf = [0u8; exfat_slim::blocking::directory::MAX_NAME_LEN];
+            match dir.next_entry(fs, &mut name_buf) {
+                Ok(Some(entry)) => {
+                    let mut heapless_name = PathString::new();
+                    for c in entry.name.chars() {
+                        if heapless_name.len() + c.len_utf8() > heapless_name.capacity() {
+                            break;
+                        }
+                        let _ = heapless_name.push(c);
                     }
-                    let _ = heapless_name.push(c);
+
+                    let kind = if entry.metadata.is_dir() {
+                        DirEntryType::Directory
+                    } else {
+                        DirEntryType::File {
+                            size: entry.metadata.len(),
+                        }
+                    };
+                    Ok(Some(DirEntry::new(heapless_name, kind)))
                 }
-
-                let kind = if entry.metadata.is_dir() {
-                    DirEntryType::Directory
-                } else {
-                    DirEntryType::File {
-                        size: entry.metadata.len(),
-                    }
-                };
-                Ok(Some(DirEntry::new(heapless_name, kind)))
+                Ok(None) => Ok(None),
+                Err(e) => {
+                    warn!("failed to read next dir entry: {}", e);
+                    Err(e)
+                }
             }
-            Ok(None) => Ok(None),
-            Err(e) => {
-                warn!("failed to read next dir entry: {}", e);
-                Err(e)
-            }
-        }
+        })
+        .await
     }
 }
 
