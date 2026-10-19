@@ -16,10 +16,12 @@ check: check-nix-fmt check-typos
     @just run-sub core check
     @just run-sub firmware check
     @just run-sub web check
+    @just run-sub effects/demo check
 
 build:
     @just run-sub firmware build
     @just run-sub web build
+    @just run-sub effects/demo build
 
 check-nix-fmt:
     alejandra -q -c .
