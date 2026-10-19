@@ -4,13 +4,15 @@ build: build-pico2 build-pico2w
 
 build-pico2:
     cargo build --release --target thumbv8m.main-none-eabihf --no-default-features --features board-pico2
-    elf2uf2-rs ./target/thumbv8m.main-none-eabihf/release/bled ./target/thumbv8m.main-none-eabihf/release/bled.uf2
-    size ./target/thumbv8m.main-none-eabihf/release/bled
+    cp ./target/thumbv8m.main-none-eabihf/release/bled ./target/thumbv8m.main-none-eabihf/release/bled-pico2
+    elf2uf2-rs ./target/thumbv8m.main-none-eabihf/release/bled-pico2 ./target/thumbv8m.main-none-eabihf/release/bled-pico2.uf2
+    size ./target/thumbv8m.main-none-eabihf/release/bled-pico2
 
 build-pico2w:
     cargo build --release --target thumbv8m.main-none-eabihf --no-default-features --features board-pico2w
-    elf2uf2-rs ./target/thumbv8m.main-none-eabihf/release/bled ./target/thumbv8m.main-none-eabihf/release/bled.uf2
-    size ./target/thumbv8m.main-none-eabihf/release/bled
+    cp ./target/thumbv8m.main-none-eabihf/release/bled ./target/thumbv8m.main-none-eabihf/release/bled-pico2w
+    elf2uf2-rs ./target/thumbv8m.main-none-eabihf/release/bled-pico2w ./target/thumbv8m.main-none-eabihf/release/bled-pico2w.uf2
+    size ./target/thumbv8m.main-none-eabihf/release/bled-pico2w
 
 fmt:
     cargo fmt
@@ -23,13 +25,13 @@ check: clippy
     cargo fmt --check
 
 run-pico2: build-pico2
-    probe-rs run --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+    probe-rs run --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled-pico2
 
 run-pico2w: build-pico2w
-    probe-rs run --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+    probe-rs run --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled-pico2w
 
 attach-pico2: build-pico2
-    probe-rs attach --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+    probe-rs attach --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled-pico2
 
 attach-pico2w: build-pico2w
-    probe-rs attach --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled
+    probe-rs attach --chip RP235x ./target/thumbv8m.main-none-eabihf/release/bled-pico2w
