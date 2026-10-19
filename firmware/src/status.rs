@@ -1,4 +1,4 @@
-use cyw43::Control;
+use crate::status_led::StatusLed;
 use embassy_futures::select::{Either, select};
 use embassy_rp::{Peri, peripherals::WATCHDOG, watchdog::Watchdog};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
@@ -12,15 +12,15 @@ pub(crate) fn reset() {
 }
 
 #[embassy_executor::task]
-pub(super) async fn task(mut control: Control<'static>, wdt: Peri<'static, WATCHDOG>) -> ! {
+pub(super) async fn task(mut led: StatusLed, wdt: Peri<'static, WATCHDOG>) -> ! {
     let mut wdt = Watchdog::new(wdt);
     wdt.start(Duration::from_secs(3));
 
     let mut ticker = Ticker::every(Duration::from_secs(1));
     loop {
-        control.gpio_set(0, true).await;
+        led.set(true).await;
         Timer::after_millis(50).await;
-        control.gpio_set(0, false).await;
+        led.set(false).await;
 
         wdt.feed(Duration::from_secs(2));
 

@@ -1,4 +1,5 @@
 //! WebAssembly backed lighting effects.
+#![cfg_attr(feature = "board-pico2", allow(unused_imports))]
 
 mod instance;
 mod runtime;

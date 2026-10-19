@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![cfg_attr(feature = "board-pico2", allow(dead_code))]
 
 extern crate alloc;
 
@@ -10,7 +11,9 @@ mod effect;
 mod leds;
 mod sdcard;
 mod status;
+mod status_led;
 mod usb;
+#[cfg(feature = "board-pico2w")]
 mod wireless;
 
 use crate::sdcard::{SdBlockDevice, SdCardStorage};
@@ -91,8 +94,17 @@ async fn main(spawner: Spawner) {
 
     info!("{}", device_info());
 
-    let (mut control, bt) = wireless::init(r.wireless, spawner).await;
-    let bt_address = wireless::ble::derive_address(&mut control).await;
+    #[cfg(feature = "board-pico2w")]
+    let (control, bt, bt_address) = {
+        let (mut control, bt) = wireless::init(r.wireless, spawner).await;
+        let bt_address = wireless::ble::derive_address(&mut control).await;
+        (control, bt, bt_address)
+    };
+
+    #[cfg(feature = "board-pico2w")]
+    let mut status_led = status_led::StatusLed::new(control);
+    #[cfg(feature = "board-pico2")]
+    let mut status_led = status_led::StatusLed::new(r.wireless.cs);
 
     let mut button_events = buttons::button_events_subscriber();
     buttons::init(r.buttons, spawner);
@@ -107,14 +119,14 @@ async fn main(spawner: Spawner) {
     .await
     {
         // Status LED on while formatting
-        control.gpio_set(0, true).await;
+        status_led.set(true).await;
 
         if let Err(e) = sd.format().await {
             error!("Failed to format SD card: {}", e);
         }
 
         // Status LED off after formatting
-        control.gpio_set(0, false).await;
+        status_led.set(false).await;
     }
 
     let mut usb_builder = usb::init(p.USB);
@@ -128,7 +140,7 @@ async fn main(spawner: Spawner) {
     .await
     {
         // Status LED on when in MSC mode
-        control.gpio_set(0, true).await;
+        status_led.set(true).await;
 
         let msc = usb::msc::init(&mut usb_builder);
         spawner.spawn(unwrap!(usb::msc::task(msc, sd)));
@@ -141,6 +153,7 @@ async fn main(spawner: Spawner) {
 
         effect::load_default_effect(&sd).await;
 
+        #[cfg(feature = "board-pico2w")]
         spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
 
         spawner.spawn(unwrap!(leds::task(r.led)));
@@ -148,7 +161,7 @@ async fn main(spawner: Spawner) {
 
         spawner.spawn(unwrap!(effect::task()));
 
-        spawner.spawn(unwrap!(status::task(control, p.WATCHDOG)));
+        spawner.spawn(unwrap!(status::task(status_led, p.WATCHDOG)));
     }
 }
 
