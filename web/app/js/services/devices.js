@@ -4,8 +4,8 @@ import { log } from './logger.js';
 /**
  * Registry of connected devices plus the current tree selection.
  *
- * Selection shape: `{ deviceId, kind, channel?, segment? }` where kind is one of
- * 'device' | 'sdcard' | 'channel' | 'segment'.
+ * Selection shape: `{ deviceId, kind, fixture?, span?, channel?, segment? }` where kind is one of
+ * 'device' | 'sdcard' | 'effect' | 'fixture' | 'span' | 'channel' | 'segment'.
  */
 class DeviceRegistry extends EventTarget {
   constructor() {

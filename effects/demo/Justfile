@@ -1,0 +1,13 @@
+default: check
+
+build:
+    cargo build --release --target wasm32-unknown-unknown
+    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/bled_effect_demo.wasm -o out/demo.wasm
+    ls -l out/demo.wasm
+
+fmt:
+    cargo fmt
+
+check:
+    cargo fmt --check
+    cargo check --target wasm32-unknown-unknown

@@ -47,13 +47,22 @@ impl<const LEN: usize, const CHANNEL_COUNT: usize> PixelDataBuffer<LEN, CHANNEL_
     }
 
     #[must_use]
-    pub fn size(&self) -> usize {
-        self.ranges.iter().map(|r| r.end - r.start).sum()
+    pub fn len(&self) -> usize {
+        if let (Some(first), Some(last)) = (self.ranges.first(), self.ranges.last()) {
+            last.end - first.start
+        } else {
+            0
+        }
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     #[must_use]
     pub fn info(&self) -> LedBufferInformation {
-        LedBufferInformation::new(self.capacity() as u32, self.size() as u32)
+        LedBufferInformation::new(self.capacity() as u32, self.len() as u32)
     }
 
     #[must_use]
@@ -263,20 +272,23 @@ mod tests {
 
     #[test]
     fn buffer_capacity_size_info() {
-        let mut buffer = PixelDataBuffer::<64, 2>::new();
+        let mut buffer = PixelDataBuffer::<64, 5>::new();
         assert_eq!(buffer.capacity(), 64);
-        assert_eq!(buffer.size(), 0);
+        assert_eq!(buffer.len(), 0);
         assert_eq!(buffer.info().capacity(), &64u32);
         assert_eq!(buffer.info().size(), &0u32);
 
         let sizes = [
             PixelDataChannelSize::new::<RGB8>(5),  // 15 bytes
             PixelDataChannelSize::new::<RGB8>(10), // 30 bytes
+            PixelDataChannelSize::new::<RGB8>(0),  // 0 bytes
+            PixelDataChannelSize::new::<RGB8>(1),  // 3 bytes
+            PixelDataChannelSize::new::<RGB8>(0),  // 0 bytes
         ];
         buffer.try_reshape(sizes).unwrap();
         assert_eq!(buffer.capacity(), 64);
-        assert_eq!(buffer.size(), 45);
+        assert_eq!(buffer.len(), 48);
         assert_eq!(buffer.info().capacity(), &64u32);
-        assert_eq!(buffer.info().size(), &45u32);
+        assert_eq!(buffer.info().size(), &48u32);
     }
 }

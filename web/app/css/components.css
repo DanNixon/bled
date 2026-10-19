@@ -4,6 +4,7 @@ bled-file-staging,
 bled-led-pixels,
 bled-led-commit,
 bled-led-buffer,
+bled-effect,
 bled-activity-log,
 bled-device-tree,
 bled-main-panel {
@@ -79,6 +80,26 @@ pre#log, pre.log-output {
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+.effect-buffers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.effect-buffers .code-editor {
+  min-height: 8rem;
+  margin-bottom: 0.5rem;
+}
+
+.effect-manifest-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0.5rem;
 }
 
 /* Directory listing */

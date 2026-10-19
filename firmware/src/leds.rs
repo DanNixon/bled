@@ -84,8 +84,8 @@ pub(super) async fn task(r: super::LedResources) -> ! {
     );
 
     loop {
-        let mask = DRAW_REQUEST.receive().await;
-        info!("Draw request: {}", mask);
+        DRAW_REQUEST.receive().await;
+        info!("Draw request");
 
         let data = CHANNEL_DATA.lock().await;
 
