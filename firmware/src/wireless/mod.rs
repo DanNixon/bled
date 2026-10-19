@@ -3,11 +3,7 @@ pub(super) mod ble;
 use crate::{Irqs, WirelessResources};
 use bt_hci::controller::ExternalController;
 use cyw43::{Control, aligned_bytes, bluetooth::BtDriver};
-#[cfg(feature = "picow")]
-use cyw43_pio::DEFAULT_CLOCK_DIVIDER as CLOCK_DIVIDER;
-use cyw43_pio::PioSpi;
-#[cfg(feature = "pico2w")]
-use cyw43_pio::RM2_CLOCK_DIVIDER as CLOCK_DIVIDER;
+use cyw43_pio::{PioSpi, RM2_CLOCK_DIVIDER};
 use defmt::unwrap;
 use embassy_executor::Spawner;
 use embassy_rp::{
@@ -33,7 +29,7 @@ pub(super) async fn init(
     let spi = PioSpi::new(
         &mut pio.common,
         pio.sm0,
-        CLOCK_DIVIDER,
+        RM2_CLOCK_DIVIDER,
         pio.irq0,
         cs,
         r.dio,

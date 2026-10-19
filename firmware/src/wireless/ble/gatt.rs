@@ -4,15 +4,18 @@ use crate::{
         file_io::{FileIoMode, FileIoSession},
         led_buffer::{LedBufferMode, LedBufferSession},
     },
-    leds,
+    effect, leds,
     sdcard::SdCardStorage,
 };
 use bled_core::{
+    PathString,
     api::{ConfigControl, FileIoControl, LedBufferControl},
     ble::{
-        COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
-        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
-        RESET_UUID, SERVICE_UUID,
+        ACTIVE_EFFECT_UUID, COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID,
+        EFFECT_COMMAND_DATA_UUID, EFFECT_COMMAND_LENGTH_UUID, EFFECT_PARAMETER_DATA_UUID,
+        EFFECT_PARAMETER_LENGTH_UUID, FILE_IO_CONTROL_UUID, FILE_IO_DATA_UUID,
+        LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN, RESET_UUID,
+        SERVICE_UUID,
     },
 };
 use defmt::{debug, error, info, warn};
@@ -56,6 +59,21 @@ pub(super) struct LedService {
 
     #[characteristic(uuid = LED_BUFFER_DATA_UUID.as_u128(), read, write)]
     led_buffer_data: (),
+
+    #[characteristic(uuid = ACTIVE_EFFECT_UUID.as_u128(), read, write)]
+    active_effect: (),
+
+    #[characteristic(uuid = EFFECT_COMMAND_LENGTH_UUID.as_u128(), read)]
+    effect_command_length: (),
+
+    #[characteristic(uuid = EFFECT_COMMAND_DATA_UUID.as_u128(), read, write)]
+    effect_command_data: (),
+
+    #[characteristic(uuid = EFFECT_PARAMETER_LENGTH_UUID.as_u128(), read)]
+    effect_parameter_length: (),
+
+    #[characteristic(uuid = EFFECT_PARAMETER_DATA_UUID.as_u128(), read, write)]
+    effect_parameter_data: (),
 }
 
 pub(super) async fn gatt_events_task<P: PacketPool>(
@@ -63,7 +81,7 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     conn: &GattConnection<'_, '_, P>,
     sd: SdCardStorage,
 ) {
-    let mut file_io = FileIoSession::new(sd);
+    let mut file_io = FileIoSession::new(sd.clone());
     let mut led_buffer = LedBufferSession::new();
     let mut config = ConfigSession::new(crate::config::get());
 
@@ -75,6 +93,22 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                     GattEvent::Read(event) => {
                         if event.handle() == server.led_service.device_info.handle {
                             process_device_info(event).await
+                        } else if event.handle() == server.led_service.active_effect.handle {
+                            process_active_effect_read(event).await
+                        } else if event.handle() == server.led_service.effect_command_length.handle
+                        {
+                            process_effect_length_read(event, effect::effect_command_size().await)
+                                .await
+                        } else if event.handle() == server.led_service.effect_command_data.handle {
+                            process_effect_data_read(event, true).await
+                        } else if event.handle()
+                            == server.led_service.effect_parameter_length.handle
+                        {
+                            process_effect_length_read(event, effect::effect_parameter_size().await)
+                                .await
+                        } else if event.handle() == server.led_service.effect_parameter_data.handle
+                        {
+                            process_effect_data_read(event, false).await
                         } else if event.handle() == server.led_service.config_data.handle {
                             process_config_data_read(event, &mut config).await
                         } else if event.handle() == server.led_service.file_io_data.handle {
@@ -88,6 +122,13 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                     GattEvent::Write(event) => {
                         if event.handle() == server.led_service.reset.handle {
                             process_reset(event).await
+                        } else if event.handle() == server.led_service.active_effect.handle {
+                            process_active_effect_write(event, &sd).await
+                        } else if event.handle() == server.led_service.effect_command_data.handle {
+                            process_effect_data_write(event, true).await
+                        } else if event.handle() == server.led_service.effect_parameter_data.handle
+                        {
+                            process_effect_data_write(event, false).await
                         } else if event.handle() == server.led_service.config_control.handle {
                             process_config_control_write(event, &mut config).await
                         } else if event.handle() == server.led_service.file_io_control.handle {
@@ -119,6 +160,112 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     file_io.reset().await;
     config.reset();
     info!("Disconnected: {:?}", reason);
+}
+
+async fn process_active_effect_read<'stack, P: PacketPool>(
+    event: ReadEvent<'stack, '_, P>,
+) -> Result<Reply<'stack, P>, Error> {
+    let path = effect::active_effect_path().await;
+    let bytes = path
+        .as_ref()
+        .map_or(&[][..], |path| path.as_str().as_bytes());
+    event.accept_unprocessed(bytes)
+}
+
+async fn process_active_effect_write<'stack, P: PacketPool>(
+    event: WriteEvent<'stack, '_, P>,
+    sd: &SdCardStorage,
+) -> Result<Reply<'stack, P>, Error> {
+    let mut bytes = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let (offset, len) = event.with_data(|offset, data| {
+        if data.len() <= bytes.len() {
+            bytes[..data.len()].copy_from_slice(data);
+        }
+        (offset, data.len())
+    });
+    if offset != 0 {
+        return event.reject(AttErrorCode::INVALID_OFFSET);
+    }
+    if len > bytes.len() {
+        return event.reject(AttErrorCode::VALUE_NOT_ALLOWED);
+    }
+
+    let path = if len == 0 {
+        None
+    } else {
+        let path = match core::str::from_utf8(&bytes[..len]) {
+            Ok(path) => path,
+            Err(_) => return event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+        };
+        match PathString::try_from(path) {
+            Ok(path) => Some(path),
+            Err(_) => return event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+        }
+    };
+
+    match effect::activate_effect(sd, path).await {
+        Ok(()) => event.accept_unprocessed(),
+        Err(()) => event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+    }
+}
+
+async fn process_effect_length_read<'stack, P: PacketPool>(
+    event: ReadEvent<'stack, '_, P>,
+    length: Result<usize, ()>,
+) -> Result<Reply<'stack, P>, Error> {
+    let length = match length {
+        Ok(length) => match u32::try_from(length) {
+            Ok(length) => length,
+            Err(_) => return event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+        },
+        Err(()) => return event.reject(AttErrorCode::READ_NOT_PERMITTED),
+    };
+    event.accept_unprocessed(&length.to_le_bytes())
+}
+
+async fn process_effect_data_read<'stack, P: PacketPool>(
+    event: ReadEvent<'stack, '_, P>,
+    command: bool,
+) -> Result<Reply<'stack, P>, Error> {
+    let mut bytes = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let result = if command {
+        effect::read_effect_command(&mut bytes).await
+    } else {
+        effect::read_effect_parameters(&mut bytes).await
+    };
+    match result {
+        Ok(len) => event.accept_unprocessed(&bytes[..len]),
+        Err(()) => event.reject(AttErrorCode::READ_NOT_PERMITTED),
+    }
+}
+
+async fn process_effect_data_write<'stack, P: PacketPool>(
+    event: WriteEvent<'stack, '_, P>,
+    command: bool,
+) -> Result<Reply<'stack, P>, Error> {
+    let mut bytes = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let (offset, len) = event.with_data(|offset, data| {
+        if data.len() <= bytes.len() {
+            bytes[..data.len()].copy_from_slice(data);
+        }
+        (offset, data.len())
+    });
+    if offset != 0 {
+        return event.reject(AttErrorCode::INVALID_OFFSET);
+    }
+    if len > bytes.len() {
+        return event.reject(AttErrorCode::VALUE_NOT_ALLOWED);
+    }
+
+    let result = if command {
+        effect::write_effect_command(&bytes[..len]).await
+    } else {
+        effect::write_effect_parameters(&bytes[..len]).await
+    };
+    match result {
+        Ok(()) => event.accept_unprocessed(),
+        Err(()) => event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+    }
 }
 
 async fn process_config_data_read<'config, 'stack, P: PacketPool>(

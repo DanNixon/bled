@@ -4,6 +4,7 @@ import './bled-file-staging.js';
 import './bled-led-pixels.js';
 import './bled-led-commit.js';
 import './bled-led-buffer.js';
+import './bled-effect.js';
 
 const VIEWS = {
   info: 'bled-device-info',
@@ -11,6 +12,7 @@ const VIEWS = {
   commit: 'bled-led-commit',
   files: 'bled-file-staging',
   pixels: 'bled-led-pixels',
+  effect: 'bled-effect',
 };
 
 /**
@@ -110,6 +112,9 @@ export class BledMainPanel extends HTMLElement {
           break;
         case 'sdcard':
           visible = [this._view(dev, 'files')];
+          break;
+        case 'effect':
+          visible = [this._view(dev, 'effect')];
           break;
         case 'fixture':
         case 'span': {

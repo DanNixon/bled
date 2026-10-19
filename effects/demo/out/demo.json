@@ -1,0 +1,4 @@
+{
+  "name": "Pixel Sweep Demo",
+  "wasm_module": "demo.wasm"
+}

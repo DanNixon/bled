@@ -65,7 +65,7 @@ impl LedBufferSession {
         info!("Prepare read LED buffer response at offset {}", offset);
 
         let channel_data = leds::data().await;
-        if offset > channel_data.size() {
+        if offset > channel_data.len() {
             return Err(());
         }
 
@@ -82,7 +82,7 @@ impl LedBufferSession {
         };
 
         let channel_data = leds::data().await;
-        let size = channel_data.size();
+        let size = channel_data.len();
         if offset >= size {
             return Ok(0);
         }
@@ -98,7 +98,7 @@ impl LedBufferSession {
         info!("Prepare write LED buffer request at offset {}", offset);
 
         let channel_data = leds::data().await;
-        if offset > channel_data.size() {
+        if offset > channel_data.len() {
             return Err(());
         }
 
@@ -124,7 +124,7 @@ impl LedBufferSession {
             .ok_or(WriteChunkError::OutOfBounds)?;
 
         let mut channel_data = leds::data().await;
-        if end > channel_data.size() {
+        if end > channel_data.len() {
             return Err(WriteChunkError::OutOfBounds);
         }
 

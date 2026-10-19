@@ -31,6 +31,17 @@ pub const LED_BUFFER_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb0000
 /// LED buffer data GATT characteristic UUID (read/write).
 pub const LED_BUFFER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000142");
 
+/// Active effect GATT characteristic UUID (read/write).
+pub const ACTIVE_EFFECT_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000150");
+/// Effect command length GATT characteristic UUID (read-only).
+pub const EFFECT_COMMAND_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000151");
+/// Effect command data GATT characteristic UUID (read/write).
+pub const EFFECT_COMMAND_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000152");
+/// Effect parameter length GATT characteristic UUID (read-only).
+pub const EFFECT_PARAMETER_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000153");
+/// Effect parameter data GATT characteristic UUID (read/write).
+pub const EFFECT_PARAMETER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000154");
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -46,6 +57,11 @@ mod tests {
             COMMIT_UUID,
             LED_BUFFER_CONTROL_UUID,
             LED_BUFFER_DATA_UUID,
+            ACTIVE_EFFECT_UUID,
+            EFFECT_COMMAND_LENGTH_UUID,
+            EFFECT_COMMAND_DATA_UUID,
+            EFFECT_PARAMETER_LENGTH_UUID,
+            EFFECT_PARAMETER_DATA_UUID,
         ];
 
         for (index, &uuid) in all.iter().enumerate() {

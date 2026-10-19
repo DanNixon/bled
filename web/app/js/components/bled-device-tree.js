@@ -8,7 +8,7 @@ const sameSelection = (a, b) =>
   a.channel === b.channel && a.segment === b.segment;
 
 /**
- * Sidebar tree: DEVICE > (SD card, FIXTURE > SPAN). Fixtures and spans
+ * Sidebar tree: DEVICE > (SD card, Effects, FIXTURE > SPAN). Fixtures and spans
  * come from each device's config file; none are shown if it could not be read.
  */
 export class BledDeviceTree extends HTMLElement {
@@ -80,7 +80,16 @@ export class BledDeviceTree extends HTMLElement {
     if (!this.collapsed.has(deviceKey)) {
       const children = [];
       children.push(this._node({
-        label: 'SD card', selection: { deviceId: id, kind: 'sdcard' }, depth: 1, icon: '▤',
+        label: 'SD card',
+        selection: { deviceId: id, kind: 'sdcard' },
+        depth: 1,
+        icon: '▤',
+      }));
+      children.push(this._node({
+        label: 'Effects',
+        selection: { deviceId: id, kind: 'effect' },
+        depth: 1,
+        icon: '✨',
       }));
 
       for (const fix of fixtures) {

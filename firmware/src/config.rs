@@ -102,5 +102,6 @@ fn default_config() -> DeviceConfig {
     DeviceConfig {
         name: "bled-default".try_into().unwrap(),
         fixtures: [onboard_leds].into(),
+        default_effect: None,
     }
 }

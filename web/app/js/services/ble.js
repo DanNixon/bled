@@ -7,6 +7,9 @@ const GATT_OPERATIONS = [
   'statFile', 'readFile', 'writeFile', 'deleteFile', 'listDirectory',
   'setChannelPixels', 'setFixturePixels', 'setSpanPixels', 'commit', 'commitChannels',
   'readBufferInfo', 'readBuffer', 'readBufferRange', 'writeBuffer',
+  'readActiveEffect', 'writeActiveEffect', 'readEffectCommandLength',
+  'readEffectCommand', 'writeEffectCommand', 'readEffectParameterLength',
+  'readEffectParameters', 'writeEffectParameters',
 ];
 
 const toBytes = (v) => (v instanceof Uint8Array ? v : new Uint8Array(v));
@@ -269,6 +272,11 @@ export class BleDevice extends EventTarget {
       this.chars.bufferData    = await service.getCharacteristic(bled.led_buffer_data_uuid());
       this.chars.fileControl   = await service.getCharacteristic(bled.file_io_control_uuid());
       this.chars.fileData      = await service.getCharacteristic(bled.file_io_data_uuid());
+      this.chars.activeEffect  = await service.getCharacteristic(bled.active_effect_uuid());
+      this.chars.effectCommandLength = await service.getCharacteristic(bled.effect_command_length_uuid());
+      this.chars.effectCommand = await service.getCharacteristic(bled.effect_command_data_uuid());
+      this.chars.effectParameterLength = await service.getCharacteristic(bled.effect_parameter_length_uuid());
+      this.chars.effectParameters = await service.getCharacteristic(bled.effect_parameter_data_uuid());
 
       this._log("Connected and resolved all characteristics.", 'success');
     } catch (err) {
@@ -339,6 +347,53 @@ export class BleDevice extends EventTarget {
     await this.chars.reset.writeValueWithResponse(new Uint8Array([]));
     this._log("Reboot command sent.", 'success');
     this._handleDisconnected();
+  }
+
+  async readActiveEffect() {
+    const view = await this.chars.activeEffect.readValue();
+    return new TextDecoder('utf-8', { fatal: true }).decode(
+      new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
+    );
+  }
+
+  async writeActiveEffect(path) {
+    const bytes = new TextEncoder().encode(path);
+    await this.chars.activeEffect.writeValueWithResponse(bytes);
+    this._log(path ? `Loaded effect manifest "${path}".` : 'Unloaded active effect.', 'success');
+  }
+
+  async readEffectCommandLength() {
+    return this._readEffectLength(this.chars.effectCommandLength);
+  }
+
+  async readEffectCommand() {
+    const view = await this.chars.effectCommand.readValue();
+    return new Uint8Array(view.buffer, view.byteOffset, view.byteLength).slice();
+  }
+
+  async writeEffectCommand(bytes) {
+    await this.chars.effectCommand.writeValueWithResponse(toBytes(bytes));
+  }
+
+  async readEffectParameterLength() {
+    return this._readEffectLength(this.chars.effectParameterLength);
+  }
+
+  async readEffectParameters() {
+    const view = await this.chars.effectParameters.readValue();
+    return new Uint8Array(view.buffer, view.byteOffset, view.byteLength).slice();
+  }
+
+  async writeEffectParameters(bytes) {
+    await this.chars.effectParameters.writeValueWithResponse(toBytes(bytes));
+  }
+
+  async _readEffectLength(characteristic) {
+    const view = await characteristic.readValue();
+    if (view.byteLength !== 4) {
+      throw new Error(`Invalid effect buffer length value (${view.byteLength} bytes).`);
+    }
+    return view.getUint32(0, true);
   }
 
   // --- Generic Chunked I/O ---

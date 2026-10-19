@@ -1,20 +1,24 @@
-use crate::config::{Fixture, MAX_FIXTURE_COUNT, MAX_NAME_LEN, PixelSpan};
+use crate::{
+    NameString, PathString,
+    config::{Fixture, MAX_FIXTURE_COUNT, PixelSpan},
+};
 use getset::Getters;
-use heapless::{String, Vec};
+use heapless::Vec;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
-// TODO: add startup effect to device config
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct DeviceConfig {
     /// Human-readable device name.
-    pub name: String<{ MAX_NAME_LEN }>,
+    pub name: NameString,
 
     /// Light fixtures controlled by this device.
     pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
+
+    /// Filename of the manifest of the effect to load on boot.
+    pub default_effect: Option<PathString>,
 }
 
 impl DeviceConfig {
@@ -40,6 +44,12 @@ impl DeviceConfig {
         }
 
         Some(lengths)
+    }
+
+    /// Gets the required length of all output channels (e.g. for calculating required buffer size)
+    pub fn total_length<const OUTPUT_CHANNEL_COUNT: usize>(&self) -> usize {
+        let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>();
+        channel_lengths.map_or(0, |l| l.into_iter().sum())
     }
 
     /// Validates the device config.
@@ -163,6 +173,7 @@ mod tests {
             device.channel_lengths::<4>().unwrap().as_slice(),
             &[5, 7, 0, 7]
         );
+        assert_eq!(device.total_length::<4>(), 19);
     }
 
     #[test]
