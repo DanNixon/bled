@@ -4,7 +4,7 @@ use bled_core::{
     PathString,
     effect::{EffectManifest, MAX_EFFECT_MANIFEST_JSON_SIZE, abi::export::StepResult},
 };
-use defmt::{error, info, warn};
+use defmt::{debug, error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embassy_time::{Instant, Timer};
 
@@ -182,41 +182,71 @@ pub(crate) async fn task() -> ! {
         let mut active_effect = ACTIVE_EFFECT.lock().await;
 
         if let Some(effect) = active_effect.as_mut() {
-            info!("Stepping effect");
-            match effect.instance.step(elapsed_ms).unwrap() {
-                StepResult::Changed => {
+            debug!("Stepping effect");
+            match effect.instance.step(elapsed_ms) {
+                Ok(StepResult::Changed) => {
                     info!("Pixels changed after step, rendering");
 
                     let mut channel_data = crate::leds::data().await;
-
-                    let guest_buffer_len = effect.instance.frame_size().unwrap();
-                    if guest_buffer_len != channel_data.len() {
-                        panic!(
-                            "Invalid buffer length: guest={} host={}",
-                            guest_buffer_len,
-                            channel_data.len()
-                        );
+                    match effect.instance.frame_size() {
+                        Ok(guest_buffer_len) if guest_buffer_len == channel_data.len() => {
+                            match effect.instance.read_frame_data(channel_data.inner_mut()) {
+                                Ok(read_len) if read_len == channel_data.len() => {
+                                    drop(channel_data);
+                                    crate::leds::draw().await;
+                                }
+                                Ok(read_len) => {
+                                    warn!(
+                                        "Effect returned an incomplete frame: guest={} host={}",
+                                        read_len,
+                                        channel_data.len()
+                                    );
+                                    *active_effect = None;
+                                }
+                                Err(error) => {
+                                    warn!(
+                                        "Failed to read effect frame: {}",
+                                        defmt::Debug2Format(&error)
+                                    );
+                                    *active_effect = None;
+                                }
+                            }
+                        }
+                        Ok(guest_buffer_len) => {
+                            warn!(
+                                "Invalid effect frame length: guest={} host={}",
+                                guest_buffer_len,
+                                channel_data.len()
+                            );
+                            *active_effect = None;
+                        }
+                        Err(error) => {
+                            warn!(
+                                "Failed to read effect frame length: {}",
+                                defmt::Debug2Format(&error)
+                            );
+                            *active_effect = None;
+                        }
                     }
-
-                    effect
-                        .instance
-                        .read_frame_data(channel_data.inner_mut())
-                        .unwrap();
-
-                    drop(channel_data);
-
-                    crate::leds::draw().await;
                 }
-                StepResult::Unchanged => {
-                    info!("Pixels unchanged after step");
+                Ok(StepResult::Unchanged) => {
+                    debug!("Pixels unchanged after step");
                 }
-                StepResult::Error => {
-                    warn!("Active effect failed while stepping");
+                Ok(StepResult::Error) => {
+                    warn!("Active effect reported an error while stepping");
+                    *active_effect = None;
+                }
+                Err(error) => {
+                    warn!(
+                        "Active effect failed while stepping: {}",
+                        defmt::Debug2Format(&error)
+                    );
                     *active_effect = None;
                 }
             }
         }
 
+        const DEFAULT_STEP_TIME: u64 = 100;
         let delay_ms = match active_effect.as_mut() {
             Some(effect) => match effect.instance.step_time() {
                 Ok(time_to_next) => time_to_next as u64,
@@ -225,12 +255,13 @@ pub(crate) async fn task() -> ! {
                         "Active effect failed while reading its step time: {}",
                         defmt::Debug2Format(&error)
                     );
-                    100
+                    *active_effect = None;
+                    DEFAULT_STEP_TIME
                 }
             },
-            None => 100,
+            None => DEFAULT_STEP_TIME,
         };
-        info!("Next step in: {}ms", delay_ms);
+        debug!("Next step in: {}ms", delay_ms);
 
         drop(active_effect);
 
