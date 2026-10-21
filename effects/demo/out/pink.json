@@ -1,0 +1,6 @@
+{
+  "name": "Pink",
+  "module": "demo.wasm",
+  "command": [3],
+  "parameters": [255, 0, 255]
+}
