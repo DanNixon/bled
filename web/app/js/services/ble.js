@@ -9,7 +9,7 @@ const GATT_OPERATIONS = [
   'readBufferInfo', 'readBuffer', 'readBufferRange', 'writeBuffer',
   'readActiveEffect', 'writeActiveEffect', 'readEffectCommandLength',
   'readEffectCommand', 'writeEffectCommand', 'readEffectParameterLength',
-  'readEffectParameters', 'writeEffectParameters',
+  'readEffectParameters', 'writeEffectParameters', 'readEffectManifest',
 ];
 
 const toBytes = (v) => (v instanceof Uint8Array ? v : new Uint8Array(v));
@@ -273,6 +273,8 @@ export class BleDevice extends EventTarget {
       this.chars.fileControl   = await service.getCharacteristic(bled.file_io_control_uuid());
       this.chars.fileData      = await service.getCharacteristic(bled.file_io_data_uuid());
       this.chars.activeEffect  = await service.getCharacteristic(bled.active_effect_uuid());
+      this.chars.effectManifestControl = await service.getCharacteristic(bled.active_effect_manifest_control_uuid());
+      this.chars.effectManifestData = await service.getCharacteristic(bled.active_effect_manifest_data_uuid());
       this.chars.effectCommandLength = await service.getCharacteristic(bled.effect_command_length_uuid());
       this.chars.effectCommand = await service.getCharacteristic(bled.effect_command_data_uuid());
       this.chars.effectParameterLength = await service.getCharacteristic(bled.effect_parameter_length_uuid());
@@ -359,7 +361,35 @@ export class BleDevice extends EventTarget {
   async writeActiveEffect(path) {
     const bytes = new TextEncoder().encode(path);
     await this.chars.activeEffect.writeValueWithResponse(bytes);
-    this._log(path ? `Loaded effect manifest "${path}".` : 'Unloaded active effect.', 'success');
+    this._log(path ? `Loaded effect module "${path}".` : 'Unloaded active effect.', 'success');
+  }
+
+  /** Read the complete JSON manifest as one serialised GATT operation. */
+  async readEffectManifest() {
+    const control = this.chars.effectManifestControl;
+    const data = this.chars.effectManifestData;
+    const reset = bled.encode_effect_manifest_reset();
+    try {
+      await control.writeValueWithResponse(bled.encode_effect_manifest_stat());
+      const view = await data.readValue();
+      const stat = bled.decode_effect_manifest_stat(
+        new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
+      );
+      const bytes = await this._readChunked({
+        controlChar: control,
+        dataChar: data,
+        makeReadCmd: (offset) => bled.encode_effect_manifest_read(offset),
+        resetCmd: reset,
+        expectedSize: stat.size,
+      });
+      if (bytes.length !== stat.size) {
+        throw new Error(`Incomplete effect manifest: expected ${stat.size} bytes, received ${bytes.length}.`);
+      }
+      return bled.decode_effect_manifest(bytes);
+    } catch (error) {
+      try { await control.writeValueWithResponse(reset); } catch (_) {}
+      throw error;
+    }
   }
 
   async readEffectCommandLength() {
@@ -417,7 +447,7 @@ export class BleDevice extends EventTarget {
         await controlChar.writeValueWithResponse(readCmd);
 
         const dataView = await dataChar.readValue();
-        const bytes = new Uint8Array(dataView.buffer);
+        const bytes = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength).slice();
         if (bytes.length === 0) break;
 
         const remaining = endOffset !== null ? endOffset - offset : bytes.length;

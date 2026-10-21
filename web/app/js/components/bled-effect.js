@@ -16,7 +16,7 @@ function joinPath(dir, name) {
   return `${dir.replace(/\/+$/, '')}/${name.replace(/^\/+/, '')}` || `/${name}`;
 }
 
-/** Selects a manifest and edits the active effect's ABI command and parameter buffers. */
+/** Selects a Wasm effect module and edits its ABI command and parameter buffers. */
 export class BledEffect extends HTMLElement {
   set device(value) {
     this._device = value;
@@ -33,15 +33,15 @@ export class BledEffect extends HTMLElement {
         <div class="card-header">
           <div>
             <span class="card-title">Effects</span>
-            <span class="card-subtitle" style="display:block;">Load an effect manifest from the device SD card and exchange its ABI buffers.</span>
+            <span class="card-subtitle" style="display:block;">Load a Wasm effect module from the device SD card and exchange its ABI buffers.</span>
           </div>
           <button class="btn btn-secondary btn-sm" data-action="refresh">Refresh</button>
         </div>
 
         <div class="form-row">
           <div class="form-group" style="flex:1; min-width:220px;">
-            <label for="effectPath">Manifest path</label>
-            <input id="effectPath" type="text" maxlength="64" placeholder="/effects/demo/manifest.json">
+            <label for="effectPath">Wasm module path</label>
+            <input id="effectPath" type="text" maxlength="64" placeholder="/effects/demo/demo.wasm">
           </div>
           <button class="btn btn-primary btn-sm" data-action="load">Load effect</button>
           <button class="btn btn-secondary btn-sm" data-action="unload">Unload</button>
@@ -51,17 +51,18 @@ export class BledEffect extends HTMLElement {
             <label for="effectDirectory">Browse directory</label>
             <input id="effectDirectory" type="text" value="/" maxlength="64">
           </div>
-          <button class="btn btn-secondary btn-sm" data-action="browse">List manifests</button>
+          <button class="btn btn-secondary btn-sm" data-action="browse">List Wasm modules</button>
           <span class="card-subtitle" data-role="active">No active effect loaded.</span>
         </div>
-        <div class="dir-table-wrap" data-role="manifest-list">
-          <div class="dir-empty">Browse a directory to find effect manifests.</div>
+        <div class="dir-table-wrap" data-role="module-list">
+          <div class="dir-empty">Browse a directory to find Wasm effect modules.</div>
         </div>
 
         <div class="effect-buffers">
           <div class="form-group">
             <label for="effectCommand">Command buffer (<span data-role="command-length">—</span> bytes)</label>
-            <textarea id="effectCommand" class="code-editor" spellcheck="false" placeholder="Hex bytes, e.g. 01 02 ff"></textarea>
+            <div id="effectCommandDescription" class="card-subtitle" data-role="command-description">No command buffer description available.</div>
+            <textarea id="effectCommand" class="code-editor" spellcheck="false" aria-describedby="effectCommandDescription" placeholder="Hex bytes, e.g. 01 02 ff"></textarea>
             <div class="form-row">
               <button class="btn btn-secondary btn-sm" data-action="read-command">Read command buffer</button>
               <button class="btn btn-primary btn-sm" data-action="write-command">Write command buffer</button>
@@ -69,7 +70,8 @@ export class BledEffect extends HTMLElement {
           </div>
           <div class="form-group">
             <label for="effectParameters">Parameter buffer (<span data-role="parameter-length">—</span> bytes)</label>
-            <textarea id="effectParameters" class="code-editor" spellcheck="false" placeholder="Hex bytes, e.g. 01 02 ff"></textarea>
+            <div id="effectParameterDescription" class="card-subtitle" data-role="parameter-description">No parameter buffer description available.</div>
+            <textarea id="effectParameters" class="code-editor" spellcheck="false" aria-describedby="effectParameterDescription" placeholder="Hex bytes, e.g. 01 02 ff"></textarea>
             <div class="form-row">
               <button class="btn btn-secondary btn-sm" data-action="read-parameters">Read parameter buffer</button>
               <button class="btn btn-primary btn-sm" data-action="write-parameters">Write parameter buffer</button>
@@ -83,9 +85,11 @@ export class BledEffect extends HTMLElement {
     this.commandInput = this.querySelector('#effectCommand');
     this.parametersInput = this.querySelector('#effectParameters');
     this.activeLabel = this.querySelector('[data-role="active"]');
-    this.manifestList = this.querySelector('[data-role="manifest-list"]');
+    this.moduleList = this.querySelector('[data-role="module-list"]');
     this.commandLength = this.querySelector('[data-role="command-length"]');
     this.parameterLength = this.querySelector('[data-role="parameter-length"]');
+    this.commandDescription = this.querySelector('[data-role="command-description"]');
+    this.parameterDescription = this.querySelector('[data-role="parameter-description"]');
 
     this.addEventListener('click', (event) => {
       const action = event.target.closest('[data-action]')?.dataset.action;
@@ -94,7 +98,7 @@ export class BledEffect extends HTMLElement {
         refresh: () => this.refresh(),
         load: () => this.loadEffect(),
         unload: () => this.unloadEffect(),
-        browse: () => this.browseManifests(),
+        browse: () => this.browseModules(),
         'read-command': () => this.readBuffer('command'),
         'write-command': () => this.writeBuffer('command'),
         'read-parameters': () => this.readBuffer('parameters'),
@@ -106,8 +110,32 @@ export class BledEffect extends HTMLElement {
     if (this.device) this.refresh();
   }
 
+  renderManifest(manifest = null) {
+    const renderDescriptors = (element, descriptors, kind) => {
+      if (!descriptors?.length) {
+        element.textContent = manifest
+          ? `This effect declares no ${kind} fields.`
+          : `No ${kind} buffer description available.`;
+        return;
+      }
+      element.innerHTML = `
+        <p>Field positions are zero-based bit offsets; the end bit is inclusive.</p>
+        <table class="dir-table">
+          <thead><tr><th scope="col">Field</th><th scope="col">Start bit</th><th scope="col">End bit</th></tr></thead>
+          <tbody>${descriptors.map((field) => `<tr>
+            <td>${escapeHtml(field.name)}</td>
+            <td>${escapeHtml(String(field.start))}</td>
+            <td>${escapeHtml(String(field.end))}</td>
+          </tr>`).join('')}</tbody>
+        </table>`;
+    };
+    renderDescriptors(this.commandDescription, manifest?.command_descriptors, 'command');
+    renderDescriptors(this.parameterDescription, manifest?.parameter_descriptors, 'parameter');
+  }
+
   async refresh() {
     if (!this.device) return;
+    this.renderManifest();
     try {
       const path = await this.device.readActiveEffect();
       this.pathInput.value = path;
@@ -128,6 +156,15 @@ export class BledEffect extends HTMLElement {
       this.parameterLength.textContent = String(parameterLength);
       this.commandInput.value = bytesToHex(command);
       this.parametersInput.value = bytesToHex(parameters);
+
+      // A missing or malformed manifest must not prevent raw buffer editing.
+      try {
+        const manifest = await this.device.readEffectManifest();
+        this.renderManifest(manifest);
+        this.activeLabel.textContent = `${manifest.name} — Active: ${path}`;
+      } catch (error) {
+        log(`Could not read effect manifest: ${error.message}`, 'error');
+      }
     } catch (error) {
       log(`Could not refresh effect state: ${error.message}`, 'error');
     }
@@ -136,7 +173,7 @@ export class BledEffect extends HTMLElement {
   async loadEffect() {
     const path = this.pathInput.value.trim();
     if (!path) {
-      log('Enter a manifest path before loading an effect.', 'error');
+      log('Enter a Wasm module path before loading an effect.', 'error');
       return;
     }
     try {
@@ -156,28 +193,28 @@ export class BledEffect extends HTMLElement {
     }
   }
 
-  async browseManifests() {
+  async browseModules() {
     const directory = this.directoryInput.value.trim() || '/';
-    this.manifestList.innerHTML = '<div class="dir-empty">Searching…</div>';
+    this.moduleList.innerHTML = '<div class="dir-empty">Searching…</div>';
     try {
       const entries = await this.device.listDirectory(directory);
-      const manifests = entries.filter((entry) =>
-        entry.kind !== 'Directory' && entry.name.toLowerCase().endsWith('.json')
+      const modules = entries.filter((entry) =>
+        entry.kind !== 'Directory' && entry.name.toLowerCase().endsWith('.wasm')
       );
-      if (manifests.length === 0) {
-        this.manifestList.innerHTML = '<div class="dir-empty">No JSON manifests found in this directory.</div>';
+      if (modules.length === 0) {
+        this.moduleList.innerHTML = '<div class="dir-empty">No Wasm modules found in this directory.</div>';
         return;
       }
-      this.manifestList.innerHTML = `<ul class="effect-manifest-list">${manifests.map((entry) => {
+      this.moduleList.innerHTML = `<ul class="effect-module-list">${modules.map((entry) => {
         const path = joinPath(directory, entry.name);
-        return `<li><button type="button" class="btn btn-secondary btn-sm" data-manifest="${escapeHtml(path)}">${escapeHtml(path)}</button></li>`;
+        return `<li><button type="button" class="btn btn-secondary btn-sm" data-module="${escapeHtml(path)}">${escapeHtml(path)}</button></li>`;
       }).join('')}</ul>`;
-      this.manifestList.querySelectorAll('[data-manifest]').forEach((button) => {
-        button.addEventListener('click', () => { this.pathInput.value = button.dataset.manifest; });
+      this.moduleList.querySelectorAll('[data-module]').forEach((button) => {
+        button.addEventListener('click', () => { this.pathInput.value = button.dataset.module; });
       });
     } catch (error) {
-      this.manifestList.innerHTML = `<div class="dir-empty">${escapeHtml(error.message)}</div>`;
-      log(`Failed to list effect manifests in "${directory}": ${error.message}`, 'error');
+      this.moduleList.innerHTML = `<div class="dir-empty">${escapeHtml(error.message)}</div>`;
+      log(`Failed to list Wasm modules in "${directory}": ${error.message}`, 'error');
     }
   }
 

@@ -94,7 +94,7 @@ pre#log, pre.log-output {
   margin-bottom: 0.5rem;
 }
 
-.effect-manifest-list {
+.effect-module-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;

@@ -56,28 +56,40 @@ pub fn active_effect_uuid() -> String {
     bled_core::ble::ACTIVE_EFFECT_UUID.to_string()
 }
 
+/// Active effect manifest control GATT characteristic UUID.
+#[wasm_bindgen]
+pub fn active_effect_manifest_control_uuid() -> String {
+    bled_core::ble::ACTIVE_EFFECT_MANIFEST_CONTROL_UUID.to_string()
+}
+
+/// Active effect manifest data GATT characteristic UUID.
+#[wasm_bindgen]
+pub fn active_effect_manifest_data_uuid() -> String {
+    bled_core::ble::ACTIVE_EFFECT_MANIFEST_DATA_UUID.to_string()
+}
+
 /// Effect command length GATT characteristic UUID.
 #[wasm_bindgen]
 pub fn effect_command_length_uuid() -> String {
-    bled_core::ble::EFFECT_COMMAND_LENGTH_UUID.to_string()
+    bled_core::ble::ACTIVE_EFFECT_COMMAND_LENGTH_UUID.to_string()
 }
 
 /// Effect command data GATT characteristic UUID.
 #[wasm_bindgen]
 pub fn effect_command_data_uuid() -> String {
-    bled_core::ble::EFFECT_COMMAND_DATA_UUID.to_string()
+    bled_core::ble::ACTIVE_EFFECT_COMMAND_DATA_UUID.to_string()
 }
 
 /// Effect parameter length GATT characteristic UUID.
 #[wasm_bindgen]
 pub fn effect_parameter_length_uuid() -> String {
-    bled_core::ble::EFFECT_PARAMETER_LENGTH_UUID.to_string()
+    bled_core::ble::ACTIVE_EFFECT_PARAMETER_LENGTH_UUID.to_string()
 }
 
 /// Effect parameter data GATT characteristic UUID.
 #[wasm_bindgen]
 pub fn effect_parameter_data_uuid() -> String {
-    bled_core::ble::EFFECT_PARAMETER_DATA_UUID.to_string()
+    bled_core::ble::ACTIVE_EFFECT_PARAMETER_DATA_UUID.to_string()
 }
 
 /// File IO control GATT characteristic UUID.
