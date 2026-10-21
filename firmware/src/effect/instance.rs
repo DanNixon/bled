@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 use bled_core::{
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
     effect::abi::{
-        self,
+        self, EFFECT_MANIFEST_SECTION_NAME,
         export::{InitResult, StepResult},
     },
 };
@@ -20,6 +20,7 @@ struct HostState {
 /// A loaded WASM effect.
 pub struct EffectInstance {
     store: Store<HostState>,
+    module: Module,
     memory: Memory,
 
     abi_version: TypedFunc<(), i32>,
@@ -70,6 +71,13 @@ impl EffectInstance {
             .set_max_cached_stacks(1);
         let engine = Engine::new(&config);
         let module = Module::new(&engine, wasm_bytes).map_err(EffectError::Wasm)?;
+        let mut sections = module
+            .custom_sections()
+            .filter(|section| section.name() == EFFECT_MANIFEST_SECTION_NAME);
+        sections.next().ok_or(EffectError::MissingManifestSection)?;
+        if sections.next().is_some() {
+            return Err(EffectError::DuplicateManifestSection);
+        }
 
         let mut store = Store::new(
             &engine,
@@ -166,6 +174,7 @@ impl EffectInstance {
 
         let mut effect = Self {
             store,
+            module,
             memory,
             abi_version,
             init,
@@ -202,6 +211,15 @@ impl EffectInstance {
         }
 
         Ok(effect)
+    }
+
+    /// Returns the raw JSON bytes from the `bled.manifest` custom section.
+    pub fn manifest_bytes(&self) -> &[u8] {
+        self.module
+            .custom_sections()
+            .find(|section| section.name() == EFFECT_MANIFEST_SECTION_NAME)
+            .expect("manifest section was validated during load")
+            .data()
     }
 
     /// Queries the size of the guest framebuffer in bytes.
@@ -419,6 +437,12 @@ pub enum EffectError {
     /// The CBOR configuration or logical pixel count cannot be represented by this ABI.
     #[error("effect configuration is too large for the ABI")]
     ConfigurationTooLarge,
+    /// The module has no manifest custom section.
+    #[error("effect has no manifest custom section")]
+    MissingManifestSection,
+    /// The module contains multiple manifest custom sections.
+    #[error("effect has multiple manifest custom sections")]
+    DuplicateManifestSection,
     /// A requested host-side allocation failed.
     #[error("host-side allocation failed")]
     AllocationFailed,

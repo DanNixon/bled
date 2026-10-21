@@ -93,3 +93,14 @@ pub mod export {
     /// `bled_parameter_len() -> i32`
     pub const PARAMETER_LEN: &str = "bled_parameter_len";
 }
+
+pub const EFFECT_MANIFEST_SECTION_NAME: &str = "bled.manifest";
+
+#[macro_export]
+macro_rules! wasm_section_effect_manifest {
+    ($data:literal) => {
+        #[used]
+        #[unsafe(link_section = "bled.manifest")]
+        static EFFECT_MANIFEST: [u8; $data.len()] = *$data;
+    };
+}

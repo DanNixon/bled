@@ -6,11 +6,24 @@ use bled_core::{
         self,
         export::{InitResult, StepResult},
     },
+    wasm_section_effect_manifest,
 };
 use core::{
     panic::PanicInfo,
     ptr::{addr_of_mut, write_bytes},
 };
+
+wasm_section_effect_manifest!(
+    br#"{
+        "name": "Pixel Sweep Demo",
+        "command_descriptors": [],
+        "parameter_descriptors": [
+            { "name": "Red", "start": 0, "end": 7 },
+            { "name": "Green", "start": 8, "end": 15 },
+            { "name": "Blue", "start": 16, "end": 23 }
+        ]
+    }"#
+);
 
 const MAX_PIXELS: u32 = 4096;
 const FRAME_BYTES: usize = MAX_PIXELS as usize * 3;

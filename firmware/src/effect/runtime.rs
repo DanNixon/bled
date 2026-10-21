@@ -1,30 +1,30 @@
 use super::{EffectError, EffectInstance};
 use alloc::vec::Vec;
-use bled_core::{
-    PathString,
-    effect::{EffectManifest, MAX_EFFECT_MANIFEST_JSON_SIZE, abi::export::StepResult},
-};
+use bled_core::{PathString, effect::abi::export::StepResult};
 use defmt::{debug, error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embassy_time::{Instant, Timer};
+use portable_atomic::{AtomicU32, Ordering};
 
 const MAX_WASM_MODULE_BYTES: usize = 64 * 1024;
 
 struct ActiveEffect {
-    manifest_path: PathString,
+    instance_id: u32,
+    module_path: PathString,
     instance: EffectInstance,
 }
 
 static ACTIVE_EFFECT: Mutex<CriticalSectionRawMutex, Option<ActiveEffect>> = Mutex::new(None);
+static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
 #[inline(never)]
 pub(crate) async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
-    let Some(manifest_path) = crate::config::get().default_effect.as_ref() else {
+    let Some(module_path) = crate::config::get().default_effect.as_ref() else {
         info!("No default effect configured");
         return;
     };
 
-    if activate_effect(sd, Some(manifest_path.clone()))
+    if activate_effect(sd, Some(module_path.clone()))
         .await
         .is_err()
     {
@@ -41,13 +41,13 @@ pub(crate) async fn activate_effect(
     *ACTIVE_EFFECT.lock().await = None;
 
     // Load the effect, if a path is provided
-    if let Some(path) = path {
-        let Some(manifest) = load_effect_manifest(sd, path.as_str()).await else {
-            return Err(());
-        };
-        let instance = load_effect_instance(sd, manifest).await?;
+    if let Some(module_path) = path {
+        let instance = load_effect_instance(sd, module_path.as_str()).await?;
+        debug!("Effect manifest: {} bytes", instance.manifest_bytes().len());
+        info!("Loaded effect module: {}", module_path.as_str());
         *ACTIVE_EFFECT.lock().await = Some(ActiveEffect {
-            manifest_path: path,
+            instance_id: NEXT_INSTANCE_ID.fetch_add(1, Ordering::Relaxed),
+            module_path,
             instance,
         });
     };
@@ -56,35 +56,11 @@ pub(crate) async fn activate_effect(
 }
 
 #[inline(never)]
-async fn load_effect_manifest(
-    sd: &crate::sdcard::SdCardStorage,
-    manifest_path: &str,
-) -> Option<EffectManifest> {
-    let mut manifest_bytes = [0; MAX_EFFECT_MANIFEST_JSON_SIZE];
-    let manifest_len = match sd.read_file(manifest_path, &mut manifest_bytes).await {
-        Ok(len) => len,
-        Err(e) => {
-            warn!("Failed to read effect manifest: {}", e);
-            return None;
-        }
-    };
-
-    match bled_core::io::decode_json::<EffectManifest>(&manifest_bytes[..manifest_len]) {
-        Ok(manifest) => Some(manifest),
-        Err(e) => {
-            warn!("Failed to parse effect manifest: {}", e);
-            None
-        }
-    }
-}
-
-#[inline(never)]
 async fn load_effect_instance(
     sd: &crate::sdcard::SdCardStorage,
-    manifest: EffectManifest,
+    module_path: &str,
 ) -> Result<EffectInstance, ()> {
-    let module_path = manifest.wasm_module();
-    let module_size = match sd.stat_file(module_path.as_str()).await {
+    let module_size = match sd.stat_file(module_path).await {
         Ok(size) => match usize::try_from(size) {
             Ok(size) if size <= MAX_WASM_MODULE_BYTES => size,
             _ => {
@@ -107,7 +83,7 @@ async fn load_effect_instance(
         return Err(());
     }
     wasm_bytes.resize(module_size, 0);
-    match sd.read_file(module_path.as_str(), &mut wasm_bytes).await {
+    match sd.read_file(module_path, &mut wasm_bytes).await {
         Ok(len) => wasm_bytes.truncate(len),
         Err(e) => {
             warn!("Failed to read effect Wasm module: {}", e);
@@ -129,7 +105,19 @@ pub(crate) async fn active_effect_path() -> Option<PathString> {
         .lock()
         .await
         .as_ref()
-        .map(|effect| effect.manifest_path.clone())
+        .map(|effect| effect.module_path.clone())
+}
+
+/// Access manifest bytes only while holding the active effect lock, without copying the manifest.
+pub(crate) async fn with_active_effect_manifest<T>(
+    operation: impl FnOnce(Option<(u32, &[u8])>) -> T,
+) -> T {
+    let active = ACTIVE_EFFECT.lock().await;
+    operation(
+        active
+            .as_ref()
+            .map(|effect| (effect.instance_id, effect.instance.manifest_bytes())),
+    )
 }
 
 pub(crate) async fn effect_command_size() -> Result<usize, ()> {

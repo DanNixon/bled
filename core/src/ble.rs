@@ -15,7 +15,7 @@ pub const RESET_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000121");
 
 /// Config control GATT characteristic UUID (write-only).
 pub const CONFIG_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000122");
-/// Config data GATT characteristic UUID (read).
+/// Config data GATT characteristic UUID (read-only).
 pub const CONFIG_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000123");
 
 /// File IO control GATT characteristic UUID (write-only).
@@ -33,14 +33,18 @@ pub const LED_BUFFER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb0000001
 
 /// Active effect GATT characteristic UUID (read/write).
 pub const ACTIVE_EFFECT_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000150");
-/// Effect command length GATT characteristic UUID (read-only).
-pub const EFFECT_COMMAND_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000151");
-/// Effect command data GATT characteristic UUID (read/write).
-pub const EFFECT_COMMAND_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000152");
-/// Effect parameter length GATT characteristic UUID (read-only).
-pub const EFFECT_PARAMETER_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000153");
-/// Effect parameter data GATT characteristic UUID (read/write).
-pub const EFFECT_PARAMETER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000154");
+/// Active effect manifest control GATT characteristic UUID (write-only).
+pub const ACTIVE_EFFECT_MANIFEST_CONTROL_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000151");
+/// Active effect manifest data GATT characteristic UUID (read-only).
+pub const ACTIVE_EFFECT_MANIFEST_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000152");
+/// Active effect command length GATT characteristic UUID (read-only).
+pub const ACTIVE_EFFECT_COMMAND_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000153");
+/// Active effect command data GATT characteristic UUID (read/write).
+pub const ACTIVE_EFFECT_COMMAND_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000154");
+/// Active effect parameter length GATT characteristic UUID (read-only).
+pub const ACTIVE_EFFECT_PARAMETER_LENGTH_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000155");
+/// Active effect parameter data GATT characteristic UUID (read/write).
+pub const ACTIVE_EFFECT_PARAMETER_DATA_UUID: Uuid = uuid!("408813df-5dd4-1f87-ec11-cdb000000156");
 
 #[cfg(test)]
 mod tests {
@@ -58,10 +62,12 @@ mod tests {
             LED_BUFFER_CONTROL_UUID,
             LED_BUFFER_DATA_UUID,
             ACTIVE_EFFECT_UUID,
-            EFFECT_COMMAND_LENGTH_UUID,
-            EFFECT_COMMAND_DATA_UUID,
-            EFFECT_PARAMETER_LENGTH_UUID,
-            EFFECT_PARAMETER_DATA_UUID,
+            ACTIVE_EFFECT_MANIFEST_CONTROL_UUID,
+            ACTIVE_EFFECT_MANIFEST_DATA_UUID,
+            ACTIVE_EFFECT_COMMAND_LENGTH_UUID,
+            ACTIVE_EFFECT_COMMAND_DATA_UUID,
+            ACTIVE_EFFECT_PARAMETER_LENGTH_UUID,
+            ACTIVE_EFFECT_PARAMETER_DATA_UUID,
         ];
 
         for (index, &uuid) in all.iter().enumerate() {

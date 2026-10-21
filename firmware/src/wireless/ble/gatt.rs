@@ -1,6 +1,7 @@
 use crate::{
     api_transport::{
         config::{ConfigMode, ConfigSession},
+        effect_manifest::{EffectManifestSession, Error as EffectManifestError},
         file_io::{FileIoMode, FileIoSession},
         led_buffer::{LedBufferMode, LedBufferSession},
     },
@@ -9,19 +10,20 @@ use crate::{
 };
 use bled_core::{
     PathString,
-    api::{ConfigControl, FileIoControl, LedBufferControl},
+    api::{ConfigControl, EffectManifestControl, FileIoControl, LedBufferControl},
     ble::{
-        ACTIVE_EFFECT_UUID, COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID,
-        EFFECT_COMMAND_DATA_UUID, EFFECT_COMMAND_LENGTH_UUID, EFFECT_PARAMETER_DATA_UUID,
-        EFFECT_PARAMETER_LENGTH_UUID, FILE_IO_CONTROL_UUID, FILE_IO_DATA_UUID,
-        LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN, RESET_UUID,
-        SERVICE_UUID,
+        ACTIVE_EFFECT_COMMAND_DATA_UUID, ACTIVE_EFFECT_COMMAND_LENGTH_UUID,
+        ACTIVE_EFFECT_MANIFEST_CONTROL_UUID, ACTIVE_EFFECT_MANIFEST_DATA_UUID,
+        ACTIVE_EFFECT_PARAMETER_DATA_UUID, ACTIVE_EFFECT_PARAMETER_LENGTH_UUID, ACTIVE_EFFECT_UUID,
+        COMMIT_UUID, CONFIG_CONTROL_UUID, CONFIG_DATA_UUID, DEVICE_INFO_UUID, FILE_IO_CONTROL_UUID,
+        FILE_IO_DATA_UUID, LED_BUFFER_CONTROL_UUID, LED_BUFFER_DATA_UUID, MAX_ATTRIBUTE_VALUE_LEN,
+        RESET_UUID, SERVICE_UUID,
     },
 };
 use defmt::{debug, error, info, warn};
 use trouble_host::{
     Error, PacketPool,
-    att::AttErrorCode,
+    att::{AttClient, AttErrorCode, AttReq},
     gatt::{GattConnection, GattConnectionEvent, GattEvent, ReadEvent, Reply, WriteEvent},
     prelude::{FromGatt, gatt_server, gatt_service},
 };
@@ -63,16 +65,22 @@ pub(super) struct LedService {
     #[characteristic(uuid = ACTIVE_EFFECT_UUID.as_u128(), read, write)]
     active_effect: (),
 
-    #[characteristic(uuid = EFFECT_COMMAND_LENGTH_UUID.as_u128(), read)]
+    #[characteristic(uuid = ACTIVE_EFFECT_MANIFEST_CONTROL_UUID.as_u128(), write)]
+    effect_manifest_control: (),
+
+    #[characteristic(uuid = ACTIVE_EFFECT_MANIFEST_DATA_UUID.as_u128(), read)]
+    effect_manifest_data: (),
+
+    #[characteristic(uuid = ACTIVE_EFFECT_COMMAND_LENGTH_UUID.as_u128(), read)]
     effect_command_length: (),
 
-    #[characteristic(uuid = EFFECT_COMMAND_DATA_UUID.as_u128(), read, write)]
+    #[characteristic(uuid = ACTIVE_EFFECT_COMMAND_DATA_UUID.as_u128(), read, write)]
     effect_command_data: (),
 
-    #[characteristic(uuid = EFFECT_PARAMETER_LENGTH_UUID.as_u128(), read)]
+    #[characteristic(uuid = ACTIVE_EFFECT_PARAMETER_LENGTH_UUID.as_u128(), read)]
     effect_parameter_length: (),
 
-    #[characteristic(uuid = EFFECT_PARAMETER_DATA_UUID.as_u128(), read, write)]
+    #[characteristic(uuid = ACTIVE_EFFECT_PARAMETER_DATA_UUID.as_u128(), read, write)]
     effect_parameter_data: (),
 }
 
@@ -84,6 +92,7 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
     let mut file_io = FileIoSession::new(sd.clone());
     let mut led_buffer = LedBufferSession::new();
     let mut config = ConfigSession::new(crate::config::get());
+    let mut effect_manifest = EffectManifestSession::new();
 
     let reason = loop {
         match conn.next().await {
@@ -95,6 +104,8 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                             process_device_info(event).await
                         } else if event.handle() == server.led_service.active_effect.handle {
                             process_active_effect_read(event).await
+                        } else if event.handle() == server.led_service.effect_manifest_data.handle {
+                            process_effect_manifest_data_read(event, &mut effect_manifest).await
                         } else if event.handle() == server.led_service.effect_command_length.handle
                         {
                             process_effect_length_read(event, effect::effect_command_size().await)
@@ -123,7 +134,11 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
                         if event.handle() == server.led_service.reset.handle {
                             process_reset(event).await
                         } else if event.handle() == server.led_service.active_effect.handle {
-                            process_active_effect_write(event, &sd).await
+                            process_active_effect_write(event, &sd, &mut effect_manifest).await
+                        } else if event.handle()
+                            == server.led_service.effect_manifest_control.handle
+                        {
+                            process_effect_manifest_control_write(event, &mut effect_manifest).await
                         } else if event.handle() == server.led_service.effect_command_data.handle {
                             process_effect_data_write(event, true).await
                         } else if event.handle() == server.led_service.effect_parameter_data.handle
@@ -159,6 +174,7 @@ pub(super) async fn gatt_events_task<P: PacketPool>(
 
     file_io.reset().await;
     config.reset();
+    effect_manifest.reset();
     info!("Disconnected: {:?}", reason);
 }
 
@@ -175,6 +191,7 @@ async fn process_active_effect_read<'stack, P: PacketPool>(
 async fn process_active_effect_write<'stack, P: PacketPool>(
     event: WriteEvent<'stack, '_, P>,
     sd: &SdCardStorage,
+    effect_manifest: &mut EffectManifestSession,
 ) -> Result<Reply<'stack, P>, Error> {
     let mut bytes = [0; MAX_ATTRIBUTE_VALUE_LEN];
     let (offset, len) = event.with_data(|offset, data| {
@@ -203,9 +220,73 @@ async fn process_active_effect_write<'stack, P: PacketPool>(
         }
     };
 
+    effect_manifest.reset();
     match effect::activate_effect(sd, path).await {
         Ok(()) => event.accept_unprocessed(),
         Err(()) => event.reject(AttErrorCode::VALUE_NOT_ALLOWED),
+    }
+}
+
+async fn process_effect_manifest_data_read<'stack, P: PacketPool>(
+    event: ReadEvent<'stack, '_, P>,
+    session: &mut EffectManifestSession,
+) -> Result<Reply<'stack, P>, Error> {
+    let mut bytes = [0; MAX_ATTRIBUTE_VALUE_LEN];
+    let result =
+        effect::with_active_effect_manifest(|manifest| session.read_data(manifest, &mut bytes))
+            .await;
+    match result {
+        Ok(len) => {
+            if let AttClient::Request(AttReq::ReadBlob { offset, .. }) = event.payload().incoming()
+                && usize::from(offset) > len
+            {
+                return event.reject(AttErrorCode::INVALID_OFFSET);
+            }
+            event.accept_unprocessed(&bytes[..len])
+        }
+        Err(error) => {
+            warn!("Failed to read effect manifest: {}", error);
+            event.reject(match error {
+                EffectManifestError::NoEffect
+                | EffectManifestError::EffectChanged
+                | EffectManifestError::NotReading => AttErrorCode::READ_NOT_PERMITTED,
+                _ => AttErrorCode::VALUE_NOT_ALLOWED,
+            })
+        }
+    }
+}
+
+async fn process_effect_manifest_control_write<'stack, P: PacketPool>(
+    event: WriteEvent<'stack, '_, P>,
+    session: &mut EffectManifestSession,
+) -> Result<Reply<'stack, P>, Error> {
+    let control = match event.with_data(|offset, data| {
+        if offset != 0 {
+            return Err(AttErrorCode::INVALID_OFFSET);
+        }
+        bled_core::io::decode_cbor::<EffectManifestControl>(data)
+            .map_err(|_| AttErrorCode::VALUE_NOT_ALLOWED)
+    }) {
+        Ok(control) => control,
+        Err(error) => return event.reject(error),
+    };
+    info!("Effect manifest control message: {:?}", control);
+
+    let result = effect::with_active_effect_manifest(|manifest| match control {
+        EffectManifestControl::Stat => session.prepare_stat(manifest),
+        EffectManifestControl::Read { offset } => session.prepare_read(manifest, offset as usize),
+        EffectManifestControl::Reset => {
+            session.reset();
+            Ok(())
+        }
+    })
+    .await;
+    match result {
+        Ok(()) => event.accept_unprocessed(),
+        Err(error) => {
+            warn!("Failed to prepare effect manifest response: {}", error);
+            event.reject(AttErrorCode::VALUE_NOT_ALLOWED)
+        }
     }
 }
 

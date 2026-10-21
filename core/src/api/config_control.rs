@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum ConfigControl {
-    /// Read a chunk from the config the given offset.
+    /// Read a chunk from the config data at the given offset.
     Read { offset: u32 },
 
     /// Resets the read state machine.

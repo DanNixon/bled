@@ -2,8 +2,11 @@
 
 This `no_std` Rust crate builds the WebAssembly module consumed by the firmware's
 ABI v1 effect host. The effect lights one logical pixel at a time, advancing
-through the host's fixture-then-span pixel order every 250 ms.
+through the host's fixture-then-span pixel order every 250 ms. Its JSON effect
+manifest is embedded in the output module as the `bled.manifest` custom section.
 
 The demo supports up to 4096 logical pixels so its static framebuffer fits
 within the host's 64 KiB Wasm memory limit. `bled-core` is used to decode the
-CBOR device config supplied by the host and verify its logical pixel count.
+CBOR device config supplied by the host and verify its logical pixel count. The
+manifest is declared directly in `src/lib.rs`, so no sidecar manifest is needed
+at runtime.
