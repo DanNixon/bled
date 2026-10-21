@@ -1,6 +1,9 @@
 use super::{EffectError, EffectInstance};
 use alloc::vec::Vec;
-use bled_core::{PathString, effect::abi::export::StepResult};
+use bled_core::{
+    PathString,
+    effect::{EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, abi::export::StepResult},
+};
 use defmt::{debug, error, info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embassy_time::{Instant, Timer};
@@ -19,19 +22,17 @@ static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
 #[inline(never)]
 pub(crate) async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
-    let Some(module_path) = crate::config::get().default_effect.as_ref() else {
+    let Some(path) = crate::config::get().default_effect.as_ref() else {
         info!("No default effect configured");
         return;
     };
 
-    if activate_effect(sd, Some(module_path.clone()))
-        .await
-        .is_err()
-    {
+    if activate_effect(sd, Some(path.clone())).await.is_err() {
         warn!("Failed to load configured default effect");
     }
 }
 
+/// Activates an effect given a path to either a WASM module or JSON preset.
 #[inline(never)]
 pub(crate) async fn activate_effect(
     sd: &crate::sdcard::SdCardStorage,
@@ -42,9 +43,18 @@ pub(crate) async fn activate_effect(
 
     // Load the effect, if a path is provided
     if let Some(module_path) = path {
-        let instance = load_effect_instance(sd, module_path.as_str()).await?;
-        debug!("Effect manifest: {} bytes", instance.manifest_bytes().len());
-        info!("Loaded effect module: {}", module_path.as_str());
+        let instance = match load_effect_instance(sd, module_path.as_str()).await {
+            Ok(instance) => instance,
+            Err(e) => {
+                warn!(
+                    "Effect failed to load as a WASM module ({}), will try to load a JSON preset",
+                    e
+                );
+                load_effect_preset(sd, module_path.as_str()).await?
+            }
+        };
+
+        info!("Loaded effect: {}", module_path.as_str());
         *ACTIVE_EFFECT.lock().await = Some(ActiveEffect {
             instance_id: NEXT_INSTANCE_ID.fetch_add(1, Ordering::Relaxed),
             module_path,
@@ -53,6 +63,75 @@ pub(crate) async fn activate_effect(
     };
 
     Ok(())
+}
+
+#[inline(never)]
+async fn load_effect_preset(
+    sd: &crate::sdcard::SdCardStorage,
+    preset_path: &str,
+) -> Result<EffectInstance, ()> {
+    let mut buf = [0; MAX_EFFECT_PRESET_JSON_SIZE];
+    let len = match sd.read_file(preset_path, &mut buf).await {
+        Ok(len) => len,
+        Err(e) => {
+            warn!("Failed to read effect JSON preset: {}", e);
+            return Err(());
+        }
+    };
+    let preset_bytes = &buf[..len];
+
+    let preset = match bled_core::io::decode_json::<EffectPreset>(preset_bytes) {
+        Ok(preset) => preset,
+        Err(e) => {
+            warn!("Failed to parse effect JSON preset: {}", e);
+            return Err(());
+        }
+    };
+
+    let module_path = match resolve_preset_module_path(preset_path, preset.module().as_str()) {
+        Ok(path) => path,
+        Err(()) => {
+            warn!("Effect JSON preset module path is too long");
+            return Err(());
+        }
+    };
+    let mut instance = load_effect_instance(sd, module_path.as_str()).await?;
+
+    if !preset.command().is_empty()
+        && let Err(e) = instance.write_command_data(preset.command())
+    {
+        warn!(
+            "Failed to apply effect preset command: {}",
+            defmt::Debug2Format(&e)
+        );
+        return Err(());
+    }
+    if !preset.parameters().is_empty()
+        && let Err(e) = instance.write_parameter_data(preset.parameters())
+    {
+        warn!(
+            "Failed to apply effect preset parameters: {}",
+            defmt::Debug2Format(&e)
+        );
+        return Err(());
+    }
+
+    Ok(instance)
+}
+
+fn resolve_preset_module_path(preset_path: &str, module_path: &str) -> Result<PathString, ()> {
+    let mut resolved = PathString::new();
+    if module_path.starts_with('/') {
+        resolved.push_str(module_path).map_err(|_| ())?;
+    } else {
+        if let Some(parent_end) = preset_path.rfind('/') {
+            resolved
+                .push_str(&preset_path[..=parent_end])
+                .map_err(|_| ())?;
+        }
+        resolved.push_str(module_path).map_err(|_| ())?;
+    }
+    Ok(resolved)
 }
 
 #[inline(never)]

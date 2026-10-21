@@ -17,7 +17,7 @@ pub struct DeviceConfig {
     /// Light fixtures controlled by this device.
     pub fixtures: Vec<Fixture, { MAX_FIXTURE_COUNT }>,
 
-    /// Filename of the WASM binary of the effect to load on boot.
+    /// Filename of the WASM binary or JSON preset for the effect to load on boot.
     pub default_effect: Option<PathString>,
 }
 
