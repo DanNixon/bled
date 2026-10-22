@@ -1,7 +1,8 @@
 use crate::{
-    NameString, PathString,
+    NameString, PathString, PixelIndex,
     config::{Fixture, MAX_FIXTURE_COUNT, PixelSpan},
 };
+use core::ops::Range;
 use getset::Getters;
 use heapless::Vec;
 use serde::{Deserialize, Serialize};
@@ -50,6 +51,27 @@ impl DeviceConfig {
     pub fn total_length<const OUTPUT_CHANNEL_COUNT: usize>(&self) -> usize {
         let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>();
         channel_lengths.map_or(0, |l| l.into_iter().sum())
+    }
+
+    /// Gets the range of pixels covered by a span with reference to the entire device.
+    /// i.e. where in the pixel-wise buffer the span starts and ends.
+    pub fn span_pixel_range<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+        span: &PixelSpan,
+    ) -> Option<Range<PixelIndex>> {
+        let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>()?;
+
+        // Find the end of the previous channel to the one that the span is in
+        let span_channel = span.channel().into_inner() as usize;
+        let end_of_previous_channel: PixelIndex = channel_lengths[..span_channel]
+            .iter()
+            .map(|i| *i as PixelIndex)
+            .sum();
+
+        let start = end_of_previous_channel + span.start();
+        let end = start + span.length();
+
+        Some(start..end)
     }
 
     /// Validates the device config.
@@ -146,6 +168,7 @@ mod tests {
     #[test]
     fn empty_configuration_has_zero_length_channels() {
         let device = config(r#"{"name":"test","fixtures":[]}"#);
+        device.validate::<4>().unwrap();
 
         assert_eq!(device.channel_lengths::<4>().unwrap().as_slice(), &[0; 4]);
     }
@@ -162,18 +185,67 @@ mod tests {
                     ]},
                     {"name":"second","layout":{"linear_array":{}},"spans":[
                         {"channel":0,"start":0,"length":1},
-                        {"channel":1,"start":1,"length":6},
+                        {"channel":1,"start":1,"length":3},
                         {"channel":3,"start":5,"length":2}
                     ]}
                 ]
             }"#,
         );
+        device.validate::<4>().unwrap();
 
         assert_eq!(
             device.channel_lengths::<4>().unwrap().as_slice(),
-            &[5, 7, 0, 7]
+            &[5, 6, 0, 7]
         );
-        assert_eq!(device.total_length::<4>(), 19);
+        assert_eq!(device.total_length::<4>(), 18);
+    }
+
+    #[test]
+    fn span_pixel_range_on_first_channel_uses_span_coordinates() {
+        let device = config(
+            r#"{
+                "name":"test",
+                "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
+                    {"channel":0,"start":3,"length":2}
+                ]}]
+            }"#,
+        );
+        device.validate::<4>().unwrap();
+
+        assert_eq!(
+            device.span_pixel_range::<4>(&device.fixtures[0].spans()[0]),
+            Some(3..5)
+        );
+    }
+
+    #[test]
+    fn span_pixel_range_offsets_by_maximum_end_of_previous_channels() {
+        let device = config(
+            r#"{
+                "name":"test",
+                "fixtures":[
+                    {"name":"first","layout":{"linear_array":{}},"spans":[
+                        {"channel":0,"start":2,"length":3},
+                        {"channel":1,"start":4,"length":2}
+                    ]},
+                    {"name":"second","layout":{"linear_array":{}},"spans":[
+                        {"channel":0,"start":0,"length":1},
+                        {"channel":1,"start":1,"length":3},
+                        {"channel":3,"start":5,"length":2}
+                    ]}
+                ]
+            }"#,
+        );
+        device.validate::<4>().unwrap();
+
+        assert_eq!(
+            device.span_pixel_range::<4>(&device.fixtures[0].spans()[1]),
+            Some(9..11)
+        );
+        assert_eq!(
+            device.span_pixel_range::<4>(&device.fixtures[1].spans()[2]),
+            Some(16..18)
+        );
     }
 
     #[test]
