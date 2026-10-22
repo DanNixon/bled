@@ -4,7 +4,7 @@
 
 ## Parts
 
-- [Raspberry Pi Pico/Pico W/Pico 2/Pico 2 W](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html)
+- [Raspberry Pi Pico 2/Pico 2 W](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html)
 - https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC2812B/C5349954
 - https://jlcpcb.com/partdetail/SOFNG-TF15x15/C111196
 - https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014
