@@ -97,10 +97,26 @@ pub mod export {
 pub const EFFECT_MANIFEST_SECTION_NAME: &str = "bled.manifest";
 
 #[macro_export]
-macro_rules! wasm_section_effect_manifest {
-    ($data:literal) => {
+macro_rules! wasm_effect {
+    ($manifest_json:literal) => {
         #[used]
         #[unsafe(link_section = "bled.manifest")]
-        static EFFECT_MANIFEST: [u8; $data.len()] = *$data;
+        static EFFECT_MANIFEST: [u8; $manifest_json.len()] = *$manifest_json;
+
+        #[panic_handler]
+        fn panic(_info: &core::panic::PanicInfo) -> ! {
+            core::arch::wasm32::unreachable();
+        }
+
+        #[link(wasm_import_module = "bled_v1")]
+        unsafe extern "C" {
+            fn bled_config_size() -> i32;
+            fn bled_config_read(dst_ptr: i32) -> i32;
+        }
+
+        #[unsafe(no_mangle)]
+        pub extern "C" fn bled_abi_version() -> i32 {
+            $crate::effect::abi::VERSION
+        }
     };
 }
