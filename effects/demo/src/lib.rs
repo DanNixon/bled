@@ -2,18 +2,12 @@
 
 use bled_core::{
     config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
-    effect::abi::{
-        self,
-        export::{InitResult, StepResult},
-    },
-    wasm_section_effect_manifest,
+    effect::abi::export::{InitResult, StepResult},
+    wasm_effect,
 };
-use core::{
-    panic::PanicInfo,
-    ptr::{addr_of_mut, write_bytes},
-};
+use core::ptr::{addr_of_mut, write_bytes};
 
-wasm_section_effect_manifest!(
+wasm_effect!(
     br#"{
         "name": "Pixel Sweep Demo",
         "command_descriptors": [],
@@ -30,17 +24,6 @@ const FRAME_BYTES: usize = MAX_PIXELS as usize * 3;
 const COMMAND_BYTES: usize = 1;
 const PARAMETER_BYTES: usize = 3;
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    core::arch::wasm32::unreachable();
-}
-
-#[link(wasm_import_module = "bled_v1")]
-unsafe extern "C" {
-    fn bled_config_size() -> i32;
-    fn bled_config_read(dst_ptr: i32) -> i32;
-}
-
 static mut FRAME: [u8; FRAME_BYTES] = [0; FRAME_BYTES];
 static mut COMMAND: [u8; COMMAND_BYTES] = [0; COMMAND_BYTES];
 static mut PARAMETERS: [u8; PARAMETER_BYTES] = [0; PARAMETER_BYTES];
@@ -49,11 +32,6 @@ static mut CONFIG: [u8; MAX_CONFIG_CBOR_SIZE] = [0; MAX_CONFIG_CBOR_SIZE];
 static mut LOGICAL_PIXEL_COUNT: u32 = 0;
 static mut LAST_PIXEL: u32 = u32::MAX;
 static mut READY: bool = false;
-
-#[unsafe(no_mangle)]
-pub extern "C" fn bled_abi_version() -> i32 {
-    abi::VERSION
-}
 
 #[unsafe(no_mangle)]
 pub extern "C" fn bled_init() -> i32 {
