@@ -24,4 +24,8 @@ impl PixelSpan {
             length,
         }
     }
+
+    pub fn end(&self) -> PixelIndex {
+        self.start + self.length
+    }
 }
