@@ -5,5 +5,5 @@ rustflags = [
     "-C",
     "link-arg=--max-memory=65536",
     "-C",
-    "link-arg=-zstack-size=8192",
+    "link-arg=-zstack-size=16384",
 ]

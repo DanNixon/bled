@@ -78,7 +78,7 @@ embassy_rp::bind_interrupts!(struct Irqs {
                  dma::InterruptHandler<DMA_CH5>;
 });
 
-const HEAP_SIZE: usize = 192 * 1024;
+const HEAP_SIZE: usize = 256 * 1024;
 
 #[global_allocator]
 static HEAP: Heap = Heap::empty();

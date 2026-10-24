@@ -1,4 +1,4 @@
-use crate::{ChannelNumber, PixelIndex};
+use crate::{ChannelNumber, NameString, PixelIndex};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct PixelSpan {
+    /// Human-readable span name.
+    name: NameString,
+
     /// The output channel the pixels are driven by
     channel: ChannelNumber,
 
@@ -17,8 +20,14 @@ pub struct PixelSpan {
 }
 
 impl PixelSpan {
-    pub fn new(channel: ChannelNumber, start: PixelIndex, length: PixelIndex) -> Self {
+    pub fn new(
+        name: NameString,
+        channel: ChannelNumber,
+        start: PixelIndex,
+        length: PixelIndex,
+    ) -> Self {
         Self {
+            name,
             channel,
             start,
             length,
@@ -27,5 +36,15 @@ impl PixelSpan {
 
     pub fn end(&self) -> PixelIndex {
         self.start + self.length
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn types_have_known_size() {
+        assert_eq!(core::mem::size_of::<PixelSpan>(), 40);
     }
 }

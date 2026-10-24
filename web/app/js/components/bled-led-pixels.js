@@ -155,9 +155,9 @@ export class BledLedPixels extends HTMLElement {
 
     if (fixture) {
       if (span) {
-        const desc = `${fixture.name} — Ch ${span.channel} [${span.start}..${span.start + span.length - 1}] (${span.length} px)`;
+        const desc = `${fixture.name} / ${span.name} — Ch ${span.channel} [${span.start}..${span.start + span.length - 1}] (${span.length} px)`;
         this.pixelTarget.textContent = desc;
-        this.pixelTargetDisplay.value = `${fixture.name} / Span (Ch ${span.channel})`;
+        this.pixelTargetDisplay.value = `${fixture.name} / ${span.name}`;
         this.pixelStart.value = 0;
         this.pixelCount.value = Math.max(1, span.length);
         this.btnSetColours.disabled = span.length < 1;

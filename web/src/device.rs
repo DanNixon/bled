@@ -68,8 +68,8 @@ mod tests {
                     "name": "onboard",
                     "layout": { "linear_array": {} },
                     "spans": [
-                        { "channel": 0, "start": 0, "length": 1 },
-                        { "channel": 1, "start": 0, "length": 1 }
+                        { "name": "a", "channel": 0, "start": 0, "length": 1 },
+                        { "name": "b", "channel": 1, "start": 0, "length": 1 }
                     ]
                 }
             ],
@@ -89,9 +89,14 @@ mod tests {
         let fixture = Fixture::new(
             "test-fixture".try_into().unwrap(),
             PixelLayout::LinearArray(LinearArray::default()),
-            [PixelSpan::new(ChannelNumber::new(0), 0, 4)]
-                .try_into()
-                .unwrap(),
+            [PixelSpan::new(
+                "a".try_into().unwrap(),
+                ChannelNumber::new(0),
+                0,
+                4,
+            )]
+            .try_into()
+            .unwrap(),
         );
         let config = DeviceConfig {
             name: "dev-cbor".try_into().unwrap(),
