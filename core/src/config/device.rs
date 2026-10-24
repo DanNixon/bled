@@ -1,12 +1,15 @@
 use crate::{
     NameString, PathString, PixelIndex,
-    config::{Fixture, MAX_FIXTURE_COUNT, PixelSpan},
+    config::{Fixture, PixelSpan},
 };
 use core::ops::Range;
 use getset::Getters;
 use heapless::Vec;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+
+/// Maximum number of pixels that may be configured on a single device.
+pub const MAX_FIXTURE_COUNT: usize = 8;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -23,6 +26,32 @@ pub struct DeviceConfig {
 }
 
 impl DeviceConfig {
+    /// Get a fixture by name.
+    pub fn find_fixture(&self, name: &str) -> Option<&Fixture> {
+        self.fixtures.iter().find(|f| f.name() == name)
+    }
+
+    /// Gets the range of pixels covered by a span with reference to the entire device.
+    /// i.e. where in the pixel-wise buffer the span starts and ends.
+    pub fn span_pixel_range<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+        span: &PixelSpan,
+    ) -> Option<Range<PixelIndex>> {
+        let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>()?;
+
+        // Find the end of the previous channel to the one that the span is in
+        let span_channel = span.channel().into_inner() as usize;
+        let end_of_previous_channel: PixelIndex = channel_lengths[..span_channel]
+            .iter()
+            .map(|i| *i as PixelIndex)
+            .sum();
+
+        let start = end_of_previous_channel + span.start();
+        let end = start + span.length();
+
+        Some(start..end)
+    }
+
     /// Gets the required length of output channels.
     pub fn channel_lengths<const OUTPUT_CHANNEL_COUNT: usize>(
         &self,
@@ -51,27 +80,6 @@ impl DeviceConfig {
     pub fn total_length<const OUTPUT_CHANNEL_COUNT: usize>(&self) -> usize {
         let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>();
         channel_lengths.map_or(0, |l| l.into_iter().sum())
-    }
-
-    /// Gets the range of pixels covered by a span with reference to the entire device.
-    /// i.e. where in the pixel-wise buffer the span starts and ends.
-    pub fn span_pixel_range<const OUTPUT_CHANNEL_COUNT: usize>(
-        &self,
-        span: &PixelSpan,
-    ) -> Option<Range<PixelIndex>> {
-        let channel_lengths = self.channel_lengths::<OUTPUT_CHANNEL_COUNT>()?;
-
-        // Find the end of the previous channel to the one that the span is in
-        let span_channel = span.channel().into_inner() as usize;
-        let end_of_previous_channel: PixelIndex = channel_lengths[..span_channel]
-            .iter()
-            .map(|i| *i as PixelIndex)
-            .sum();
-
-        let start = end_of_previous_channel + span.start();
-        let end = start + span.length();
-
-        Some(start..end)
     }
 
     /// Validates the device config.
@@ -161,6 +169,11 @@ pub enum DeviceConfigValidationError {
 mod tests {
     use super::{DeviceConfig, DeviceConfigValidationError};
 
+    #[test]
+    fn types_have_known_size() {
+        assert_eq!(core::mem::size_of::<DeviceConfig>(), 2992);
+    }
+
     fn config(json: &str) -> DeviceConfig {
         serde_json_core::from_slice(json.as_bytes()).unwrap().0
     }
@@ -180,13 +193,13 @@ mod tests {
                 "name":"test",
                 "fixtures":[
                     {"name":"first","layout":{"linear_array":{}},"spans":[
-                        {"channel":0,"start":2,"length":3},
-                        {"channel":1,"start":4,"length":2}
+                        {"name":"first","channel":0,"start":2,"length":3},
+                        {"name":"second","channel":1,"start":4,"length":2}
                     ]},
                     {"name":"second","layout":{"linear_array":{}},"spans":[
-                        {"channel":0,"start":0,"length":1},
-                        {"channel":1,"start":1,"length":3},
-                        {"channel":3,"start":5,"length":2}
+                        {"name":"first","channel":0,"start":0,"length":1},
+                        {"name":"second","channel":1,"start":1,"length":3},
+                        {"name":"third","channel":3,"start":5,"length":2}
                     ]}
                 ]
             }"#,
@@ -206,7 +219,7 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":3,"length":2}
+                    {"name":"first","channel":0,"start":3,"length":2}
                 ]}]
             }"#,
         );
@@ -225,13 +238,13 @@ mod tests {
                 "name":"test",
                 "fixtures":[
                     {"name":"first","layout":{"linear_array":{}},"spans":[
-                        {"channel":0,"start":2,"length":3},
-                        {"channel":1,"start":4,"length":2}
+                        {"name":"first","channel":0,"start":2,"length":3},
+                        {"name":"second","channel":1,"start":4,"length":2}
                     ]},
                     {"name":"second","layout":{"linear_array":{}},"spans":[
-                        {"channel":0,"start":0,"length":1},
-                        {"channel":1,"start":1,"length":3},
-                        {"channel":3,"start":5,"length":2}
+                        {"name":"first","channel":0,"start":0,"length":1},
+                        {"name":"second","channel":1,"start":1,"length":3},
+                        {"name":"third","channel":3,"start":5,"length":2}
                     ]}
                 ]
             }"#,
@@ -262,8 +275,8 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":0,"length":3},
-                    {"channel":0,"start":3,"length":2}
+                    {"name":"first","channel":0,"start":0,"length":3},
+                    {"name":"second","channel":0,"start":3,"length":2}
                 ]}]
             }"#,
         );
@@ -277,8 +290,8 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":0,"length":3},
-                    {"channel":0,"start":2,"length":2}
+                    {"name":"first","channel":0,"start":0,"length":3},
+                    {"name":"second","channel":0,"start":2,"length":2}
                 ]}]
             }"#,
         );
@@ -295,8 +308,12 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[
-                    {"name":"first","layout":{"linear_array":{}},"spans":[{"channel":0,"start":4,"length":3}]},
-                    {"name":"second","layout":{"linear_array":{}},"spans":[{"channel":0,"start":6,"length":2}]}
+                    {"name":"first","layout":{"linear_array":{}},"spans":[
+                        {"name":"first","channel":0,"start":4,"length":3}
+                    ]},
+                    {"name":"second","layout":{"linear_array":{}},"spans":[
+                        {"name":"second","channel":0,"start":6,"length":2}
+                    ]}
                 ]
             }"#,
         );
@@ -313,8 +330,8 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":0,"length":4},
-                    {"channel":1,"start":0,"length":4}
+                    {"name":"first","channel":0,"start":0,"length":4},
+                    {"name":"second","channel":1,"start":0,"length":4}
                 ]}]
             }"#,
         );
@@ -328,8 +345,8 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":0,"length":1},
-                    {"channel":0,"start":4294967295,"length":1}
+                    {"name":"first","channel":0,"start":0,"length":1},
+                    {"name":"second","channel":0,"start":4294967295,"length":1}
                 ]}]
             }"#,
         );
@@ -346,7 +363,7 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":4,"start":0,"length":1}
+                    {"name":"first","channel":4,"start":0,"length":1}
                 ]}]
             }"#,
         );
@@ -366,7 +383,7 @@ mod tests {
             r#"{
                 "name":"test",
                 "fixtures":[{"name":"fixture","layout":{"linear_array":{}},"spans":[
-                    {"channel":0,"start":4294967295,"length":1}
+                    {"name":"first","channel":0,"start":4294967295,"length":1}
                 ]}]
             }"#,
         );
@@ -374,6 +391,39 @@ mod tests {
         assert_eq!(
             device.validate::<4>(),
             Err(DeviceConfigValidationError::SpanEndOverflow)
+        );
+    }
+
+    #[test]
+    fn find_fixtures_and_spans_by_name() {
+        let device = config(
+            r#"{
+                "name":"test",
+                "fixtures":[
+                    {"name":"first","layout":{"linear_array":{}},"spans":[
+                        {"name":"first","channel":0,"start":2,"length":3},
+                        {"name":"second","channel":1,"start":4,"length":2}
+                    ]},
+                    {"name":"second","layout":{"linear_array":{}},"spans":[
+                        {"name":"first","channel":0,"start":0,"length":1},
+                        {"name":"second","channel":1,"start":1,"length":3},
+                        {"name":"third","channel":3,"start":5,"length":2}
+                    ]}
+                ]
+            }"#,
+        );
+        device.validate::<4>().unwrap();
+
+        assert_eq!(*device.find_fixture("first").unwrap(), device.fixtures()[0]);
+        assert!(device.find_fixture("third").is_none());
+
+        assert_eq!(
+            *device
+                .find_fixture("second")
+                .unwrap()
+                .find_span("third")
+                .unwrap(),
+            device.fixtures()[1].spans()[2]
         );
     }
 }

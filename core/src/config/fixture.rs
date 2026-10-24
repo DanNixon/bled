@@ -1,14 +1,20 @@
-use crate::config::{MAX_NAME_LEN, MAX_SPAN_PER_FIXTURE_COUNT, PixelLayout, PixelSpan};
+use crate::{
+    NameString,
+    config::{PixelLayout, PixelSpan},
+};
 use getset::Getters;
-use heapless::{String, Vec};
+use heapless::Vec;
 use serde::{Deserialize, Serialize};
+
+/// Maximum number of spanls that may be used in a single fixture.
+pub const MAX_SPAN_PER_FIXTURE_COUNT: usize = 8;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct Fixture {
     /// Human-readable fixture name.
-    name: String<{ MAX_NAME_LEN }>,
+    name: NameString,
 
     /// Layout of the pixels in this fixture.
     layout: PixelLayout,
@@ -19,7 +25,7 @@ pub struct Fixture {
 
 impl Fixture {
     pub fn new(
-        name: String<{ MAX_NAME_LEN }>,
+        name: NameString,
         layout: PixelLayout,
         spans: Vec<PixelSpan, { MAX_SPAN_PER_FIXTURE_COUNT }>,
     ) -> Self {
@@ -28,5 +34,20 @@ impl Fixture {
             layout,
             spans,
         }
+    }
+
+    /// Get a span by name.
+    pub fn find_span(&self, name: &str) -> Option<&PixelSpan> {
+        self.spans.iter().find(|s| s.name() == name)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn types_have_known_size() {
+        assert_eq!(core::mem::size_of::<Fixture>(), 360);
     }
 }

@@ -91,10 +91,10 @@ fn default_config() -> DeviceConfig {
         "onboard".try_into().unwrap(),
         PixelLayout::LinearArray(LinearArray::default()),
         [
-            PixelSpan::new(ChannelNumber::new(0), 0, 1),
-            PixelSpan::new(ChannelNumber::new(1), 0, 1),
-            PixelSpan::new(ChannelNumber::new(2), 0, 1),
-            PixelSpan::new(ChannelNumber::new(3), 0, 1),
+            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(0), 0, 1),
+            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(1), 0, 1),
+            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(2), 0, 1),
+            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(3), 0, 1),
         ]
         .into(),
     );

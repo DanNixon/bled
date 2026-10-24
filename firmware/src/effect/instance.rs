@@ -6,6 +6,7 @@ use bled_core::{
         export::{InitResult, StepResult},
     },
 };
+use defmt::info;
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -45,6 +46,7 @@ pub struct EffectInstance {
 impl EffectInstance {
     /// Compiles and initializes an effect from a WebAssembly binary.
     pub fn load(wasm_bytes: &[u8], device_config: &DeviceConfig) -> Result<Self, EffectError> {
+        info!("creating device config for effect");
         let mut device_config_bytes = Vec::new();
         device_config_bytes
             .try_reserve_exact(MAX_CONFIG_CBOR_SIZE)
@@ -54,6 +56,7 @@ impl EffectInstance {
             .map_err(|_| EffectError::ConfigurationTooLarge)?;
         device_config_bytes.truncate(length);
 
+        info!("loading effect");
         let mut config = Config::default();
         config
             .consume_fuel(true)
@@ -94,6 +97,7 @@ impl EffectInstance {
         );
         store.limiter(|state| &mut state.limits);
 
+        info!("linking effect");
         let mut linker = Linker::<HostState>::new(&engine);
         linker
             .func_wrap(
@@ -190,6 +194,7 @@ impl EffectInstance {
         };
 
         // Check ABI version
+        info!("checking ABI version");
         let version = call_guest(
             &mut effect.store,
             &mut effect.active,
@@ -202,6 +207,7 @@ impl EffectInstance {
         }
 
         // Initialise the effect
+        info!("initializing effect");
         let init_result = call_guest(&mut effect.store, &mut effect.active, &effect.init, ())?;
         let init_result = InitResult::try_from(init_result)
             .map_err(|_| EffectError::InvalidInitResult(init_result))?;
@@ -210,6 +216,7 @@ impl EffectInstance {
             return Err(EffectError::InitializationFailed(init_result));
         }
 
+        info!("effect ready");
         Ok(effect)
     }
 

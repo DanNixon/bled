@@ -103,7 +103,7 @@ export class BledDeviceTree extends HTMLElement {
         if (hasSpans && !this.collapsed.has(fixtureKey)) {
           for (const sp of fix.spans) {
             children.push(this._node({
-              label: `Ch ${sp.channel}: ${sp.start}..${sp.start + sp.length - 1} (${sp.length} px)`,
+              label: `${sp.name} — Ch ${sp.channel}: ${sp.start}..${sp.start + sp.length - 1} (${sp.length} px)`,
               selection: { deviceId: id, kind: 'span', fixture: fix.index, span: sp.index },
               depth: 2, icon: '▪',
             }));

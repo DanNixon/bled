@@ -25,7 +25,7 @@ const toBytes = (v) => (v instanceof Uint8Array ? v : new Uint8Array(v));
  *     layout,
  *     totalPixels,
  *     totalBytes,
- *     spans: [{ index, channel, start, length, byteOffset, byteLength }]
+ *     spans: [{ index, name, channel, start, length, byteOffset, byteLength }]
  *   }],
  *   channelLengths: [number],
  *   channelOffsets: [number],
@@ -89,6 +89,7 @@ export function normaliseConfig(raw) {
       const byteLength = length * 3;
       return {
         index: sIndex,
+        name: span.name || `Span ${sIndex + 1}`,
         channel: ch,
         start,
         length,
