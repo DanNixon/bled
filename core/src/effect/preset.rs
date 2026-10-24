@@ -24,11 +24,28 @@ pub struct EffectPreset {
 }
 
 /// Maximum allowable size of an effect preset in bytes when encoded as JSON.
-pub const MAX_EFFECT_PRESET_JSON_SIZE: usize = 1024 * 4; // TODO: calculate
+pub const MAX_EFFECT_PRESET_JSON_SIZE: usize = 1024 * 5;
 
 #[cfg(test)]
 mod tests {
-    use super::EffectPreset;
+    use super::*;
+    use crate::effect::MAX_EFFECT_PRESET_JSON_SIZE;
+
+    #[test]
+    fn max_json_size_is_reasonable() {
+        let biggest_effect_preset = EffectPreset {
+            name: "0123456789abcdef".try_into().unwrap(),
+            module: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+                .try_into()
+                .unwrap(),
+            command: [u8::MAX; 512].into(),
+            parameters: [u8::MAX; 512].into(),
+        };
+
+        let mut buf = [0; MAX_EFFECT_PRESET_JSON_SIZE];
+        let n = crate::io::encode_json(&biggest_effect_preset, &mut buf).unwrap();
+        assert!(n < MAX_EFFECT_PRESET_JSON_SIZE - 256);
+    }
 
     #[test]
     fn omitted_fields_default_to_empty_values() {

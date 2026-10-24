@@ -6,7 +6,7 @@ use getset::Getters;
 use heapless::Vec;
 use serde::{Deserialize, Serialize};
 
-/// Maximum number of spanls that may be used in a single fixture.
+/// Maximum number of spans that may be used in a single fixture.
 pub const MAX_SPAN_PER_FIXTURE_COUNT: usize = 8;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
