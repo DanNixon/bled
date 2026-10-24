@@ -11,9 +11,3 @@ pub use span::*;
 /// Maximum length of any name.
 /// Should never be more than the maximum length of an allowable BLE device name.
 pub const MAX_NAME_LEN: usize = 16;
-
-/// Maximum allowable size of the config file in bytes when encoded as JSON.
-pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 4; // TODO: calculate
-
-/// Maximum allowable size of the config file in bytes when encoded as CBOR.
-pub const MAX_CONFIG_CBOR_SIZE: usize = 1024 * 2; // TODO: calculate
