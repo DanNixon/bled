@@ -1,5 +1,5 @@
 {
   "name": "Pink",
-  "module": "demo.wasm",
+  "module": "span-painter.wasm",
   "parameters": [255, 0, 255]
 }
