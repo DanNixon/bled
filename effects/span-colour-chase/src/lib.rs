@@ -6,6 +6,8 @@ use bled_core::{config::Fixtures, effect::abi::export::StepResult, wasm_effect};
 wasm_effect!(
     br#"{
         "name": "Span Col. Chase",
+        "command_descriptors": [
+        ],
         "parameter_descriptors": [
             { "name": "Delay", "start": 0, "end": 15 },
             { "name": "Brightness", "start": 16, "end": 23 }
