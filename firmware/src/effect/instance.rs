@@ -47,14 +47,15 @@ impl EffectInstance {
     /// Compiles and initializes an effect from a WebAssembly binary.
     pub fn load(wasm_bytes: &[u8], device_config: &DeviceConfig) -> Result<Self, EffectError> {
         info!("creating device config for effect");
-        let mut device_config_bytes = Vec::new();
-        device_config_bytes
+        let mut fixture_config_bytes = Vec::new();
+        fixture_config_bytes
             .try_reserve_exact(MAX_CONFIG_CBOR_SIZE)
             .map_err(|_| EffectError::AllocationFailed)?;
-        device_config_bytes.resize(MAX_CONFIG_CBOR_SIZE, 0);
-        let length = bled_core::io::encode_cbor(device_config, &mut device_config_bytes)
-            .map_err(|_| EffectError::ConfigurationTooLarge)?;
-        device_config_bytes.truncate(length);
+        fixture_config_bytes.resize(MAX_CONFIG_CBOR_SIZE, 0);
+        let length =
+            bled_core::io::encode_cbor(device_config.fixtures(), &mut fixture_config_bytes)
+                .map_err(|_| EffectError::ConfigurationTooLarge)?;
+        fixture_config_bytes.truncate(length);
 
         info!("loading effect");
         let mut config = Config::default();
@@ -85,7 +86,7 @@ impl EffectInstance {
         let mut store = Store::new(
             &engine,
             HostState {
-                config: device_config_bytes,
+                config: fixture_config_bytes,
                 limits: StoreLimitsBuilder::new()
                     .memory_size(64 * 1024)
                     .table_elements(1024)
@@ -102,7 +103,7 @@ impl EffectInstance {
         linker
             .func_wrap(
                 abi::import::MODULE,
-                abi::import::CONFIG_SIZE,
+                abi::import::FIXTURE_CONFIG_SIZE,
                 |caller: Caller<'_, HostState>| {
                     i32::try_from(caller.data().config.len()).unwrap_or(INVALID_IMPORT_RESULT)
                 },
@@ -111,7 +112,7 @@ impl EffectInstance {
         linker
             .func_wrap(
                 abi::import::MODULE,
-                abi::import::CONFIG_READ,
+                abi::import::FIXTURE_CONFIG_READ,
                 |mut caller: Caller<'_, HostState>, dst_ptr: i32| {
                     let dst_start = dst_ptr as u32 as usize;
                     let byte_count = caller.data().config.len();
