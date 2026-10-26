@@ -1,21 +1,21 @@
 //! WASM ABI for a BLED effect.
 
 /// ABI version.
-pub const VERSION: i32 = 1;
+pub const VERSION: i32 = 2;
 
 /// Imports from the host to the guest.
 pub mod import {
-    pub const MODULE: &str = "bled_v1";
+    pub const MODULE: &str = "bled_v2";
 
-    /// Function returning the byte length of the CBOR encoded device config.
-    /// `bled_config_size() -> i32`
-    pub const CONFIG_SIZE: &str = "bled_config_size";
+    /// Function returning the byte length of the CBOR encoded fixture config.
+    /// `bled_fixture_config_size() -> i32`
+    pub const FIXTURE_CONFIG_SIZE: &str = "bled_fixture_config_size";
 
-    /// Function copying the CBOR encoded device config into guest memory.
-    /// The guest should ensure that the destination buffer is large enough by calling `bled_config_size` first.
+    /// Function copying the CBOR encoded fixture config into guest memory.
+    /// The guest should ensure that the destination buffer is large enough by calling `bled_fixture_config_size` first.
     /// Returns the number of bytes copied.
-    /// `bled_config_read(dest_ptr: i32) -> i32`
-    pub const CONFIG_READ: &str = "bled_config_read";
+    /// `bled_fixture_config_read(dest_ptr: i32) -> i32`
+    pub const FIXTURE_CONFIG_READ: &str = "bled_fixture_config_read";
 }
 
 /// Exports from the guest to the host.
@@ -108,10 +108,10 @@ macro_rules! wasm_effect {
             core::arch::wasm32::unreachable();
         }
 
-        #[link(wasm_import_module = "bled_v1")]
+        #[link(wasm_import_module = "bled_v2")]
         unsafe extern "C" {
-            fn bled_config_size() -> i32;
-            fn bled_config_read(dst_ptr: i32) -> i32;
+            fn bled_fixture_config_size() -> i32;
+            fn bled_fixture_config_read(dst_ptr: i32) -> i32;
         }
 
         #[unsafe(no_mangle)]

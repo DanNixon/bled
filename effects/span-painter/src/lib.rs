@@ -2,7 +2,7 @@
 #![allow(static_mut_refs)]
 
 use bled_core::{
-    config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
+    config::{Fixtures, MAX_CONFIG_CBOR_SIZE},
     effect::abi::export::{InitResult, StepResult},
     wasm_effect,
 };
@@ -35,26 +35,26 @@ static mut COMMAND: [u8; COMMAND_BYTES] = [0; COMMAND_BYTES];
 static mut PARAMETERS: [u8; PARAMETER_BYTES] = [0; PARAMETER_BYTES];
 static mut CONFIG_CBOR: [u8; MAX_CONFIG_CBOR_SIZE] = [0; MAX_CONFIG_CBOR_SIZE];
 
-static mut CONFIG: Option<DeviceConfig> = None;
+static mut CONFIG: Option<Fixtures> = None;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn bled_init() -> i32 {
     // Get config size
-    let size = unsafe { bled_config_size() };
+    let size = unsafe { bled_fixture_config_size() };
     if size <= 0 || size as usize > MAX_CONFIG_CBOR_SIZE {
         return InitResult::ConfigParseError.into();
     }
 
     // Read config CBOR data
     let config_ptr = addr_of_mut!(CONFIG_CBOR).cast::<u8>();
-    let bytes_read = unsafe { bled_config_read(config_ptr as usize as i32) };
+    let bytes_read = unsafe { bled_fixture_config_read(config_ptr as usize as i32) };
     if bytes_read != size {
         return InitResult::ConfigParseError.into();
     }
 
     // Parse config
     let config_bytes = unsafe { &CONFIG_CBOR[..size as usize] };
-    let config = match bled_core::io::decode_cbor::<DeviceConfig>(config_bytes) {
+    let config = match bled_core::io::decode_cbor::<Fixtures>(config_bytes) {
         Ok(config) => config,
         Err(_) => return InitResult::ConfigParseError.into(),
     };
@@ -107,7 +107,7 @@ pub extern "C" fn bled_step(_time_ms: i32) -> i32 {
     // Get the range of pixels in the span
     let Some(pixel_range) = (unsafe {
         let config = CONFIG.as_ref().unwrap();
-        let span = config.fixtures()[fixture_idx as usize].spans()[span_idx as usize].clone();
+        let span = config.as_slice()[fixture_idx as usize].spans()[span_idx as usize].clone();
         config.span_pixel_range::<4>(&span)
     }) else {
         return StepResult::Error.into();

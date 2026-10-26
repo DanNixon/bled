@@ -40,7 +40,7 @@ mod tests {
     use bled_core::{
         ChannelNumber,
         api::{BootReason, DeviceInfo},
-        config::{DeviceConfig, Fixture, LinearArray, PixelLayout, PixelSpan},
+        config::{DeviceConfig, Fixture, Fixtures, LinearArray, PixelLayout, PixelSpan},
     };
 
     #[test]
@@ -78,9 +78,9 @@ mod tests {
 
         let decoded = internal_decode_device_config(json.as_bytes()).unwrap();
         assert_eq!(decoded.name().as_str(), "test-dev");
-        assert_eq!(decoded.fixtures().len(), 1);
-        assert_eq!(decoded.fixtures()[0].name().as_str(), "onboard");
-        assert_eq!(decoded.fixtures()[0].spans().len(), 2);
+        assert_eq!(decoded.fixtures().as_slice().len(), 1);
+        assert_eq!(decoded.fixtures().as_slice()[0].name().as_str(), "onboard");
+        assert_eq!(decoded.fixtures().as_slice()[0].spans().len(), 2);
         assert!(decoded.default_effect().is_none());
     }
 
@@ -100,7 +100,7 @@ mod tests {
         );
         let config = DeviceConfig {
             name: "dev-cbor".try_into().unwrap(),
-            fixtures: [fixture].into(),
+            fixtures: Fixtures::new([fixture].into()),
             default_effect: None,
         };
 

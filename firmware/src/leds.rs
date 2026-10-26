@@ -42,6 +42,7 @@ pub(crate) async fn draw() {
 #[embassy_executor::task]
 pub(super) async fn task(r: super::LedResources) -> ! {
     let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] = crate::config::get()
+        .fixtures()
         .channel_lengths::<CHANNEL_COUNT>()
         .unwrap()
         .map(PixelDataChannelSize::new::<RGB8>);

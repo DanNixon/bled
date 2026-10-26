@@ -1,7 +1,9 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
 use bled_core::{
     ChannelNumber,
-    config::{DeviceConfig, Fixture, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan},
+    config::{
+        DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan,
+    },
 };
 use defmt::{error, info, warn};
 use embassy_sync::once_lock::OnceLock;
@@ -52,7 +54,10 @@ async fn load_config(sd: &SdCardStorage) -> Result<Option<DeviceConfig>, ()> {
     let mut bytes = [0u8; MAX_CONFIG_JSON_SIZE];
     match sd.read_file(CONFIG_PATH, &mut bytes).await {
         Ok(len) => match bled_core::io::decode_json::<DeviceConfig>(&bytes[..len]) {
-            Ok(config) => match config.validate::<{ crate::leds::CHANNEL_COUNT }>() {
+            Ok(config) => match config
+                .fixtures()
+                .validate::<{ crate::leds::CHANNEL_COUNT }>()
+            {
                 Ok(()) => Ok(Some(config)),
                 Err(e) => {
                     warn!("Invalid config loaded from SD card: {}", e);
@@ -101,7 +106,7 @@ fn default_config() -> DeviceConfig {
 
     DeviceConfig {
         name: "bled-default".try_into().unwrap(),
-        fixtures: [onboard_leds].into(),
+        fixtures: Fixtures::new([onboard_leds].into()),
         default_effect: None,
     }
 }
