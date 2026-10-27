@@ -21,6 +21,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bled-effect"
+version = "0.1.0"
+dependencies = [
+ "bled-core",
+ "bytemuck",
+]
+
+[[package]]
 name = "bytemuck"
 version = "1.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -271,7 +279,7 @@ dependencies = [
 name = "span-painter"
 version = "0.1.0"
 dependencies = [
- "bled-core",
+ "bled-effect",
 ]
 
 [[package]]

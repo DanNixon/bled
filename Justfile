@@ -13,7 +13,8 @@ run-sub dir *recipe="":
     @if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::endgroup::"; fi
 
 check: check-nix-fmt check-typos
-    @just run-sub core check
+    @just run-sub lib/core check
+    @just run-sub lib/effect check
     @just run-sub firmware check
     @just run-sub web check
     @just run-sub effects/span-colour-chase check

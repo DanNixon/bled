@@ -1,0 +1,15 @@
+[package]
+name = "bled-effect"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lints.rust]
+unused_crate_dependencies = "deny"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+bled-core = { path = "../core" }
+bytemuck = { version = "1.25.2", default-features = false }

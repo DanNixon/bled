@@ -27,7 +27,7 @@ board-pico2w = [
 [dependencies]
 aligned = "0.4.2"
 assign-resources = "0.5.0"
-bled-core = { path = "../core", features = ["defmt"] }
+bled-core = { path = "../lib/core", features = ["defmt"] }
 bt-hci = { version = "0.10.1", optional = true }
 cortex-m-rt = "0.7.3"
 cyw43 = { version = "0.7.0", features = ["defmt", "firmware-logs", "bluetooth"], optional = true }
