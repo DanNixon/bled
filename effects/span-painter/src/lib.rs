@@ -1,7 +1,6 @@
 #![no_std]
-#![allow(static_mut_refs)]
 
-use bled_core::{config::Fixtures, effect::abi::export::StepResult, wasm_effect};
+use bled_effect::guest::prelude::*;
 
 wasm_effect!(
     br#"{
@@ -27,60 +26,44 @@ struct SpanPainter {
     fixtures: Fixtures,
 }
 
-impl WasmEffect for SpanPainter {
-    fn new(ctx: &Context, fixtures: Fixtures) -> Result<Self, ()> {
+impl Effect for SpanPainter {
+    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
         // Set default colour to white
-        ctx.parameters()[0..3].fill(255);
+        ctx.parameters_mut()[0..3].fill(255);
 
         Ok(Self { fixtures })
     }
 
-    fn step_time(&self, _ctx: &Context) -> u32 {
+    fn step_time(&self, _ctx: &Context<'_>) -> u32 {
         100
     }
 
-    fn step(&mut self, ctx: &Context, _timestamp_ms: u32) -> StepResult {
-        // Return early if no command is set
-        let command = ctx.command()[0];
-        if command == 0 {
+    fn step(&mut self, ctx: &mut Context<'_>, _timestamp_ms: u32) -> StepResult {
+        let command = ctx.command();
+
+        if command[0] == 0 {
             return StepResult::Unchanged;
         }
 
-        // Get fixture and span indices from command buffer
-        let fixture_idx = ctx.command()[1];
-        let span_idx = ctx.command()[2];
+        let fixture_index = command[1] as usize;
+        let span_index = command[2] as usize;
 
-        // Get colour from parameter buffer
-        let (r, g, b) = (
-            ctx.parameters()[0],
-            ctx.parameters()[1],
-            ctx.parameters()[2],
-        );
+        let parameters = ctx.parameters();
+        let red = parameters[0];
+        let green = parameters[1];
+        let blue = parameters[2];
 
-        // Get the range of pixels in the span
-        let Some(pixel_range) = ({
-            let span =
-                self.fixtures.as_slice()[fixture_idx as usize].spans()[span_idx as usize].clone();
-            self.fixtures.span_pixel_range::<4>(&span)
-        }) else {
+        let Some(pixel_range) = self
+            .fixtures
+            .span_pixel_range_at::<4>(fixture_index, span_index)
+        else {
             return StepResult::Error;
         };
 
-        // Set pixel colours in frame buffer
-        for pixel in pixel_range {
-            let pixel = pixel as usize;
+        ctx.frame_mut().pixels_mut()[pixel_range.start as usize..pixel_range.end as usize]
+            .fill(RGB8::new(red, green, blue));
 
-            let r_offset = pixel * 3;
-            let g_offset = r_offset + 1;
-            let b_offset = r_offset + 2;
-
-            ctx.frame()[r_offset] = r;
-            ctx.frame()[g_offset] = g;
-            ctx.frame()[b_offset] = b;
-        }
-
-        // Reset the draw command byte
-        ctx.command()[0] = 0;
+        ctx.command_mut()[0] = 0;
 
         StepResult::Changed
     }

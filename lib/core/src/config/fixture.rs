@@ -30,6 +30,44 @@ impl Fixtures {
         self.0.iter().find(|f| f.name() == name)
     }
 
+    /// Iterate over all spans, yielding fixture and span indices.
+    pub fn spans(&self) -> impl Iterator<Item = (usize, usize, &PixelSpan)> + '_ {
+        self.0
+            .iter()
+            .enumerate()
+            .flat_map(|(fixture_index, fixture)| {
+                fixture
+                    .spans()
+                    .iter()
+                    .enumerate()
+                    .map(move |(span_index, span)| (fixture_index, span_index, span))
+            })
+    }
+
+    /// Count all spans across all fixtures.
+    pub fn span_count(&self) -> usize {
+        self.spans().count()
+    }
+
+    /// Get a span by fixture and span index.
+    pub fn span(&self, fixture_index: usize, span_index: usize) -> Option<&PixelSpan> {
+        self.0.get(fixture_index)?.spans().get(span_index)
+    }
+
+    /// Get a span by its linear index across all fixtures.
+    pub fn span_at(&self, index: usize) -> Option<(usize, usize, &PixelSpan)> {
+        self.spans().nth(index)
+    }
+
+    /// Gets the range of pixels covered by a span selected by fixture and span index.
+    pub fn span_pixel_range_at<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+        fixture_index: usize,
+        span_index: usize,
+    ) -> Option<Range<PixelIndex>> {
+        self.span_pixel_range::<OUTPUT_CHANNEL_COUNT>(self.span(fixture_index, span_index)?)
+    }
+
     /// Gets the range of pixels covered by a span with reference to the entire device.
     /// i.e. where in the pixel-wise buffer the span starts and ends.
     pub fn span_pixel_range<const OUTPUT_CHANNEL_COUNT: usize>(
@@ -505,5 +543,59 @@ mod tests {
                 .unwrap(),
             fixtures.as_slice()[1].spans()[2]
         );
+    }
+}
+
+#[cfg(test)]
+mod span_helper_tests {
+    use super::*;
+
+    fn fixtures() -> Fixtures {
+        crate::io::decode_json(
+            br#"[
+                {
+                    "name": "first",
+                    "layout": {"linear_array": {}},
+                    "spans": [
+                        {"name": "a", "channel": 0, "start": 0, "length": 2},
+                        {"name": "b", "channel": 1, "start": 1, "length": 3}
+                    ]
+                },
+                {
+                    "name": "second",
+                    "layout": {"linear_array": {}},
+                    "spans": [
+                        {"name": "c", "channel": 2, "start": 0, "length": 1}
+                    ]
+                }
+            ]"#,
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn enumerates_and_selects_spans() {
+        let fixtures = fixtures();
+
+        assert_eq!(fixtures.span_count(), 3);
+        let (fixture_index, span_index, selected) = fixtures.spans().nth(1).unwrap();
+        assert_eq!(fixture_index, 0);
+        assert_eq!(span_index, 1);
+        assert_eq!(*selected, *fixtures.span(0, 1).unwrap());
+        assert_eq!(
+            *fixtures.span_at(2).unwrap().2,
+            *fixtures.span(1, 0).unwrap()
+        );
+        assert!(fixtures.span(1, 1).is_none());
+    }
+
+    #[test]
+    fn resolves_pixel_ranges_by_index() {
+        let fixtures = fixtures();
+
+        assert_eq!(fixtures.span_pixel_range_at::<4>(0, 0), Some(0..2));
+        assert_eq!(fixtures.span_pixel_range_at::<4>(0, 1), Some(3..6));
+        assert_eq!(fixtures.span_pixel_range_at::<4>(1, 0), Some(6..7));
+        assert_eq!(fixtures.span_pixel_range_at::<4>(2, 0), None);
     }
 }

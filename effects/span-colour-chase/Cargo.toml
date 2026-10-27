@@ -8,7 +8,7 @@ license = "MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-bled-core = { path = "../../core" }
+bled-effect = { path = "../../lib/effect" }
 
 [profile.release]
 codegen-units = 1

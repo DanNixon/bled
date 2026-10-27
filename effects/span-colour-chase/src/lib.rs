@@ -1,7 +1,6 @@
 #![no_std]
-#![allow(static_mut_refs)]
 
-use bled_core::{config::Fixtures, effect::abi::export::StepResult, wasm_effect};
+use bled_effect::guest::prelude::*;
 
 wasm_effect!(
     br#"{
@@ -25,12 +24,11 @@ struct SpanColourChase {
     colour_index: usize,
 }
 
-impl WasmEffect for SpanColourChase {
-    fn new(ctx: &Context, fixtures: Fixtures) -> Result<Self, ()> {
-        // Set default parameters
+impl Effect for SpanColourChase {
+    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
         let delay_bytes = 500u16.to_le_bytes();
-        ctx.parameters()[0..2].copy_from_slice(&delay_bytes);
-        ctx.parameters()[2] = 0x0F; // Dim enough you can actually look at the LEDs
+        ctx.parameters_mut()[0..2].copy_from_slice(&delay_bytes);
+        ctx.parameters_mut()[2] = 0x0F;
 
         Ok(Self {
             fixtures,
@@ -39,61 +37,40 @@ impl WasmEffect for SpanColourChase {
         })
     }
 
-    fn step_time(&self, ctx: &Context) -> u32 {
-        let bytes: [u8; 2] = ctx.parameters()[0..2].try_into().unwrap();
-        u16::from_le_bytes(bytes).try_into().unwrap()
+    fn step_time(&self, ctx: &Context<'_>) -> u32 {
+        let delay_bytes = &ctx.parameters()[0..2];
+        let delay = u16::from_le_bytes(delay_bytes.try_into().unwrap());
+        delay as u32
     }
 
-    fn step(&mut self, ctx: &Context, _timestamp_ms: u32) -> StepResult {
+    fn step(&mut self, ctx: &mut Context<'_>, _timestamp_ms: u32) -> StepResult {
         let brightness = ctx.parameters()[2];
         let colours = [
-            (brightness, 0, 0),                   // Red
-            (0, brightness, 0),                   // Green
-            (0, 0, brightness),                   // Blue
-            (0, brightness, brightness),          // Cyan
-            (brightness, 0, brightness),          // Magenta
-            (brightness, brightness, 0),          // Yellow
-            (brightness, brightness, brightness), // White
+            (brightness, 0, 0),
+            (0, brightness, 0),
+            (0, 0, brightness),
+            (0, brightness, brightness),
+            (brightness, 0, brightness),
+            (brightness, brightness, 0),
+            (brightness, brightness, brightness),
         ];
 
-        let Some((total_spans, pixel_range)) = ({
-            let total_spans: usize = self
-                .fixtures
-                .as_slice()
-                .iter()
-                .map(|fixture| fixture.spans().len())
-                .sum();
-            if total_spans == 0 {
-                return StepResult::Unchanged;
-            }
+        let total_spans = self.fixtures.span_count();
+        if total_spans == 0 {
+            return StepResult::Unchanged;
+        }
 
-            let target_span = self.span_index % total_spans;
-            let mut span_position = 0;
-            let mut pixel_range = None;
-
-            'fixtures: for fixture in self.fixtures.as_slice() {
-                for span in fixture.spans() {
-                    if span_position == target_span {
-                        pixel_range = self.fixtures.span_pixel_range::<4>(span);
-                        break 'fixtures;
-                    }
-                    span_position += 1;
-                }
-            }
-
-            pixel_range.map(|range| (total_spans, range))
-        }) else {
+        let target_span = self.span_index % total_spans;
+        let Some((_, _, span)) = self.fixtures.span_at(target_span) else {
+            return StepResult::Error;
+        };
+        let Some(pixel_range) = self.fixtures.span_pixel_range::<4>(span) else {
             return StepResult::Error;
         };
 
-        let (r, g, b) = colours[self.colour_index % colours.len()];
-        for pixel in pixel_range {
-            let offset = pixel as usize * 3;
-            let frame = ctx.frame();
-            frame[offset] = r;
-            frame[offset + 1] = g;
-            frame[offset + 2] = b;
-        }
+        let (red, green, blue) = colours[self.colour_index % colours.len()];
+        ctx.frame_mut().pixels_mut()[pixel_range.start as usize..pixel_range.end as usize]
+            .fill(RGB8::new(red, green, blue));
 
         self.colour_index = (self.colour_index + 1) % colours.len();
         if self.colour_index == 0 {
