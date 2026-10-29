@@ -1,0 +1,103 @@
+(footprint "FTC252010S"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 2 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "566c5cb5-99cf-4f87-aeed-f8de32e02c57")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "FTC252010S"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "5b60163e-a59a-4ba9-a193-658e46d6bb06")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://jlcpcb.com/partdetail/6763474-FTC252010SR47MBCA/C5832354"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "186119be-7afa-4f01-bee9-5c52d0f97e65")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ca736976-c7e7-4635-96cf-4f00b77addb1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.25 -1.2)
+		(end 1.25 -1.2)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4440444e-1cb5-4e30-8952-1a7b00b286a2")
+	)
+	(fp_line
+		(start -1.25 1.2)
+		(end 1.25 1.2)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "1b4bbfb7-b235-4648-917c-f92f85c40bec")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "b87a33ce-62d8-408c-9ee4-2c6f074a890f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd trapezoid
+		(at -0.825 0)
+		(size 0.95 2.1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "d7b7cc6f-d912-4490-8716-75b73be336c3")
+	)
+	(pad "2" smd trapezoid
+		(at 0.825 0)
+		(size 0.95 2.1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "120b0b76-85d1-4ab9-bfb0-5b2d044480fb")
+	)
+	(embedded_fonts no)
+)

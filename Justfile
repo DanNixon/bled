@@ -114,3 +114,8 @@ size-report:
             printf "| \`%s\` | %s | %s |\n" "$effect" "$(fmt_num "$bytes")" "$human"
         fi
     done
+
+fab-pcbs:
+    @just run-sub pcb/bled-badge fab
+    @just run-sub pcb/bled-pico-w-backpack fab
+    @just run-sub pcb/bled-stamp fab
