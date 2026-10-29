@@ -45,7 +45,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn cbor_round_trip() {
+    fn postcard_round_trip() {
         let value = DeviceInfo::new(
             heapless::String::try_from("a1b2c3d4").unwrap(),
             BootReason::WatchdogTimeout,
@@ -55,10 +55,9 @@ mod tests {
         );
         let mut data = [0; 128];
 
-        let length = crate::io::encode_cbor(&value, &mut data).unwrap();
-        assert_eq!(length, 102);
+        let length = crate::io::encode_postcard(&value, &mut data).unwrap();
 
-        let decoded = crate::io::decode_cbor::<DeviceInfo>(&data[..length]).unwrap();
+        let decoded = crate::io::decode_postcard::<DeviceInfo>(&data[..length]).unwrap();
         assert_eq!(decoded, value);
     }
 }

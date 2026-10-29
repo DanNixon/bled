@@ -1,7 +1,7 @@
 use super::{Context, Effect};
 use bled_core::config::Fixtures;
 #[cfg(target_arch = "wasm32")]
-use bled_core::config::MAX_CONFIG_CBOR_SIZE;
+use bled_core::config::MAX_CONFIG_POSTCARD_SIZE;
 use bled_core::effect::abi::export::{InitResult, StepResult};
 
 #[cfg(target_arch = "wasm32")]
@@ -24,7 +24,7 @@ pub struct Runtime<
     command: [u8; COMMAND_BYTES],
     parameters: [u8; PARAMETER_BYTES],
     #[cfg(target_arch = "wasm32")]
-    config: [u8; MAX_CONFIG_CBOR_SIZE],
+    config: [u8; MAX_CONFIG_POSTCARD_SIZE],
 }
 
 impl<E, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARAMETER_BYTES: usize>
@@ -39,7 +39,7 @@ impl<E, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARAMETER_BY
             command: [0; COMMAND_BYTES],
             parameters: [0; PARAMETER_BYTES],
             #[cfg(target_arch = "wasm32")]
-            config: [0; MAX_CONFIG_CBOR_SIZE],
+            config: [0; MAX_CONFIG_POSTCARD_SIZE],
         }
     }
 }
@@ -59,7 +59,7 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
     #[cfg(target_arch = "wasm32")]
     pub fn init(&mut self) -> InitResult {
         let size = unsafe { bled_fixture_config_size() };
-        if size <= 0 || size as usize > MAX_CONFIG_CBOR_SIZE {
+        if size <= 0 || size as usize > MAX_CONFIG_POSTCARD_SIZE {
             return InitResult::ConfigParseError;
         }
         let size = size as usize;
@@ -70,7 +70,7 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
             return InitResult::ConfigParseError;
         }
 
-        let fixtures = match bled_core::io::decode_cbor::<Fixtures>(&self.config[..size]) {
+        let fixtures = match bled_core::io::decode_postcard::<Fixtures>(&self.config[..size]) {
             Ok(fixtures) => fixtures,
             Err(_) => return InitResult::ConfigParseError,
         };

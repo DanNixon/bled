@@ -48,8 +48,8 @@ pub fn max_config_json_size() -> usize {
 }
 
 #[wasm_bindgen]
-pub fn max_config_cbor_size() -> usize {
-    bled_core::config::MAX_CONFIG_CBOR_SIZE
+pub fn max_config_postcard_size() -> usize {
+    bled_core::config::MAX_CONFIG_POSTCARD_SIZE
 }
 
 #[wasm_bindgen]

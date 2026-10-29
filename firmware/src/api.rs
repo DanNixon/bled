@@ -14,7 +14,7 @@ use bled_core::{
         ApiError, Chunk, DirEntry, MAX_CHUNK_SIZE, RPC_ACK_TIMEOUT, RPC_CHANNEL_ID,
         RPC_FRAME_BUF_LEN, Request, Response,
     },
-    config::MAX_CONFIG_CBOR_SIZE,
+    config::MAX_CONFIG_POSTCARD_SIZE,
 };
 use core::time::Duration;
 use defmt::{debug, warn};
@@ -184,10 +184,10 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
     }
 }
 
-/// Encodes the active device configuration as CBOR.
-fn config_bytes() -> Result<([u8; MAX_CONFIG_CBOR_SIZE], usize), ApiError> {
-    let mut buffer = [0u8; MAX_CONFIG_CBOR_SIZE];
-    let length = bled_core::io::encode_cbor(crate::config::get(), &mut buffer)
+/// Encodes the active device configuration as Postcard.
+fn config_bytes() -> Result<([u8; MAX_CONFIG_POSTCARD_SIZE], usize), ApiError> {
+    let mut buffer = [0u8; MAX_CONFIG_POSTCARD_SIZE];
+    let length = bled_core::io::encode_postcard(crate::config::get(), &mut buffer)
         .map_err(|_| ApiError::Internal)?;
     Ok((buffer, length))
 }
