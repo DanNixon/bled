@@ -412,7 +412,7 @@ where
     if !*active {
         return Err(EffectError::Inactive);
     }
-    if let Err(error) = store.set_fuel(1_000_000) {
+    if let Err(error) = store.set_fuel(2_000_000) {
         *active = false;
         return Err(EffectError::Wasm(error));
     }

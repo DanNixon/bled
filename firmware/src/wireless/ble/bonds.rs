@@ -14,7 +14,7 @@ pub(super) const BONDS_MAX: usize = 10;
 const STORED_BONDS_MAX: usize = BONDS_MAX - 1;
 
 /// File name of the bonds file on the SD card.
-const BONDS_PATH: &str = "/ble_bonds.bin";
+const BONDS_PATH: &str = "/ble-bonds.bin";
 
 /// Maximum serialized size of the bonds file in bytes.
 const MAX_BONDS_POSTCARD_SIZE: usize = 512;
