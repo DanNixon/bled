@@ -153,6 +153,16 @@ async fn main(spawner: Spawner) {
 
         effect::load_default_effect(&sd).await;
 
+        let (sender, receiver, control) = usb::cdc_acm::init(&mut usb_builder);
+        spawner.spawn(unwrap!(usb::cdc_acm::task(
+            sender,
+            receiver,
+            control,
+            sd.clone()
+        )));
+
+        spawner.spawn(unwrap!(usb::task(usb_builder)));
+
         #[cfg(feature = "board-pico2w")]
         spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
 

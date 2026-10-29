@@ -1,3 +1,4 @@
+pub(super) mod cdc_acm;
 pub(super) mod msc;
 
 use embassy_rp::{

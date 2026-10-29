@@ -7,40 +7,60 @@ export class BledHeader extends HTMLElement {
       <header>
         <div class="title-group">
           <h1>BLED</h1>
-          <p>Configuration and control of BLED Bluetooth LED controllers [<a href="https://github.com/DanNixon/bled">GitHub</a>]<span id="gitRevContainer"></span></p>
+          <p>Configuration and control of BLED LED controllers [<a href="https://github.com/DanNixon/bled">GitHub</a>]<span id="gitRevContainer"></span></p>
         </div>
         <div class="conn-group">
-          <button id="btnConnect" class="btn btn-primary">Connect device</button>
+          <button id="btnConnectBle" class="btn btn-primary">Connect BLE</button>
+          <button id="btnConnectSerial" class="btn btn-primary">Connect USB Serial</button>
         </div>
       </header>
-      <div id="noBleAlert" class="alert" style="display:none;">
-        <strong>Web Bluetooth Unsupported:</strong> Your current browser does not support the Web Bluetooth API.
-        Please use Google Chrome, Microsoft Edge, or a Web Bluetooth capable browser over HTTPS or localhost.
-      </div>
+      <div id="transportAlert" class="alert" style="display:none;"></div>
+      <div id="transportWarning" class="alert" style="display:none;"></div>
     `;
 
-    this.btnConnect = this.querySelector('#btnConnect');
-    this.noBleAlert = this.querySelector('#noBleAlert');
+    this.btnConnectBle = this.querySelector('#btnConnectBle');
+    this.btnConnectSerial = this.querySelector('#btnConnectSerial');
+    this.transportAlert = this.querySelector('#transportAlert');
+    this.transportWarning = this.querySelector('#transportWarning');
     this.gitRevContainer = this.querySelector('#gitRevContainer');
 
     if (this._revision) {
       this._renderRevision();
     }
 
-    if (!devices.isSupported) {
-      this.noBleAlert.style.display = 'block';
-      this.btnConnect.disabled = true;
-    }
+    this.btnConnectBle.disabled = !devices.isBleSupported;
+    this.btnConnectSerial.disabled = !devices.isSerialSupported;
+    this.transportAlert.style.display = devices.isSupported ? 'none' : 'block';
+    this.transportAlert.innerHTML = `
+      <strong>No supported connection transport is available.</strong>
+      Use a browser with Web Bluetooth or Web Serial over HTTPS or localhost.
+    `;
+    this.transportWarning.style.display = devices.isSerialSupported ? 'none' : 'block';
+    this.transportWarning.textContent = !globalThis.isSecureContext
+      ? 'Web Serial requires a secure context. Open this page over HTTPS or localhost.'
+      : 'Web Serial is not supported by this browser. Use a browser with Web Serial support.';
 
-    this.btnConnect.onclick = async () => {
+    this.btnConnectBle.onclick = async () => {
       try {
         await devices.addDevice();
       } catch (err) {
         // The user dismissing the chooser is not an error worth shouting about.
         if (err?.name === 'NotFoundError') {
-          log('No device selected.');
+          log('No Bluetooth device selected.');
         } else {
           log(`Bluetooth connection failed: ${err.message}`, 'error');
+        }
+      }
+    };
+
+    this.btnConnectSerial.onclick = async () => {
+      try {
+        await devices.addSerialDevice();
+      } catch (err) {
+        if (err?.name === 'NotFoundError') {
+          log('No serial port selected.');
+        } else {
+          log(`USB serial connection failed: ${err.message}`, 'error');
         }
       }
     };
