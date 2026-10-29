@@ -1,17 +1,19 @@
 //! WASM ABI for a BLED effect.
 
 /// ABI version.
-pub const VERSION: i32 = 2;
+/// The ABI version of the host and effect must match for the effect to be loaded.
+/// There are no backwards or future compatibility guarantees.
+pub const VERSION: i32 = 3;
 
 /// Imports from the host to the guest.
 pub mod import {
     pub const MODULE: &str = "bled_v2";
 
-    /// Function returning the byte length of the CBOR encoded fixture config.
+    /// Function returning the byte length of the Postcard encoded fixture config.
     /// `bled_fixture_config_size() -> i32`
     pub const FIXTURE_CONFIG_SIZE: &str = "bled_fixture_config_size";
 
-    /// Function copying the CBOR encoded fixture config into guest memory.
+    /// Function copying the Postcard encoded fixture config into guest memory.
     /// The guest should ensure that the destination buffer is large enough by calling `bled_fixture_config_size` first.
     /// Returns the number of bytes copied.
     /// `bled_fixture_config_read(dest_ptr: i32) -> i32`

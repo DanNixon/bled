@@ -2,18 +2,18 @@
 
 use wasm_bindgen::prelude::*;
 
-/// Pure Rust decoding of `DeviceConfig` from CBOR or JSON.
+/// Pure Rust decoding of `DeviceConfig` from Postcard or JSON.
 pub fn internal_decode_device_config(
     data: &[u8],
 ) -> Result<bled_core::config::DeviceConfig, String> {
-    match bled_core::io::decode_cbor(data) {
+    match bled_core::io::decode_postcard(data) {
         Ok(c) => Ok(c),
         Err(_) => bled_core::io::decode_json(data)
             .map_err(|e| format!("failed to decode DeviceConfig: {e}")),
     }
 }
 
-/// Decodes the CBOR payload returned by the configuration RPC into a JS object.
+/// Decodes the Postcard payload returned by the configuration RPC into a JS object.
 #[wasm_bindgen]
 pub fn decode_device_config(data: &[u8]) -> Result<JsValue, JsError> {
     let config = internal_decode_device_config(data).map_err(|e| JsError::new(&e))?;
@@ -55,7 +55,7 @@ mod tests {
     }
 
     #[test]
-    fn test_device_config_cbor_decoding() {
+    fn test_device_config_postcard_decoding() {
         let fixture = Fixture::new(
             "test-fixture".try_into().unwrap(),
             PixelLayout::LinearArray(LinearArray::default()),
@@ -69,13 +69,13 @@ mod tests {
             .unwrap(),
         );
         let config = DeviceConfig {
-            name: "dev-cbor".try_into().unwrap(),
+            name: "dev-postcard".try_into().unwrap(),
             fixtures: Fixtures::new([fixture].into()),
             default_effect: None,
         };
 
         let mut buffer = [0u8; 512];
-        let len = bled_core::io::encode_cbor(&config, &mut buffer).unwrap();
+        let len = bled_core::io::encode_postcard(&config, &mut buffer).unwrap();
 
         let decoded = internal_decode_device_config(&buffer[..len]).unwrap();
         assert_eq!(decoded, config);

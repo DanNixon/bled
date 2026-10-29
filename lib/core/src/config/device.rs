@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 /// Maximum allowable size of the config file in bytes when encoded as JSON.
 pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 5;
 
-/// Maximum allowable size of the config file in bytes when encoded as CBOR.
-pub const MAX_CONFIG_CBOR_SIZE: usize = 1024 * 4;
+/// Maximum allowable size of the config file in bytes when encoded as Postcard.
+pub const MAX_CONFIG_POSTCARD_SIZE: usize = 1024 * 3;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -183,10 +183,10 @@ mod tests {
     }
 
     #[test]
-    fn max_cbor_size_is_reasonable() {
+    fn max_postcard_size_is_reasonable() {
         let config = biggest_config();
-        let mut buf = [0; MAX_CONFIG_CBOR_SIZE];
-        let n = crate::io::encode_cbor(&config, &mut buf).unwrap();
-        assert!(n < MAX_CONFIG_CBOR_SIZE);
+        let mut buf = [0; MAX_CONFIG_POSTCARD_SIZE];
+        let n = crate::io::encode_postcard(&config, &mut buf).unwrap();
+        assert!(n < MAX_CONFIG_POSTCARD_SIZE);
     }
 }

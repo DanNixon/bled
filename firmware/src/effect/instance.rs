@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 use bled_core::{
-    config::{DeviceConfig, MAX_CONFIG_CBOR_SIZE},
+    config::{DeviceConfig, MAX_CONFIG_POSTCARD_SIZE},
     effect::abi::{
         self, EFFECT_MANIFEST_SECTION_NAME,
         export::{InitResult, StepResult},
@@ -49,11 +49,11 @@ impl EffectInstance {
         info!("creating device config for effect");
         let mut fixture_config_bytes = Vec::new();
         fixture_config_bytes
-            .try_reserve_exact(MAX_CONFIG_CBOR_SIZE)
+            .try_reserve_exact(MAX_CONFIG_POSTCARD_SIZE)
             .map_err(|_| EffectError::AllocationFailed)?;
-        fixture_config_bytes.resize(MAX_CONFIG_CBOR_SIZE, 0);
+        fixture_config_bytes.resize(MAX_CONFIG_POSTCARD_SIZE, 0);
         let length =
-            bled_core::io::encode_cbor(device_config.fixtures(), &mut fixture_config_bytes)
+            bled_core::io::encode_postcard(device_config.fixtures(), &mut fixture_config_bytes)
                 .map_err(|_| EffectError::ConfigurationTooLarge)?;
         fixture_config_bytes.truncate(length);
 
@@ -442,8 +442,8 @@ pub enum EffectError {
     /// A guest returned an invalid pointer, length, or descriptor.
     #[error("effect returned an invalid buffer")]
     InvalidBuffer,
-    /// The CBOR configuration or logical pixel count cannot be represented by this ABI.
-    #[error("effect configuration is too large for the ABI")]
+    /// The fixture configuration consumes more space than the ABI can represent.
+    #[error("effect fixture configuration is too large for the ABI")]
     ConfigurationTooLarge,
     /// The module has no manifest custom section.
     #[error("effect has no manifest custom section")]

@@ -49,10 +49,10 @@ pub enum Request {
     /// Reboot the device.
     Reboot,
 
-    /// Stat the active device configuration (CBOR encoded).
+    /// Stat the active device configuration (Postcard encoded).
     ConfigStat,
 
-    /// Read a chunk of the active device configuration (CBOR encoded).
+    /// Read a chunk of the active device configuration (Postcard encoded).
     ConfigRead { offset: u32, length: u32 },
 
     /// Render the staged contents of the LED buffer.

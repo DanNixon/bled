@@ -21,10 +21,9 @@ dependencies = [
  "bytemuck",
  "getset",
  "heapless 0.9.3",
- "minicbor",
- "minicbor-serde",
  "num_enum",
  "nutype",
+ "postcard",
  "rgb",
  "serde",
  "serde-json-core",
@@ -418,22 +417,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d640282b302c0bb0a2a8e0233ead9035e3bed871f0b7e81fe4a1ec829765db44"
 dependencies = [
  "libc",
-]
-
-[[package]]
-name = "minicbor"
-version = "2.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c12b4033ffaa92fbf9df03df38d19324f52bad130dd223f811734a8006dd2d69"
-
-[[package]]
-name = "minicbor-serde"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7abdec9761edcb452764c68564ae4b77ec62f6c1a361aa68f5de15fd788c679"
-dependencies = [
- "minicbor",
- "serde",
 ]
 
 [[package]]
