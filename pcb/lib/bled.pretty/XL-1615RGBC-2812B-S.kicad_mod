@@ -1,0 +1,159 @@
+(footprint "XL-1615RGBC-2812B-S"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -1.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "57cb71df-f4d3-4c3a-bee6-43b0cb615658")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "XL-1615RGBC-2812B-S"
+		(at 0 2 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "d3109a8f-b1ed-4496-88a9-d0c1f3036062")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC_2812BS/C41413180"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5825cc5f-443e-4652-b8d2-fe3413293b32")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Addressable RGB LED with WS2812B driver"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "52968449-560c-44dc-850b-970eebc71db9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "LCSC" "C41413180"
+		(at 0 0 0)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "6cf5b816-0644-4658-943f-9cf93f9eb565")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start 0.25 -0.25)
+		(end -0.25 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "a2c3d6c0-6816-435e-ac2c-6fcc2c0cef3b")
+	)
+	(fp_line
+		(start 0.25 0.25)
+		(end -0.25 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d0325070-d820-43d1-b9b7-dad53c00d4e3")
+	)
+	(fp_line
+		(start 0.25 0.25)
+		(end 0.25 -0.25)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "52ee2867-2e02-4e79-9d2f-196aaa96b33f")
+	)
+	(fp_rect
+		(start -0.9 -0.85)
+		(end 0.9 0.85)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "7b9afd06-e9e2-4228-a08e-21e7343ca479")
+	)
+	(fp_circle
+		(center -0.9 0)
+		(end -0.85 0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "73a620aa-3daa-4736-9e37-3d99a2cbf7bf")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 3.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "39d727e4-61f1-429b-b4cc-75cc2a0410ab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -0.625 0.475)
+		(size 0.45 0.65)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "c2203265-415b-4bc0-859f-bdaecddedefc")
+	)
+	(pad "2" smd rect
+		(at 0.625 0.475)
+		(size 0.45 0.65)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "11e40d27-a36c-410f-b515-11bab2115f2b")
+	)
+	(pad "3" smd rect
+		(at 0.625 -0.475)
+		(size 0.45 0.65)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "eb926df4-1580-4ca9-827d-90f9a71fd868")
+	)
+	(pad "4" smd rect
+		(at -0.625 -0.475)
+		(size 0.45 0.65)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "3aff6b18-65bd-42bd-8ba9-2f8ae5730afb")
+	)
+	(embedded_fonts no)
+)
