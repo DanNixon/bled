@@ -12,17 +12,22 @@ run-sub dir *recipe="":
     @just -f {{dir}}/Justfile {{recipe}}
     @if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::endgroup::"; fi
 
-check: check-nix-fmt check-typos
+check: check-nix-fmt check-typos check-effects
     @just run-sub lib/core check
     @just run-sub lib/effect check
     @just run-sub firmware check
     @just run-sub web check
+
+
+build: build-effects
+    @just run-sub firmware build
+    @just run-sub web build
+
+check-effects:
     @just run-sub effects/span-colour-chase check
     @just run-sub effects/span-painter check
 
-build:
-    @just run-sub firmware build
-    @just run-sub web build
+build-effects:
     @just run-sub effects/span-colour-chase build
     @just run-sub effects/span-painter build
 
