@@ -1,11 +1,6 @@
-//! Device information and configuration decoders.
+//! Device configuration decoder.
 
 use wasm_bindgen::prelude::*;
-
-/// Pure Rust decoding of `DeviceInfo` from CBOR.
-pub fn internal_decode_device_info(data: &[u8]) -> Result<bled_core::api::DeviceInfo, String> {
-    bled_core::io::decode_cbor(data).map_err(|e| format!("failed to decode DeviceInfo: {e}"))
-}
 
 /// Pure Rust decoding of `DeviceConfig` from CBOR or JSON.
 pub fn internal_decode_device_config(
@@ -18,15 +13,7 @@ pub fn internal_decode_device_config(
     }
 }
 
-/// Decodes the CBOR payload read from the Device Info characteristic into a JS object.
-#[wasm_bindgen]
-pub fn decode_device_info(data: &[u8]) -> Result<JsValue, JsError> {
-    let info = internal_decode_device_info(data).map_err(|e| JsError::new(&e))?;
-    serde_wasm_bindgen::to_value(&info)
-        .map_err(|e| JsError::new(&format!("failed to serialize DeviceInfo: {e}")))
-}
-
-/// Decodes the payload for DeviceConfig (CBOR or JSON) into a JS object.
+/// Decodes the CBOR payload returned by the configuration RPC into a JS object.
 #[wasm_bindgen]
 pub fn decode_device_config(data: &[u8]) -> Result<JsValue, JsError> {
     let config = internal_decode_device_config(data).map_err(|e| JsError::new(&e))?;
@@ -39,25 +26,8 @@ mod tests {
     use super::*;
     use bled_core::{
         ChannelNumber,
-        api::{BootReason, DeviceInfo},
         config::{DeviceConfig, Fixture, Fixtures, LinearArray, PixelLayout, PixelSpan},
     };
-
-    #[test]
-    fn test_device_info_cbor_decoding() {
-        let info = DeviceInfo::new(
-            "rev1234".try_into().unwrap(),
-            BootReason::Normal,
-            12_345,
-            16 * 1024,
-            4,
-        );
-        let mut buffer = [0u8; 128];
-        let len = bled_core::io::encode_cbor(&info, &mut buffer).unwrap();
-
-        let decoded = internal_decode_device_info(&buffer[..len]).unwrap();
-        assert_eq!(decoded, info);
-    }
 
     #[test]
     fn test_device_config_json_decoding() {

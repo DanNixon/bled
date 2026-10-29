@@ -4,7 +4,7 @@
 
 extern crate alloc;
 
-mod api_transport;
+mod api;
 mod buttons;
 mod config;
 mod effect;

@@ -1,5 +1,5 @@
 mod advertise;
-mod gatt;
+mod serial;
 
 use super::BtController;
 use crate::sdcard::SdCardStorage;
@@ -28,11 +28,13 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
     let mut runner = stack.runner();
     let mut peripheral = stack.peripheral();
 
-    let server = gatt::Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
+    let server = serial::Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
         name: &device_name,
         appearance: &appearance::UNKNOWN,
     }))
     .unwrap();
+
+    let rx_pipe = serial::init_rx_pipe();
 
     let runner_fut = async {
         loop {
@@ -44,15 +46,12 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
 
     let srv_fut = async {
         loop {
-            let mut srv = async || -> Result<(), BleHostError<_>> {
-                let conn = advertise::advertise(&device_name, &mut peripheral).await?;
-                let conn = conn.with_attribute_server(&server)?;
-                gatt::gatt_events_task(&server, &conn, sd.clone()).await;
-                Ok(())
-            };
-
-            if let Err(e) = srv().await {
-                error!("error: {}", e);
+            match advertise::advertise(&device_name, &mut peripheral).await {
+                Ok(conn) => {
+                    let conn = conn.with_attribute_server(&server).unwrap();
+                    serial::run_connection(&server, &conn, rx_pipe, sd.clone()).await;
+                }
+                Err(e) => error!("BLE advertising error: {}", e),
             }
         }
     };
