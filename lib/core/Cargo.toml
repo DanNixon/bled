@@ -7,6 +7,14 @@ license = "MIT"
 [lints.rust]
 unused_crate_dependencies = "deny"
 
+[features]
+defmt = [
+  "dep:defmt",
+  "heapless/defmt",
+  "serde-json-core/defmt",
+  "rgb/defmt-03",
+]
+
 [dependencies]
 bytemuck = { version = "1.25.2", default-features = false }
 defmt = { version = "1", default-features = false, optional = true }
@@ -22,10 +30,5 @@ serde-json-core = "0.6.0"
 thiserror = { version = "2.0.20", default-features = false }
 uuid = { version = "1.26.0", default-features = false }
 
-[features]
-defmt = [
-  "dep:defmt",
-  "heapless/defmt",
-  "serde-json-core/defmt",
-  "rgb/defmt-03",
-]
+[dev-dependencies]
+postcard = "1.1.1"

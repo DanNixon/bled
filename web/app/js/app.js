@@ -11,7 +11,7 @@ import './components/bled-activity-log.js';
 try {
   await init();
   log("WebAssembly protocol runtime loaded successfully.", 'success');
-  log(`Service UUID: ${bled.service_uuid()}`);
+  log(`Serial service UUID: ${bled.serial_service_uuid()}`);
   document.querySelector('bled-header')?.setGitRevision(bled.git_revision());
 } catch (e) {
   log(`Failed to initialize WebAssembly: ${e}`, 'error');

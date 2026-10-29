@@ -1,4 +1,4 @@
-use bled_core::ble::SERVICE_UUID;
+use bled_core::ble::SERIAL_SERVICE_UUID;
 use defmt::info;
 use trouble_host::prelude::*;
 
@@ -11,7 +11,7 @@ pub(super) async fn advertise<'a, C: Controller>(
     let len = AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-            AdStructure::CompleteServiceUuids128(&[SERVICE_UUID.as_u128().to_le_bytes()]),
+            AdStructure::CompleteServiceUuids128(&[SERIAL_SERVICE_UUID.as_u128().to_le_bytes()]),
         ],
         &mut advertiser_data[..],
     )?;
