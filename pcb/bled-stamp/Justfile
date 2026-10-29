@@ -1,0 +1,9 @@
+default: fab
+
+fab:
+    kikit fab \
+        jlcpcb \
+        --assembly \
+        --schematic ./bled-stamp.kicad_sch \
+        ./bled-stamp.kicad_pcb \
+        ./fab
