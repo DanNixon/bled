@@ -182,6 +182,7 @@ dependencies = [
  "embassy-usb",
  "embedded-alloc",
  "embedded-hal-bus",
+ "embedded-io-async 0.7.0",
  "embedded-sdmmc",
  "exfat-embedded",
  "exfat-slim",

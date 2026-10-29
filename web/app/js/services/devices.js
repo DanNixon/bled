@@ -1,4 +1,5 @@
 import { BleDevice } from './ble.js';
+import { SerialDevice } from './serial.js';
 import { log } from './logger.js';
 
 /**
@@ -16,7 +17,15 @@ class DeviceRegistry extends EventTarget {
   }
 
   get isSupported() {
+    return this.isBleSupported || this.isSerialSupported;
+  }
+
+  get isBleSupported() {
     return BleDevice.isSupported;
+  }
+
+  get isSerialSupported() {
+    return SerialDevice.isSupported;
   }
 
   list() {
@@ -31,23 +40,33 @@ class DeviceRegistry extends EventTarget {
     return this.selection ? this.devices.get(this.selection.deviceId) : undefined;
   }
 
-  /** Ask the user to pick a device and connect to it. Resolves to the BleDevice. */
+  /** Ask the user to pick a Bluetooth device and connect to it. */
   async addDevice() {
-    const raw = await BleDevice.choose();
-    const existing = this.devices.get(raw.id);
+    return this._addDevice(BleDevice);
+  }
+
+  /** Ask the user to pick a serial port and connect to it. */
+  async addSerialDevice() {
+    return this._addDevice(SerialDevice);
+  }
+
+  async _addDevice(DeviceType) {
+    const raw = await DeviceType.choose();
+    const existing = DeviceType === BleDevice ? this.devices.get(raw.id) : null;
     if (existing) {
       log(`"${existing.displayName}" is already connected.`);
       this.select({ deviceId: existing.id, kind: 'device' });
       return existing;
     }
 
-    const dev = new BleDevice(raw);
+    const dev = new DeviceType(raw);
     this.pending++;
     this._changed();
     try {
       await dev.connect();
     } finally {
       this.pending--;
+      this._changed();
     }
 
     this.devices.set(dev.id, dev);

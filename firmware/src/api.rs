@@ -2,7 +2,7 @@
 //!
 //! Serves the RPC API described by [`bled_core::api::Request`] and
 //! [`bled_core::api::Response`] over any `teeny-rpc` transport, such as the
-//! emulated serial over BLE stream provided by the wireless module.
+//! emulated serial over BLE stream or USB CDC ACM transport.
 
 use crate::{
     effect, leds,
