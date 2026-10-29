@@ -1,0 +1,278 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "3e025044-e694-4110-8cfc-0d811f19f9a3")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at 215.9 63.5)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "0dd43cf6-4ab5-454c-98bb-bd62c174ab63")
+		(property "Sheetname" "LED channel 2"
+			(at 215.9 62.7884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "led_channel.kicad_sch"
+			(at 215.9 76.7846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DATA_IN" input
+			(at 215.9 69.85 180)
+			(uuid "1283d26a-f898-4375-a0bd-a1ab252752b5")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DATA_OUT" input
+			(at 241.3 69.85 0)
+			(uuid "467707af-3cad-4408-af41-47f89276d0eb")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "bled-badge"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 215.9 38.1)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "637790d7-b402-4bbb-b0d1-9b05a6baddb9")
+		(property "Sheetname" "LED channel 1"
+			(at 215.9 37.3884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "led_channel.kicad_sch"
+			(at 215.9 51.3846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DATA_IN" input
+			(at 215.9 44.45 180)
+			(uuid "61845844-3c98-474f-99c4-12a519e8f558")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DATA_OUT" input
+			(at 241.3 44.45 0)
+			(uuid "3b2e87ea-2626-4a60-83e3-5e5ec7cf4a20")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "bled-badge"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 215.9 114.3)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "6bc0b8e1-a7eb-4783-9dee-5fd9caf1df4c")
+		(property "Sheetname" "LED channel 4"
+			(at 215.9 113.5884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "led_channel.kicad_sch"
+			(at 215.9 127.5846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DATA_IN" input
+			(at 215.9 120.65 180)
+			(uuid "0207f4d8-3b6a-40a6-a1a7-e5f1165d1cf2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DATA_OUT" input
+			(at 241.3 120.65 0)
+			(uuid "3d6b15eb-cbab-44e5-9563-2f386bdb75da")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "bled-badge"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 215.9 88.9)
+		(size 25.4 12.7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "f7015891-a9dd-402e-b9c6-100053161d49")
+		(property "Sheetname" "LED channel 3"
+			(at 215.9 88.1884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "led_channel.kicad_sch"
+			(at 215.9 102.1846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "DATA_IN" input
+			(at 215.9 95.25 180)
+			(uuid "58587bb0-b6bd-401a-aaf6-5fac27965adb")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DATA_OUT" input
+			(at 241.3 95.25 0)
+			(uuid "b948de28-d0c9-4f49-91c4-e8080b7e66f6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "bled-badge"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
