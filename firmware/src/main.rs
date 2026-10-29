@@ -10,6 +10,7 @@ mod buttons;
 mod config;
 mod effect;
 mod leds;
+mod power_management;
 mod sdcard;
 mod status;
 mod status_led;
@@ -53,6 +54,8 @@ async fn main(spawner: Spawner) {
     let mut status_led = status_led::StatusLed::new(control);
     #[cfg(feature = "_status_light_gpio25")]
     let mut status_led = status_led::StatusLed::new(p.PIN_25);
+    #[cfg(all(feature = "_wireless", not(feature = "_status_light_cyw43_gpio0")))]
+    let _ = control;
 
     let mut button_events = buttons::button_events_subscriber();
     buttons::init(r.buttons, spawner);
@@ -95,6 +98,9 @@ async fn main(spawner: Spawner) {
 
         spawner.spawn(unwrap!(usb::task(usb_builder)));
     } else {
+        #[cfg(feature = "_bq25895")]
+        spawner.spawn(unwrap!(power_management::bq25895::task(r.bq25895)));
+
         let sd = SdCardStorage::new(sd);
 
         config::init(&sd).await;

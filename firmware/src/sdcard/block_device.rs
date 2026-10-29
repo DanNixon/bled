@@ -1,8 +1,10 @@
 use crate::SdCardResources;
 use aligned::{A4, Aligned};
 use defmt::{Format, debug, info, unwrap, warn};
+#[cfg(feature = "_sdcard_detect_pin")]
+use embassy_rp::gpio::{Input, Pull};
 use embassy_rp::{
-    gpio::{Input, Level, Output, Pull},
+    gpio::{Level, Output},
     mode::Blocking,
     spi::{Config, Spi},
     time::Hertz,
@@ -21,6 +23,7 @@ pub(crate) type SdCard =
 #[derive(Debug, Format)]
 pub(crate) enum SdBlockDeviceError {
     /// No SD card is inserted in the slot.
+    #[cfg(feature = "_sdcard_detect_pin")]
     CardNotInserted,
 
     /// Error while accessing the SD card.
@@ -34,6 +37,7 @@ pub(crate) enum FormatError {
 }
 
 pub(crate) struct SdBlockDevice {
+    #[cfg(feature = "_sdcard_detect_pin")]
     detect: Input<'static>,
     sd: SdCard,
     block_count: Option<BlockCount>,
@@ -42,6 +46,7 @@ pub(crate) struct SdBlockDevice {
 
 impl SdBlockDevice {
     pub(crate) fn new(r: SdCardResources) -> SdBlockDevice {
+        #[cfg(feature = "_sdcard_detect_pin")]
         let detect = Input::new(r.detect, Pull::Up);
 
         let mut config = Config::default();
@@ -52,6 +57,7 @@ impl SdBlockDevice {
         let sd = SpiSdCard::new(spi, Delay);
 
         SdBlockDevice {
+            #[cfg(feature = "_sdcard_detect_pin")]
             detect,
             sd,
             block_count: None,
@@ -59,11 +65,13 @@ impl SdBlockDevice {
         }
     }
 
+    #[cfg(feature = "_sdcard_detect_pin")]
     fn is_card_inserted(&self) -> bool {
         self.detect.is_low()
     }
 
     pub(crate) fn ensure_init(&mut self) -> Result<(), SdBlockDeviceError> {
+        #[cfg(feature = "_sdcard_detect_pin")]
         if !self.is_card_inserted() {
             return Err(SdBlockDeviceError::CardNotInserted);
         }
