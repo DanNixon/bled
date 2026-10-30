@@ -5194,7 +5194,7 @@
 				)
 			)
 		)
-		(property "Footprint" "XSON8_XH_2x3x0p4_WIN"
+		(property "Footprint" "bled:XSON8_XH_2x3x0p4_WIN"
 			(at 170.18 33.02 0)
 			(hide yes)
 			(show_name no)
@@ -9377,7 +9377,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ABM8-272-T3_ABR"
+		(property "Footprint" "bled:ABM8-272-T3_ABR"
 			(at 177.8 74.93 0)
 			(hide yes)
 			(show_name no)
