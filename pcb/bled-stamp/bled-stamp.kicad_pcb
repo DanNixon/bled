@@ -177,29 +177,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C32246052"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "b8f4df3e-0978-4b85-87e1-664b0f36b96b")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "XSON8_XH_2x3x0p4_WIN XSON8_XH_2x3x0p4_WIN-M XSON8_XH_2x3x0p4_WIN-L")
 		(path "/0e39f78a-23f1-45d8-8820-d1deb8385234")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "8" "9" "4" "1" "6" "5" "2" "3" "7")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -567,7 +548,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -594,12 +575,6 @@
 		(path "/f3997f83-710c-493b-80b2-86487f9b5ab6")
 		(sheetname "/Connectors/")
 		(sheetfile "connectors.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -709,7 +684,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -722,7 +697,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -750,12 +725,6 @@
 		(path "/5a046a8b-1eae-4b65-8af5-6db954797103")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -898,7 +867,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -925,12 +894,6 @@
 		(path "/4cdcfa7f-d9e5-4d82-818a-17086da85a46")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -1056,7 +1019,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1083,12 +1046,6 @@
 		(path "/d542819c-ba2d-4974-8d27-31d0315c4572")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -1208,7 +1165,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1231,29 +1188,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "d943ccb5-01ba-4cea-a608-bcb9d7f1ff81")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/7595da6a-9b53-459f-ae34-77f245106d67")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -1368,7 +1306,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.we-online.com/components/products/datasheet/693072010801.pdf"
+		(property "Datasheet" "https://jlcpcb.com/partdetail/HOAUC-HYCW103_TF08375B/C2962028"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1381,7 +1319,7 @@
 				)
 			)
 		)
-		(property "Description" "Micro SD Card Socket"
+		(property "Description" ""
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1398,12 +1336,6 @@
 		(path "/b8a960ff-db1e-463f-b084-e9a649a627d0")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "4" "5" "6" "7" "8" "SH")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -1820,13 +1752,6 @@
 			(uuid "07ecf7b9-b578-4178-81bc-78147dfd082d")
 		)
 		(embedded_fonts no)
-		(embedded_files
-			(file
-				(name "C2962028.pdf")
-				(type datasheet)
-				(checksum "A43754E69F06A3139988F9185518B525")
-			)
-		)
 	)
 	(footprint "Capacitor_SMD:C_0201_0603Metric"
 		(layer "F.Cu")
@@ -1867,7 +1792,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1894,12 +1819,6 @@
 		(path "/8ab0ce55-34f8-476b-8bff-11cbbc4f093a")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -2019,7 +1938,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -2046,12 +1965,6 @@
 		(path "/5535950b-b3af-4f2e-a8e1-863eec05a92a")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -2179,7 +2092,7 @@
 				)
 			)
 		)
-		(property "Description" "RGB LED with integrated controller"
+		(property "Description" "Addressable RGB LED with WS2812B driver"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2207,12 +2120,6 @@
 		(path "/74248b22-3629-456c-9961-0761527e5774")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "2" "3" "1" "4")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -2356,7 +2263,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -2383,12 +2290,6 @@
 		(path "/f6c2ed92-6042-4fa1-aeae-7b67ee5c7a45")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -2498,7 +2399,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "kicad-embed://bq25895.pdf"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -2520,31 +2421,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C80200"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "9918a37c-45b1-42c1-a1d6-b07ac3e8d186")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "RTW0024H")
 		(path "/05c2894b-6bd4-481b-9ec4-74375fa44bd9")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "23" "10" "4" "24" "3" "2" "6" "5" "7" "8" "9" "21" "19" "20"
-					"15" "16" "22" "13" "14" "12" "11" "17" "18" "25"
-				)
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -3074,7 +2954,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3101,12 +2981,6 @@
 		(path "/814d70f5-9f2b-41f1-b911-0a929e012006")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -3226,7 +3100,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3253,12 +3127,6 @@
 		(path "/ad1a42db-936f-4d87-902d-3d3b7f7edf72")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -3378,7 +3246,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3405,12 +3273,6 @@
 		(path "/42672b17-2f00-412d-ba82-8977b9134291")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -3520,7 +3382,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3533,7 +3395,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3561,12 +3423,6 @@
 		(path "/19b8a377-e403-4ba8-ad4e-8d1cbb526d4b")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -3709,7 +3565,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3736,12 +3592,6 @@
 		(path "/77aaa3de-afba-452e-91f2-56b12e15d2a8")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -3861,7 +3711,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3888,12 +3738,6 @@
 		(path "/b4eff757-4803-40a3-b41a-234145f3ba02")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -4002,7 +3846,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/YJYCOIN-YHNR40202R2M/C2926400"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4015,7 +3859,7 @@
 				)
 			)
 		)
-		(property "Description" "Inductor"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4028,29 +3872,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C2926400"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "ae216a01-ffac-49ce-87ec-2e93df20f183")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "Choke_* *Coil* Inductor_* L_*")
 		(path "/17ff080f-82ac-49ac-98e1-9e3f886a09a6")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -4144,7 +3969,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -4171,12 +3996,6 @@
 		(path "/b8379eaf-4310-4fe6-b169-6c3c5f1efa0d")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -4298,7 +4117,7 @@
 				)
 			)
 		)
-		(property "Description" "RGB LED with integrated controller"
+		(property "Description" "Addressable RGB LED with WS2812B driver"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4326,12 +4145,6 @@
 		(path "/1ff2086c-a686-4b3a-9b44-4ff5ff0cdc66")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "2" "3" "1" "4")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -4475,7 +4288,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -4502,12 +4315,6 @@
 		(path "/fbf7254b-0753-47e2-9617-4ffcc0cf18c3")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -4617,7 +4424,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "ABM8-272-T3"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -4639,29 +4446,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C20625731"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "ea7cec4d-7fb5-4a8d-9d4e-08325a0b49f8")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "ABM8-272-T3_ABR")
 		(path "/b15667fa-c8d1-4f99-bd97-adafab4241c9")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "4" "3")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
@@ -4964,7 +4752,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -4991,12 +4779,6 @@
 		(path "/615a8513-e355-49df-9e2b-e9302b0fa921")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -5111,7 +4893,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/6763474-FTC252010SR47MBCA/C5832354"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5124,7 +4906,7 @@
 				)
 			)
 		)
-		(property "Description" "Inductor"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5137,29 +4919,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C5832354"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "6f98bba6-2684-4984-bf89-64d12b66f7ea")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "Choke_* *Coil* Inductor_* L_*")
 		(path "/4f4068ab-826d-4078-a4f1-bc3a97cb82c3")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -5253,7 +5016,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5280,12 +5043,6 @@
 		(path "/1e8805ca-92d9-4530-90a4-3b32c26708c1")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -5395,7 +5152,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "kicad-embed://tlv62595.pdf"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5417,29 +5174,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C3189969"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "6f4bf8b3-9ee7-456c-810a-451e1f78a314")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "DMQ0006A-MFG")
 		(path "/b2bc30e0-9609-4eba-bec0-8f37079c501a")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "6" "1" "2" "5" "3" "4")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_poly
@@ -5755,7 +5493,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5782,12 +5520,6 @@
 		(path "/606688d3-4ebb-431e-8a08-f65fccf7001c")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -5907,7 +5639,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5934,12 +5666,6 @@
 		(path "/32fd631b-2e77-4bea-a817-fd98177d6863")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -6059,7 +5785,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -6086,12 +5812,6 @@
 		(path "/bbbb56c3-4254-473d-9064-356be1c62dfe")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -6211,7 +5931,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -6234,29 +5954,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "9874f62a-7123-4a28-b091-4e0207bc162e")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/19777ab0-50fc-4ae4-9944-2c96f7a555e5")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -6376,7 +6077,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -6403,12 +6104,6 @@
 		(path "/953a97c6-6ebe-4939-b712-e19f34a6d058")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -6528,7 +6223,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -6551,29 +6246,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C304547"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "3fd9b302-db31-474a-a02e-df356cde3c5f")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "R_*")
 		(path "/c9bc7c34-3b80-41a3-93f7-3149fb059d39")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -6683,7 +6359,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6696,7 +6372,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6724,12 +6400,6 @@
 		(path "/169efafe-9152-4619-8abc-5f8574d91416")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -6862,7 +6532,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6875,7 +6545,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6903,12 +6573,6 @@
 		(path "/3aabc4ee-f3f6-48b2-acf5-764940bb04cf")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -7051,7 +6715,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7078,12 +6742,6 @@
 		(path "/4884ce65-060b-436a-92db-a5675075d655")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -7203,7 +6861,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7226,29 +6884,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "ac07f087-98d0-47ea-9402-899b0085df60")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/9a959505-63d6-4880-8fdd-668f72e36fbb")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -7368,7 +7007,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7391,29 +7030,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C304547"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "2f26187e-3c02-42f5-8841-0efe71736ee3")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "R_*")
 		(path "/d5e2cf2e-2503-4ce1-935d-7f843a2a9ebf")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -7533,7 +7153,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7556,29 +7176,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "71976c84-5a34-4293-95f3-f01c0fa15544")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/c13ffece-89a0-4ded-a549-64ef8fb90209")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -7688,7 +7289,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "kicad-embed://C2982555.pdf"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7710,31 +7311,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C2982555"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "cd437e29-d99e-4374-a0a8-b88d7a474dcb")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "TYPEC-304-ACP16_XNP")
 		(path "/6aca5ec2-4cb4-47d7-80fe-411f2bca795d")
 		(sheetname "/Connectors/")
 		(sheetfile "connectors.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "A1-B12" "A4-B9" "A5" "A6" "A7" "A8" "B8" "B7" "B6" "B5" "B4-A9"
-					"B1-A12"
-				)
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -8150,7 +7730,7 @@
 		(fp_text user "*"
 			(at -5.765 -3.7447 0)
 			(layer "F.SilkS")
-			(uuid "1ae7844c-26a4-4aab-9f7e-f9f25ca438d5")
+			(uuid "2a134217-c72e-47fd-958e-cf427321dc26")
 			(effects
 				(font
 					(size 1 1)
@@ -8173,7 +7753,7 @@
 		(fp_text user "*"
 			(at -5.765 -3.7447 0)
 			(layer "F.Fab")
-			(uuid "2a134217-c72e-47fd-958e-cf427321dc26")
+			(uuid "1ae7844c-26a4-4aab-9f7e-f9f25ca438d5")
 			(effects
 				(font
 					(size 1 1)
@@ -8392,7 +7972,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -8419,12 +7999,6 @@
 		(path "/e209e51e-88e8-4b9c-9e88-b9f851fc6c9b")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -8536,7 +8110,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://pip-assets.raspberrypi.com/categories/1216-raspberry-pi-radio-module-2/documents/RP-008943-DS-7-Radio%20Module%202%20Datasheet.pdf"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8566,14 +8140,6 @@
 		(path "/e64cd0cd-2da8-4a57-bd6b-a08f508cd80b")
 		(sheetname "/Connectors/")
 		(sheetfile "connectors.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "21"
-					"20" "19" "18" "17" "16" "15"
-				)
-			)
-		)
 		(solder_mask_margin 0.1)
 		(solder_paste_margin -0.05)
 		(attr smd)
@@ -9016,7 +8582,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -9039,29 +8605,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "19e324fa-1032-43a6-a625-c50fe5bd7b06")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/cb74860a-6bed-45a5-9928-04e1a2e2f69a")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -9170,7 +8717,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -9181,7 +8728,7 @@
 				)
 			)
 		)
-		(property "Description" "A microcontroller by Raspberry Pi, dual CPU architecture (ARM Cortex-M33 / RISC-V Hazard3), 150MHz, no flash, 520KB SRAM, 12 PIO state machines, VQFN-60"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -9208,17 +8755,6 @@
 		(path "/d51fb730-5da2-485e-a9fb-6869d061db7a")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "26" "51" "52" "60" "56" "57" "59" "58" "55" "21" "22" "24" "25"
-					"46" "53" "44" "54" "20" "30" "38" "11" "45" "1" "47" "61" "49" "48"
-					"50" "6" "23" "39" "2" "3" "4" "5" "7" "8" "9" "10" "12" "13" "14" "15"
-					"16" "17" "18" "19" "27" "28" "29" "31" "32" "33" "34" "35" "36" "37"
-					"40" "41" "42" "43"
-				)
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -10264,7 +9800,7 @@
 				)
 			)
 		)
-		(property "Description" "RGB LED with integrated controller"
+		(property "Description" "Addressable RGB LED with WS2812B driver"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10292,12 +9828,6 @@
 		(path "/d1cd3089-ffd4-42ab-b856-16fc935bc35e")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "2" "3" "1" "4")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -10441,7 +9971,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -10468,12 +9998,6 @@
 		(path "/41db6341-1bb9-4572-b958-9445a10c384c")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -10593,7 +10117,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -10620,12 +10144,6 @@
 		(path "/aa405f65-b820-4aaa-8a1b-eee546c5306d")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -10745,7 +10263,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -10768,29 +10286,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "f9296d3a-8fb3-41af-a28a-ecd518baf5ad")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/74d1f73c-b344-454a-ad24-3f08fe5e8a2c")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -10910,7 +10409,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -10937,12 +10436,6 @@
 		(path "/9a216126-4ce4-4136-b221-60fb9371eb59")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -11068,7 +10561,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11095,12 +10588,6 @@
 		(path "/83a9c41a-29d8-4d58-8fc8-b9eb8e2d47fc")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -11226,7 +10713,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11253,12 +10740,6 @@
 		(path "/1d4b6064-59b6-4022-8e91-bc7776f72901")
 		(sheetname "/Connectors/")
 		(sheetfile "connectors.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -11378,7 +10859,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11401,29 +10882,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C304547"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "e230261c-8eff-44ae-8588-335e3cdbdad4")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "R_*")
 		(path "/e9fe2e59-9489-4b70-b0d6-42aa16b35f0f")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -11543,7 +11005,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11570,12 +11032,6 @@
 		(path "/4cd30821-87cf-49a5-a09a-7f03bd189dc1")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -11695,7 +11151,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11722,12 +11178,6 @@
 		(path "/b1d0439b-f202-4389-a1de-739a70b4efe5")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -11847,7 +11297,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -11874,12 +11324,6 @@
 		(path "/2c2dd0c3-3167-48c1-b92d-dae9f97593ae")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -11999,7 +11443,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -12026,12 +11470,6 @@
 		(path "/2acec605-0a1a-45f2-b6cc-1deed5653890")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -12153,7 +11591,7 @@
 				)
 			)
 		)
-		(property "Description" "RGB LED with integrated controller"
+		(property "Description" "Addressable RGB LED with WS2812B driver"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12181,12 +11619,6 @@
 		(path "/06b5d166-5ebb-479e-b5b3-24f51d379f0d")
 		(sheetname "/Onboard WS2812/")
 		(sheetfile "onboard_ws2812.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "2" "3" "1" "4")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -12330,7 +11762,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -12353,29 +11785,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C304547"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "3e8ea670-92b9-41f1-a46b-89bb63a89095")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "R_*")
 		(path "/23f722b2-e30e-47e6-b8c2-3bfa135ed6b7")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -12495,7 +11908,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -12518,29 +11931,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "94835b44-48f8-44cf-b958-1b915b457196")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/7734c57a-0e8c-4e09-ad76-057db77b9a47")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -12660,7 +12054,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -12687,12 +12081,6 @@
 		(path "/9d05c33e-f459-4092-b7ef-0b038c7ba3ea")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -12802,7 +12190,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12815,7 +12203,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12843,12 +12231,6 @@
 		(path "/ad2b502c-698e-44f4-b5f4-cb36f27198c7")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -12991,7 +12373,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13018,12 +12400,6 @@
 		(path "/32ad35d0-2534-4f59-959d-cbf2b59e0cc2")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -13143,7 +12519,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13170,12 +12546,6 @@
 		(path "/2364be3b-c4fe-4002-ab95-0df1ce4af099")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -13295,7 +12665,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13318,29 +12688,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C15525"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "79bd0a5d-4844-4c89-901a-ffa13cd21371")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "C_*")
 		(path "/6243b45d-2f3d-4910-87bc-1195b1c1a7e8")
 		(sheetname "/SD Card/")
 		(sheetfile "sd_card.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -13468,7 +12819,7 @@
 				)
 			)
 		)
-		(property "Description" "test point"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13485,12 +12836,7 @@
 		(path "/ef24f264-5aa3-4972-82ff-be1b6c8de3a6")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1")
-			)
-		)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
 			(center 0 0)
@@ -13565,7 +12911,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/jianfu-TVAU10_025BR/C19271014"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13578,7 +12924,7 @@
 				)
 			)
 		)
-		(property "Description" "Push button switch, generic, two pins"
+		(property "Description" "SMD push to make tactile button"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13606,12 +12952,6 @@
 		(path "/a0dbe800-e88f-44f8-9747-8c5dfae9fe84")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -13754,7 +13094,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13781,12 +13121,6 @@
 		(path "/fd4702b7-893e-4249-af70-17e5ecf06424")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
@@ -13906,7 +13240,7 @@
 				)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
+		(property "Description" ""
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13933,12 +13267,6 @@
 		(path "/7b9778db-d134-42a4-8ce2-cd4efbe62c1b")
 		(sheetname "/MCU/")
 		(sheetfile "bled-stamp.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_rect
