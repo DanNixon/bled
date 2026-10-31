@@ -68558,7 +68558,7 @@
 	)
 	(wire
 		(pts
-			(xy 25.4 114.3) (xy 31.75 114.3)
+			(xy 27.94 114.3) (xy 31.75 114.3)
 		)
 		(stroke
 			(width 0)
@@ -69264,6 +69264,30 @@
 			)
 		)
 	)
+	(global_label "PMIC_OTG"
+		(shape input)
+		(at 27.94 114.3 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "af193270-ef75-4961-889e-83ca03bba790")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 15.8229 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "SDA"
 		(shape input)
 		(at 53.34 99.06 180)
@@ -69633,83 +69657,6 @@
 			(project "bled-stamp"
 				(path "/e988e766-358b-4d27-8746-3fe94b603f13"
 					(reference "C32")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 25.4 114.3 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0e3f110f-790d-46e3-bdac-02e4371bd949")
-		(property "Reference" "TP1"
-			(at 22.098 109.22 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint"
-			(at 22.098 111.76 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 25.4 109.22 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 25.4 109.22 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "test point"
-			(at 25.4 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2285f633-6cc7-4821-8f3b-80a8e8ddad15")
-		)
-		(instances
-			(project "bled-stamp"
-				(path "/e988e766-358b-4d27-8746-3fe94b603f13"
-					(reference "TP1")
 					(unit 1)
 				)
 			)
