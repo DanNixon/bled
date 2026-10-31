@@ -4549,7 +4549,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/6763474-FTC252010SR47MBCA/C5832354"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4562,7 +4562,7 @@
 				)
 			)
 		)
-		(property "Description" "Inductor"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4575,29 +4575,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C5832354"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "28ca3391-e4ba-47fe-a9a4-ae2be21b352f")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "Choke_* *Coil* Inductor_* L_*")
 		(path "/4f4068ab-826d-4078-a4f1-bc3a97cb82c3")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -4651,13 +4632,6 @@
 			(uuid "c69e285e-accf-4978-97de-6dac70ace4ee")
 		)
 		(embedded_fonts no)
-		(embedded_files
-			(file
-				(name "C5832354.pdf")
-				(type datasheet)
-				(checksum "FFDCF96D30074B877B936DC4E5B825A8")
-			)
-		)
 	)
 	(footprint "Resistor_SMD:R_0201_0603Metric"
 		(layer "F.Cu")
@@ -12957,7 +12931,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://jlcpcb.com/partdetail/YJYCOIN-YHNR40202R2M/C2926400"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12970,7 +12944,7 @@
 				)
 			)
 		)
-		(property "Description" "Inductor"
+		(property "Description" ""
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12983,29 +12957,10 @@
 				)
 			)
 		)
-		(property "LCSC" "C2926400"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "f06dcc1c-e498-40eb-8d72-c0922d40d4eb")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property ki_fp_filters "Choke_* *Coil* Inductor_* L_*")
 		(path "/17ff080f-82ac-49ac-98e1-9e3f886a09a6")
 		(sheetname "/Power/")
 		(sheetfile "power.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -13059,13 +13014,6 @@
 			(uuid "1fb1f887-0ef8-4ab2-ad03-5c49cdd27718")
 		)
 		(embedded_fonts no)
-		(embedded_files
-			(file
-				(name "C2926400.pdf")
-				(type datasheet)
-				(checksum "6AAD9763F26AEA3E1503E67EE4065BD1")
-			)
-		)
 	)
 	(footprint "bled:TVAU10-025B-R"
 		(layer "F.Cu")
