@@ -4350,6 +4350,17 @@
 				)
 			)
 		)
+		(property "LCSC" "C473048"
+			(at 54.61 158.75 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "5852b3d4-1d8d-4849-90a6-09888e27f6e0")
 		)
@@ -5844,6 +5855,17 @@
 		)
 		(property "Description" "Resistor"
 			(at 54.61 142.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C473464"
+			(at 54.61 142.24 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

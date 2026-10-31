@@ -1280,7 +1280,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
+		(property "LCSC" "C22435937"
 			(at 127 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -1883,7 +1883,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
+		(property "LCSC" "C22435937"
 			(at 127 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -2288,7 +2288,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
+		(property "LCSC" "C22435937"
 			(at 127 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -2537,7 +2537,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C49062"
+		(property "LCSC" "C22435937"
 			(at 127 152.4 0)
 			(hide yes)
 			(show_name no)
