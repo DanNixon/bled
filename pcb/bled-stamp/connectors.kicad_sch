@@ -8185,7 +8185,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0201_0603Metric"
 			(at 54.61 160.528 90)
 			(hide yes)
 			(show_name no)
@@ -9848,7 +9848,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0201_0603Metric"
 			(at 54.61 144.018 90)
 			(hide yes)
 			(show_name no)
