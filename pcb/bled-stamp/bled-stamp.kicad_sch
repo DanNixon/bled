@@ -2113,7 +2113,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "ABM8-272-T3"
+			(property "Datasheet" ""
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
