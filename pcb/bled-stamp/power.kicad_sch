@@ -2682,6 +2682,16 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "TODO\nCheck this"
+		(exclude_from_sim no)
+		(at 120.396 183.642 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "1906214e-ef04-4581-98ee-3498fec95eec")
+	)
 	(junction
 		(at 139.7 66.04)
 		(diameter 0)
@@ -7526,7 +7536,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C52675989"
+		(property "LCSC" "C2286"
 			(at 127 173.99 90)
 			(hide yes)
 			(show_name no)

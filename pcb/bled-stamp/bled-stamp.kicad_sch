@@ -5839,7 +5839,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "33R"
+		(property "Value" "27R"
 			(at 40.64 33.0199 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10442,7 +10442,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C52675989"
+		(property "LCSC" "C2286"
 			(at 260.35 40.64 90)
 			(hide yes)
 			(show_name no)
