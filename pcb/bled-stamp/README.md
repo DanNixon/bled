@@ -18,7 +18,7 @@ TODO
 - [Small WS2812B (for signal buffering)](https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC2812B/C5349954)
 - Resistors
   - [0201 47k](https://jlcpcb.com/partdetail/259875-0201WMF4702TEE/C270345)
-  - [0402 27R]()
+  - [0402 33R](https://jlcpcb.com/partdetail/25848-0402WGF330JTCE/C25105)
   - [0201 1k](https://jlcpcb.com/partdetail/259895-0201WMF1001TEE/C270365)
   - [0201 100R](https://jlcpcb.com/partdetail/259896-0201WMF1000TEE/C270366)
   - [0201 470R](https://jlcpcb.com/partdetail/479857-0201WMF4700TEE/C473464)
