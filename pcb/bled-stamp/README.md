@@ -17,15 +17,15 @@ TODO
 - [Indicator LED](https://jlcpcb.com/partdetail/Hubei_KENTOElec-KT0603R/C2286)
 - [Small WS2812B (for signal buffering)](https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC2812B/C5349954)
 - Resistors
-  - [0201 47k](https://jlcpcb.com/partdetail/259875-0201WMF4702TEE/C270345)
+  - [0402 47k](https://jlcpcb.com/partdetail/26535-0402WGF4702TCE/C25792) x
   - [0402 33R](https://jlcpcb.com/partdetail/25848-0402WGF330JTCE/C25105)
-  - [0201 1k](https://jlcpcb.com/partdetail/259895-0201WMF1001TEE/C270365)
+  - [0402 1k](https://jlcpcb.com/partdetail/12256-0402WGF1001TCE/C11702) x
   - [0201 100R](https://jlcpcb.com/partdetail/259896-0201WMF1000TEE/C270366)
   - [0201 470R](https://jlcpcb.com/partdetail/479857-0201WMF4700TEE/C473464)
   - [0201 261R](https://jlcpcb.com/partdetail/479795-0201WMF2610TEE/C473025)
   - [0201 10k](https://jlcpcb.com/partdetail/479818-0201WMF1002TEE/C473048)
   - [0201 45.3k](https://jlcpcb.com/partdetail/479936-0201WMF4532TEE/C473543)
-  - [0201 100k](https://jlcpcb.com/partdetail/259894-0201WMF1003TEE/C270364)
+  - [0402 100k](https://jlcpcb.com/partdetail/26484-0402WGF1003TCE/C25741) x
 - Capacitors
   - [0402 15p](https://jlcpcb.com/partdetail/1900-0402CG150J500NT/C1548)
   - [0402 4.7u](https://jlcpcb.com/partdetail/24469-CL05A475MP5NRNC/C23733)
@@ -33,4 +33,4 @@ TODO
   - [0402 1u](https://jlcpcb.com/partdetail/53938-CL05A105KA5NQNC/C52923)
   - [0402 47n](https://jlcpcb.com/partdetail/YAGEO-CC0402KRX5R7BB473/C505498)
   - [0402 120p](https://jlcpcb.com/partdetail/HRE-CSA0402C0G121J500GT/C54824715)
-  - [0402 100n](https://jlcpcb.com/partdetail/HRE-CGA0402X5R104K250GT/C22435937)
+  - [0402 100n](https://jlcpcb.com/partdetail/1877-CL05B104KO5NNNC/C1525)
