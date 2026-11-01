@@ -6219,7 +6219,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "bled:TVAU10-025B-R"
+		(property "Footprint" ""
 			(at 147.32 177.8 0)
 			(hide yes)
 			(show_name no)
@@ -6252,7 +6252,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C19271014"
+		(property "LCSC" "C720477"
 			(at 152.4 177.8 0)
 			(hide yes)
 			(show_name no)

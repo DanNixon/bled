@@ -2,6 +2,11 @@
 
 TODO
 
+- battery connector
+- update button footprint
+- update resistors
+- check BMS design, parts and layout
+
 ## Parts
 
 - [RP3254A](https://jlcpcb.com/partdetail/RaspberryPi-RP2354A/C41378174)
@@ -16,14 +21,15 @@ TODO
 - [Micro SD card slot](https://jlcpcb.com/partdetail/HOAUC-HYCW103_TF08375B/C2962028)
 - [Indicator LED](https://jlcpcb.com/partdetail/Hubei_KENTOElec-KT0603R/C2286)
 - [Small WS2812B (for signal buffering)](https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC2812B/C5349954)
+- [Button](https://jlcpcb.com/partdetail/XUNPU-TS_1088AR02016/C720477)
 - Resistors
   - [0402 47k](https://jlcpcb.com/partdetail/26535-0402WGF4702TCE/C25792) x
   - [0402 33R](https://jlcpcb.com/partdetail/25848-0402WGF330JTCE/C25105)
   - [0402 1k](https://jlcpcb.com/partdetail/12256-0402WGF1001TCE/C11702) x
-  - [0201 100R](https://jlcpcb.com/partdetail/259896-0201WMF1000TEE/C270366)
-  - [0201 470R](https://jlcpcb.com/partdetail/479857-0201WMF4700TEE/C473464)
+  - [0201 100R](https://jlcpcb.com/partdetail/25819-0402WGF1000TCE/C25076) x
+  - [0201 470R](https://jlcpcb.com/partdetail/25860-0402WGF4700TCE/C25117) x
   - [0201 261R](https://jlcpcb.com/partdetail/479795-0201WMF2610TEE/C473025)
-  - [0201 10k](https://jlcpcb.com/partdetail/479818-0201WMF1002TEE/C473048)
+  - [0201 10k](https://jlcpcb.com/partdetail/26487-0402WGF1002TCE/C25744) x
   - [0201 45.3k](https://jlcpcb.com/partdetail/479936-0201WMF4532TEE/C473543)
   - [0402 100k](https://jlcpcb.com/partdetail/26484-0402WGF1003TCE/C25741) x
 - Capacitors
