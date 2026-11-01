@@ -28,6 +28,17 @@ board-backpack-pico2w = [
     "_status_light_cyw43_gpio0",
 ]
 
+# A BLED stamp board without an RM2 module fitted
+board-stamp = [
+    "_status_light_gpio25",
+]
+
+# A BLED stamp board with an RM2 module fitted
+board-stamp-rm2 = [
+    "_wireless",
+    "_status_light_gpio25",
+]
+
 # Support for a CYW43 wireless chip/Raspberry Pi RM2 module
 _wireless = [
     "dep:bt-hci",
