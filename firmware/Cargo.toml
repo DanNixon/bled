@@ -14,16 +14,34 @@ bench = false
 
 [features]
 default = [
-    "board-pico2w",
+    "board-backpack-pico2w",
 ]
-board-pico2 = []
-board-pico2w = [
+
+# A backpack board fitted with a Pico 2
+board-backpack-pico2 = [
+    "_status_light_gpio25",
+]
+
+# A backpack board fitted with a Pico 2 W
+board-backpack-pico2w = [
+    "_wireless",
+    "_status_light_cyw43_gpio0",
+]
+
+# Support for a CYW43 wireless chip/Raspberry Pi RM2 module
+_wireless = [
     "dep:bt-hci",
     "dep:cyw43",
     "dep:cyw43-pio",
     "dep:heapless",
     "dep:trouble-host",
 ]
+
+# Status light will use GPIO0 on the CYW43 chip (e.g. like on the Pico 2 W)
+_status_light_cyw43_gpio0 = []
+
+# Status light will use GPIO25 (e.g. like on the Pico 2)
+_status_light_gpio25 = []
 
 [dependencies]
 aligned = "0.4.2"
