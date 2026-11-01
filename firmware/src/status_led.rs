@@ -1,23 +1,23 @@
-#[cfg(feature = "board-pico2w")]
+#[cfg(feature = "_status_light_cyw43_gpio0")]
 use cyw43::Control;
-#[cfg(feature = "board-pico2")]
+#[cfg(feature = "_status_light_gpio25")]
 use embassy_rp::{
     Peri,
     gpio::{Level, Output},
     peripherals::PIN_25,
 };
 
-#[cfg(feature = "board-pico2")]
+#[cfg(feature = "_status_light_gpio25")]
 pub(crate) struct StatusLed {
     pin: Output<'static>,
 }
 
-#[cfg(feature = "board-pico2w")]
+#[cfg(feature = "_status_light_cyw43_gpio0")]
 pub(crate) struct StatusLed {
     control: Control<'static>,
 }
 
-#[cfg(feature = "board-pico2")]
+#[cfg(feature = "_status_light_gpio25")]
 impl StatusLed {
     pub(crate) fn new(pin: Peri<'static, PIN_25>) -> Self {
         Self {
@@ -31,7 +31,7 @@ impl StatusLed {
     }
 }
 
-#[cfg(feature = "board-pico2w")]
+#[cfg(feature = "_status_light_cyw43_gpio0")]
 impl StatusLed {
     pub(crate) fn new(control: Control<'static>) -> Self {
         Self { control }

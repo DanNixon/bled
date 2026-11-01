@@ -1,10 +1,11 @@
 #![no_std]
 #![no_main]
-#![cfg_attr(feature = "board-pico2", allow(dead_code))]
+#![cfg_attr(not(feature = "_wireless"), allow(dead_code))]
 
 extern crate alloc;
 
 mod api;
+mod boards;
 mod buttons;
 mod config;
 mod effect;
@@ -13,70 +14,19 @@ mod sdcard;
 mod status;
 mod status_led;
 mod usb;
-#[cfg(feature = "board-pico2w")]
+#[cfg(feature = "_wireless")]
 mod wireless;
 
+use crate::boards::*;
 use crate::sdcard::{SdBlockDevice, SdCardStorage};
 use bled_core::api::{BootReason, DeviceInfo};
 use defmt::{error, info, unwrap};
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::{
-    Peri, dma,
-    peripherals::{self, DMA_CH0, DMA_CH1, DMA_CH2, DMA_CH3, DMA_CH4, DMA_CH5, PIO0, PIO1},
-    pio,
-};
 use embassy_time::{Duration, Instant};
 use embedded_alloc::LlffHeap as Heap;
 use panic_probe as _;
 use portable_atomic as _;
-
-assign_resources::assign_resources! {
-    wireless: WirelessResources {
-        pio: PIO0,
-        tx_dma: DMA_CH0,
-        rx_dma: DMA_CH1,
-        pwr: PIN_23,
-        cs: PIN_25,
-        dio: PIN_24,
-        clk: PIN_29,
-    },
-    led: LedResources {
-        pio: PIO1,
-        channel_0_dma: DMA_CH2,
-        channel_0_pin: PIN_21,
-        channel_1_dma: DMA_CH3,
-        channel_1_pin: PIN_20,
-        channel_2_dma: DMA_CH4,
-        channel_2_pin: PIN_8,
-        channel_3_dma: DMA_CH5,
-        channel_3_pin: PIN_7,
-    },
-    buttons: ButtonResources {
-        a: PIN_17,
-        b: PIN_16,
-        c: PIN_15,
-    },
-    sdcard: SdCardResources {
-        spi: SPI1,
-        sck: PIN_10,
-        mosi: PIN_11,
-        miso: PIN_12,
-        cs: PIN_9,
-        detect: PIN_22,
-    },
-}
-
-embassy_rp::bind_interrupts!(struct Irqs {
-    PIO0_IRQ_0 => pio::InterruptHandler<PIO0>;
-    PIO1_IRQ_0 => pio::InterruptHandler<PIO1>;
-    DMA_IRQ_0 => dma::InterruptHandler<DMA_CH0>,
-                 dma::InterruptHandler<DMA_CH1>,
-                 dma::InterruptHandler<DMA_CH2>,
-                 dma::InterruptHandler<DMA_CH3>,
-                 dma::InterruptHandler<DMA_CH4>,
-                 dma::InterruptHandler<DMA_CH5>;
-});
 
 const HEAP_SIZE: usize = 256 * 1024;
 
@@ -94,17 +44,17 @@ async fn main(spawner: Spawner) {
 
     info!("{}", device_info());
 
-    #[cfg(feature = "board-pico2w")]
+    #[cfg(feature = "_wireless")]
     let (control, bt, bt_address) = {
         let (mut control, bt) = wireless::init(r.wireless, spawner).await;
         let bt_address = wireless::ble::derive_address(&mut control).await;
         (control, bt, bt_address)
     };
 
-    #[cfg(feature = "board-pico2w")]
+    #[cfg(feature = "_status_light_cyw43_gpio0")]
     let mut status_led = status_led::StatusLed::new(control);
-    #[cfg(feature = "board-pico2")]
-    let mut status_led = status_led::StatusLed::new(r.wireless.cs);
+    #[cfg(feature = "_status_light_gpio25")]
+    let mut status_led = status_led::StatusLed::new(p.PIN_25);
 
     let mut button_events = buttons::button_events_subscriber();
     buttons::init(r.buttons, spawner);
@@ -163,7 +113,7 @@ async fn main(spawner: Spawner) {
 
         spawner.spawn(unwrap!(usb::task(usb_builder)));
 
-        #[cfg(feature = "board-pico2w")]
+        #[cfg(feature = "_wireless")]
         spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
 
         spawner.spawn(unwrap!(leds::task(r.led)));
