@@ -970,7 +970,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "01e75551-cc84-4910-91a1-e05880e97a5c")
-		(property "Reference" "#PWR023"
+		(property "Reference" "#PWR038"
 			(at 63.5 72.39 0)
 			(hide yes)
 			(show_name no)
@@ -1030,7 +1030,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR023")
+					(reference "#PWR038")
 					(unit 1)
 				)
 			)
@@ -1147,7 +1147,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0faf4ad9-8027-485c-b000-33c8234115f9")
-		(property "Reference" "#PWR011"
+		(property "Reference" "#PWR043"
 			(at 63.5 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -1207,7 +1207,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR011")
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -1225,7 +1225,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "19777ab0-50fc-4ae4-9944-2c96f7a555e5")
-		(property "Reference" "C23"
+		(property "Reference" "C17"
 			(at 130.81 36.8299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1300,7 +1300,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "C23")
+					(reference "C17")
 					(unit 1)
 				)
 			)
@@ -1318,7 +1318,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1db052bc-1095-4145-995c-63c6934951b9")
-		(property "Reference" "#PWR019"
+		(property "Reference" "#PWR051"
 			(at 127 162.56 0)
 			(hide yes)
 			(show_name no)
@@ -1378,7 +1378,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR019")
+					(reference "#PWR051")
 					(unit 1)
 				)
 			)
@@ -1395,7 +1395,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1ff2086c-a686-4b3a-9b44-4ff5ff0cdc66")
-		(property "Reference" "D8"
+		(property "Reference" "D4"
 			(at 67.056 107.442 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1477,7 +1477,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "D8")
+					(reference "D4")
 					(unit 1)
 				)
 			)
@@ -1495,7 +1495,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4368718b-4d8d-4897-b538-01906478e10e")
-		(property "Reference" "#PWR018"
+		(property "Reference" "#PWR049"
 			(at 127 124.46 0)
 			(hide yes)
 			(show_name no)
@@ -1555,7 +1555,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR018")
+					(reference "#PWR049")
 					(unit 1)
 				)
 			)
@@ -1573,7 +1573,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "559df36f-1afd-48a3-befb-8924f49f5c55")
-		(property "Reference" "#PWR012"
+		(property "Reference" "#PWR041"
 			(at 63.5 128.27 0)
 			(hide yes)
 			(show_name no)
@@ -1633,7 +1633,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR012")
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -1651,7 +1651,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "652a834d-bc50-4b4d-9339-32f3787302de")
-		(property "Reference" "#PWR05"
+		(property "Reference" "#PWR048"
 			(at 127 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -1711,7 +1711,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR05")
+					(reference "#PWR048")
 					(unit 1)
 				)
 			)
@@ -1728,7 +1728,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "74248b22-3629-456c-9961-0761527e5774")
-		(property "Reference" "D7"
+		(property "Reference" "D3"
 			(at 67.564 69.596 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1810,7 +1810,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "D7")
+					(reference "D3")
 					(unit 1)
 				)
 			)
@@ -1828,7 +1828,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "74d1f73c-b344-454a-ad24-3f08fe5e8a2c")
-		(property "Reference" "C25"
+		(property "Reference" "C19"
 			(at 130.81 113.0299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1903,7 +1903,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "C25")
+					(reference "C19")
 					(unit 1)
 				)
 			)
@@ -1921,7 +1921,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "80ddd30c-169d-474e-9843-bf1b374e00c6")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR042"
 			(at 63.5 148.59 0)
 			(hide yes)
 			(show_name no)
@@ -1981,7 +1981,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR025")
+					(reference "#PWR042")
 					(unit 1)
 				)
 			)
@@ -1999,7 +1999,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "880b93d5-409b-4672-b08a-45a43b5b4c5e")
-		(property "Reference" "#PWR010"
+		(property "Reference" "#PWR050"
 			(at 127 152.4 0)
 			(hide yes)
 			(show_name no)
@@ -2059,7 +2059,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR010")
+					(reference "#PWR050")
 					(unit 1)
 				)
 			)
@@ -2077,7 +2077,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "89ddf464-927d-42a7-9836-d464059de1d2")
-		(property "Reference" "#PWR014"
+		(property "Reference" "#PWR037"
 			(at 63.5 52.07 0)
 			(hide yes)
 			(show_name no)
@@ -2137,7 +2137,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR014")
+					(reference "#PWR037")
 					(unit 1)
 				)
 			)
@@ -2155,7 +2155,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8c82892b-64da-4335-a0ac-216980cc17b1")
-		(property "Reference" "#PWR04"
+		(property "Reference" "#PWR046"
 			(at 127 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -2215,7 +2215,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR04")
+					(reference "#PWR046")
 					(unit 1)
 				)
 			)
@@ -2233,7 +2233,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9a959505-63d6-4880-8fdd-668f72e36fbb")
-		(property "Reference" "C24"
+		(property "Reference" "C18"
 			(at 130.81 74.9299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2308,7 +2308,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "C24")
+					(reference "C18")
 					(unit 1)
 				)
 			)
@@ -2326,7 +2326,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b862db3a-048d-4b0e-8b1b-a2847dc12f86")
-		(property "Reference" "#PWR03"
+		(property "Reference" "#PWR044"
 			(at 127 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -2386,7 +2386,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR03")
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -2404,7 +2404,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c1490f9c-e1cc-4cba-9e5c-5a407030d3f3")
-		(property "Reference" "#PWR02"
+		(property "Reference" "#PWR036"
 			(at 63.5 34.29 0)
 			(hide yes)
 			(show_name no)
@@ -2464,7 +2464,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR02")
+					(reference "#PWR036")
 					(unit 1)
 				)
 			)
@@ -2482,7 +2482,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cb74860a-6bed-45a5-9928-04e1a2e2f69a")
-		(property "Reference" "C26"
+		(property "Reference" "C20"
 			(at 130.81 151.1299 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2557,7 +2557,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "C26")
+					(reference "C20")
 					(unit 1)
 				)
 			)
@@ -2575,7 +2575,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cebb7476-3870-40ef-8443-070296637557")
-		(property "Reference" "#PWR024"
+		(property "Reference" "#PWR040"
 			(at 63.5 110.49 0)
 			(hide yes)
 			(show_name no)
@@ -2635,7 +2635,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR024")
+					(reference "#PWR040")
 					(unit 1)
 				)
 			)
@@ -2652,7 +2652,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d1cd3089-ffd4-42ab-b856-16fc935bc35e")
-		(property "Reference" "D12"
+		(property "Reference" "D5"
 			(at 67.056 145.796 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2734,7 +2734,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "D12")
+					(reference "D5")
 					(unit 1)
 				)
 			)
@@ -2752,7 +2752,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d2301a9a-27b8-4e4b-80fd-acad7194f754")
-		(property "Reference" "#PWR016"
+		(property "Reference" "#PWR045"
 			(at 127 48.26 0)
 			(hide yes)
 			(show_name no)
@@ -2812,7 +2812,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR016")
+					(reference "#PWR045")
 					(unit 1)
 				)
 			)
@@ -2830,7 +2830,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d4acfdbd-4e63-4a29-899e-4a7acdfbcc80")
-		(property "Reference" "#PWR013"
+		(property "Reference" "#PWR039"
 			(at 63.5 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -2890,7 +2890,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR013")
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -2908,7 +2908,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e1af9424-7350-46bb-99dc-fb40bd4a8907")
-		(property "Reference" "#PWR017"
+		(property "Reference" "#PWR047"
 			(at 127 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -2968,7 +2968,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/32a1dafa-1786-456b-802b-b7def924daab"
-					(reference "#PWR017")
+					(reference "#PWR047")
 					(unit 1)
 				)
 			)
