@@ -2,8 +2,8 @@
 
 TODO
 
-- update button footprint
 - update resistors
+- update capacitors
 - check BMS design, parts and layout
 
 ## Parts

@@ -663,12 +663,6 @@
           "label": "LCSC",
           "name": "LCSC",
           "show": true
-        },
-        {
-          "group_by": false,
-          "label": "KLC_S4.2_VREG_LX",
-          "name": "KLC_S4.2_VREG_LX",
-          "show": true
         }
       ],
       "filter_string": "",
