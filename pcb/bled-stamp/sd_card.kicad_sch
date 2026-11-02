@@ -1417,17 +1417,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 76.2 120.65 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 76.2 120.65 90)
 			(hide yes)
@@ -1601,17 +1590,6 @@
 			)
 		)
 		(property "LCSC" "C23733"
-			(at 63.5 62.23 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 63.5 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -2027,17 +2005,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 139.7 58.42 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 139.7 58.42 0)
 			(hide yes)
@@ -2164,17 +2131,6 @@
 			)
 		)
 		(property "LCSC" "C1525"
-			(at 76.2 62.23 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 76.2 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -2365,17 +2321,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 88.9 120.65 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 88.9 120.65 90)
 			(hide yes)
@@ -2478,17 +2423,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 101.6 120.65 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 101.6 120.65 90)
 			(hide yes)
@@ -2581,17 +2515,6 @@
 			)
 		)
 		(property "LCSC" "C270345"
-			(at 63.5 120.65 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 63.5 120.65 90)
 			(hide yes)
 			(show_name no)

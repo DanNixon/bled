@@ -4875,17 +4875,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 260.35 152.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 260.35 152.4 0)
 			(hide yes)
@@ -4978,17 +4967,6 @@
 			)
 		)
 		(property "LCSC" "C720477"
-			(at 260.35 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 260.35 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -5551,17 +5529,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 76.2 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 76.2 184.15 0)
 			(hide yes)
@@ -5666,17 +5633,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 203.2 44.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 203.2 44.45 0)
 			(hide yes)
@@ -5769,17 +5725,6 @@
 			)
 		)
 		(property "LCSC" "C270366"
-			(at 33.02 132.08 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 33.02 132.08 90)
 			(hide yes)
 			(show_name no)
@@ -5985,17 +5930,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 260.35 127 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 260.35 127 0)
 			(hide yes)
@@ -6168,17 +6102,6 @@
 			)
 		)
 		(property "LCSC" "C22435937"
-			(at 50.8 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 50.8 184.15 0)
 			(hide yes)
 			(show_name no)
@@ -6371,17 +6294,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 101.6 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 101.6 184.15 0)
 			(hide yes)
@@ -6564,17 +6476,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 203.2 120.65 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 203.2 120.65 0)
 			(hide yes)
@@ -6669,17 +6570,6 @@
 			)
 		)
 		(property "LCSC" "C23733"
-			(at 101.6 31.75 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 101.6 31.75 0)
 			(hide yes)
 			(show_name no)
@@ -6950,17 +6840,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 203.2 133.35 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 203.2 133.35 0)
 			(hide yes)
@@ -7133,17 +7012,6 @@
 			)
 		)
 		(property "LCSC" "C1548"
-			(at 152.4 44.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 152.4 44.45 0)
 			(hide yes)
 			(show_name no)
@@ -7661,17 +7529,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 88.9 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 88.9 184.15 0)
 			(hide yes)
@@ -7854,17 +7711,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 203.2 107.95 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 203.2 107.95 0)
 			(hide yes)
@@ -7959,17 +7805,6 @@
 			)
 		)
 		(property "LCSC" "C23733"
-			(at 114.3 31.75 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 114.3 31.75 0)
 			(hide yes)
 			(show_name no)
@@ -8162,17 +7997,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 127 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 127 184.15 0)
 			(hide yes)
@@ -8265,17 +8089,6 @@
 			)
 		)
 		(property "LCSC" "C270365"
-			(at 247.65 139.7 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 247.65 139.7 90)
 			(hide yes)
 			(show_name no)
@@ -8468,17 +8281,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 38.1 44.45 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 38.1 44.45 0)
 			(hide yes)
@@ -8661,17 +8463,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 152.4 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 152.4 184.15 0)
 			(hide yes)
@@ -8842,17 +8633,6 @@
 			)
 		)
 		(property "LCSC" "C720477"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 260.35 101.6 0)
 			(hide yes)
 			(show_name no)
@@ -9123,17 +8903,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 203.2 31.75 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 203.2 31.75 0)
 			(hide yes)
@@ -9226,17 +8995,6 @@
 			)
 		)
 		(property "LCSC" "C720477"
-			(at 260.35 139.7 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 260.35 139.7 0)
 			(hide yes)
 			(show_name no)
@@ -9507,17 +9265,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 165.1 36.83 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 165.1 36.83 0)
 			(hide yes)
@@ -9628,17 +9375,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 63.5 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 63.5 184.15 0)
 			(hide yes)
@@ -9731,17 +9467,6 @@
 			)
 		)
 		(property "LCSC" "C270366"
-			(at 33.02 139.7 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 33.02 139.7 90)
 			(hide yes)
 			(show_name no)
@@ -9856,17 +9581,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 38.1 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 38.1 184.15 0)
 			(hide yes)
@@ -9961,17 +9675,6 @@
 			)
 		)
 		(property "LCSC" "C22435937"
-			(at 139.7 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 139.7 184.15 0)
 			(hide yes)
 			(show_name no)
@@ -10409,17 +10112,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 177.8 130.81 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 177.8 130.81 90)
 			(hide yes)
@@ -10670,17 +10362,6 @@
 			)
 		)
 		(property "LCSC" "C473464"
-			(at 177.8 123.19 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 177.8 123.19 0)
 			(hide yes)
 			(show_name no)
@@ -11109,17 +10790,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 81.28 35.56 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 81.28 35.56 90)
 			(hide yes)
@@ -11214,17 +10884,6 @@
 			)
 		)
 		(property "LCSC" "C22435937"
-			(at 25.4 184.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 25.4 184.15 0)
 			(hide yes)
 			(show_name no)

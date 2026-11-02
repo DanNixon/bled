@@ -1114,17 +1114,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 63.5 38.1 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 63.5 38.1 0)
 			(hide yes)
@@ -1313,17 +1302,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 127 38.1 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 127 38.1 0)
 			(hide yes)
@@ -1496,17 +1474,6 @@
 			)
 		)
 		(property "LCSC" "C5349954"
-			(at 63.5 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 63.5 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -1861,17 +1828,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 63.5 76.2 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 63.5 76.2 0)
 			(hide yes)
@@ -1972,17 +1928,6 @@
 			)
 		)
 		(property "LCSC" "C22435937"
-			(at 127 114.3 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 127 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -2409,17 +2354,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 127 76.2 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 127 76.2 0)
 			(hide yes)
@@ -2680,17 +2614,6 @@
 				)
 			)
 		)
-		(property "KLC_S4.2_DVDD" ""
-			(at 127 152.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
 		(property "KLC_S4.2_VREG_LX" ""
 			(at 127 152.4 0)
 			(hide yes)
@@ -2863,17 +2786,6 @@
 			)
 		)
 		(property "LCSC" "C5349954"
-			(at 63.5 152.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KLC_S4.2_DVDD" ""
 			(at 63.5 152.4 0)
 			(hide yes)
 			(show_name no)
