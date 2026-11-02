@@ -668,13 +668,13 @@
           "group_by": false,
           "label": "KLC_S4.2_DVDD",
           "name": "KLC_S4.2_DVDD",
-          "show": false
+          "show": true
         },
         {
           "group_by": false,
           "label": "KLC_S4.2_VREG_LX",
           "name": "KLC_S4.2_VREG_LX",
-          "show": false
+          "show": true
         }
       ],
       "filter_string": "",

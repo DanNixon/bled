@@ -2,7 +2,6 @@
 
 TODO
 
-- battery connector
 - update button footprint
 - update resistors
 - check BMS design, parts and layout
@@ -13,6 +12,7 @@ TODO
 - [RP2350 crystal](https://jlcpcb.com/partdetail/AbraconLLC-ABM8_272T3/C20625731)
 - [RP2350 core SMPS inductor](https://jlcpcb.com/partdetail/AbraconLLC-AOTA_B201610S3R3_101T/C42411119)
 - [Battery management IC](https://jlcpcb.com/partdetail/TexasInstruments-BQ25895RTWR/C80200)
+- [Battery connector](https://jlcpcb.com/partdetail/JST-SM02B_SRSS_TB_LF_SN/C160402)
 - [VSYS SMPS inductor](https://jlcpcb.com/partdetail/YJYCOIN-YHNR40202R2M/C2926400)
 - [Power selection diodes](https://jlcpcb.com/partdetail/SEP-B5819WSL/C50176370)
 - [Voltage regulator](https://jlcpcb.com/partdetail/TexasInstruments-TLV62595DMQR/C3189969)
