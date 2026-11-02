@@ -5844,7 +5844,7 @@
 	)
 	(symbol
 		(lib_id "Switch:SW_Push")
-		(at 152.4 177.8 90)
+		(at 152.4 177.8 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5855,29 +5855,29 @@
 		(fields_autoplaced yes)
 		(uuid "5a046a8b-1eae-4b65-8af5-6db954797103")
 		(property "Reference" "SW6"
-			(at 153.67 176.5299 90)
+			(at 156.21 176.5299 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 		(property "Value" "SW_Push"
-			(at 153.67 179.0699 90)
+			(at 156.21 179.0699 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
 		)
 		(property "Footprint" "bled:SW_TS-1088_XNP"
-			(at 147.32 177.8 0)
+			(at 157.48 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5888,7 +5888,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 147.32 177.8 0)
+			(at 157.48 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
