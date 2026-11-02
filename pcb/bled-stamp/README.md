@@ -2,8 +2,6 @@
 
 TODO
 
-- update resistors
-- update capacitors
 - check BMS design, parts and layout
 
 ## Parts
@@ -23,15 +21,15 @@ TODO
 - [Small WS2812B (for signal buffering)](https://jlcpcb.com/partdetail/XINGLIGHT-XL_1615RGBC2812B/C5349954)
 - [Button](https://jlcpcb.com/partdetail/XUNPU-TS_1088AR02016/C720477)
 - Resistors
-  - [0402 47k](https://jlcpcb.com/partdetail/26535-0402WGF4702TCE/C25792) x
+  - [0402 47k](https://jlcpcb.com/partdetail/26535-0402WGF4702TCE/C25792)
   - [0402 33R](https://jlcpcb.com/partdetail/25848-0402WGF330JTCE/C25105)
-  - [0402 1k](https://jlcpcb.com/partdetail/12256-0402WGF1001TCE/C11702) x
-  - [0201 100R](https://jlcpcb.com/partdetail/25819-0402WGF1000TCE/C25076) x
-  - [0201 470R](https://jlcpcb.com/partdetail/25860-0402WGF4700TCE/C25117) x
+  - [0402 1k](https://jlcpcb.com/partdetail/12256-0402WGF1001TCE/C11702)
+  - [0201 100R](https://jlcpcb.com/partdetail/25819-0402WGF1000TCE/C25076)
+  - [0201 470R](https://jlcpcb.com/partdetail/25860-0402WGF4700TCE/C25117)
   - [0201 261R](https://jlcpcb.com/partdetail/479795-0201WMF2610TEE/C473025)
-  - [0201 10k](https://jlcpcb.com/partdetail/26487-0402WGF1002TCE/C25744) x
+  - [0201 10k](https://jlcpcb.com/partdetail/26487-0402WGF1002TCE/C25744)
   - [0201 45.3k](https://jlcpcb.com/partdetail/479936-0201WMF4532TEE/C473543)
-  - [0402 100k](https://jlcpcb.com/partdetail/26484-0402WGF1003TCE/C25741) x
+  - [0402 100k](https://jlcpcb.com/partdetail/26484-0402WGF1003TCE/C25741)
 - Capacitors
   - [0402 15p](https://jlcpcb.com/partdetail/1900-0402CG150J500NT/C1548)
   - [0402 4.7u](https://jlcpcb.com/partdetail/24469-CL05A475MP5NRNC/C23733)
