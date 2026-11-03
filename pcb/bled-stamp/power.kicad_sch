@@ -3567,6 +3567,16 @@
 	)
 	(wire
 		(pts
+			(xy 127 179.07) (xy 127 176.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce177eab-3f82-4d86-923f-707a0ba27f74")
+	)
+	(wire
+		(pts
 			(xy 127 81.28) (xy 127 91.44)
 		)
 		(stroke
@@ -3776,7 +3786,7 @@
 		(uuid "fed3b271-8b76-4a2e-a470-9b96a1c51f69")
 	)
 	(label "STAT"
-		(at 127 185.42 270)
+		(at 127 186.69 270)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4285,7 +4295,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 127 170.18 0)
+		(at 127 168.91 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4296,7 +4306,7 @@
 		(fields_autoplaced yes)
 		(uuid "06fa1a5e-5b66-46b5-bf79-039daceb917e")
 		(property "Reference" "#PWR063"
-			(at 127 173.99 0)
+			(at 127 172.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4307,7 +4317,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 127 165.1 0)
+			(at 127 163.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4317,7 +4327,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 127 170.18 0)
+			(at 127 168.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4328,7 +4338,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 127 170.18 0)
+			(at 127 168.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4339,7 +4349,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 127 170.18 0)
+			(at 127 168.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6305,7 +6315,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 127 173.99 180)
+		(at 127 182.88 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6316,7 +6326,7 @@
 		(fields_autoplaced yes)
 		(uuid "9a25631e-c925-4891-a576-30792914d2ed")
 		(property "Reference" "R16"
-			(at 129.54 172.7199 0)
+			(at 129.54 181.6099 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6327,7 +6337,7 @@
 			)
 		)
 		(property "Value" "1k"
-			(at 129.54 175.2599 0)
+			(at 129.54 184.1499 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6338,7 +6348,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 128.778 173.99 90)
+			(at 128.778 182.88 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6349,7 +6359,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 127 173.99 0)
+			(at 127 182.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6360,7 +6370,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 127 173.99 0)
+			(at 127 182.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6371,7 +6381,7 @@
 			)
 		)
 		(property "LCSC" "C11702"
-			(at 127 173.99 90)
+			(at 127 182.88 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6647,7 +6657,7 @@
 	)
 	(symbol
 		(lib_id "Device:LED")
-		(at 127 181.61 90)
+		(at 127 172.72 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6658,7 +6668,7 @@
 		(fields_autoplaced yes)
 		(uuid "b0aeed07-c22f-404e-acb4-85bffcaa5ebf")
 		(property "Reference" "D6"
-			(at 130.81 181.9274 90)
+			(at 130.81 173.0374 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6669,7 +6679,7 @@
 			)
 		)
 		(property "Value" "LED"
-			(at 130.81 184.4674 90)
+			(at 130.81 175.5774 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6680,7 +6690,7 @@
 			)
 		)
 		(property "Footprint" "LED_SMD:LED_0603_1608Metric"
-			(at 127 181.61 0)
+			(at 127 172.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6691,7 +6701,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 127 181.61 0)
+			(at 127 172.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6702,7 +6712,7 @@
 			)
 		)
 		(property "Description" "Light emitting diode"
-			(at 127 181.61 0)
+			(at 127 172.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6713,7 +6723,7 @@
 			)
 		)
 		(property "Sim.Pins" "1=K 2=A"
-			(at 127 181.61 0)
+			(at 127 172.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6724,7 +6734,7 @@
 			)
 		)
 		(property "LCSC" "C2286"
-			(at 127 181.61 90)
+			(at 127 172.72 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
