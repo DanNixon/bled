@@ -1275,7 +1275,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "194471a1-a7a0-49b9-8b4a-66eb06d35849")
-		(property "Reference" "#PWR093"
+		(property "Reference" "#PWR095"
 			(at 162.56 82.55 0)
 			(hide yes)
 			(show_name no)
@@ -1335,7 +1335,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR093")
+					(reference "#PWR095")
 					(unit 1)
 				)
 			)
@@ -1444,7 +1444,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4e84026c-d523-4b2d-abbb-4e825066480a")
-		(property "Reference" "#PWR090"
+		(property "Reference" "#PWR092"
 			(at 88.9 120.65 0)
 			(hide yes)
 			(show_name no)
@@ -1505,7 +1505,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR090")
+					(reference "#PWR092")
 					(unit 1)
 				)
 			)
@@ -1616,7 +1616,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7f973c73-4009-4f74-b395-81ba38f4228f")
-		(property "Reference" "#PWR088"
+		(property "Reference" "#PWR090"
 			(at 76.2 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -1676,7 +1676,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR088")
+					(reference "#PWR090")
 					(unit 1)
 				)
 			)
@@ -1694,7 +1694,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7fdbfb48-5864-4ea0-ab82-1860e24ece4f")
-		(property "Reference" "#PWR085"
+		(property "Reference" "#PWR087"
 			(at 63.5 59.69 0)
 			(hide yes)
 			(show_name no)
@@ -1755,7 +1755,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR085")
+					(reference "#PWR087")
 					(unit 1)
 				)
 			)
@@ -1773,7 +1773,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "80908ce3-b6a8-4e08-86c9-7cda462ad9ca")
-		(property "Reference" "#PWR087"
+		(property "Reference" "#PWR089"
 			(at 63.5 120.65 0)
 			(hide yes)
 			(show_name no)
@@ -1834,7 +1834,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR087")
+					(reference "#PWR089")
 					(unit 1)
 				)
 			)
@@ -1852,7 +1852,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b33b8470-d98c-4b85-86ea-1c2ac3920edb")
-		(property "Reference" "#PWR086"
+		(property "Reference" "#PWR088"
 			(at 63.5 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -1912,7 +1912,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR086")
+					(reference "#PWR088")
 					(unit 1)
 				)
 			)
@@ -2135,7 +2135,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c6b348a7-37fb-467c-970b-dee937046d52")
-		(property "Reference" "#PWR092"
+		(property "Reference" "#PWR094"
 			(at 114.3 82.55 0)
 			(hide yes)
 			(show_name no)
@@ -2195,7 +2195,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR092")
+					(reference "#PWR094")
 					(unit 1)
 				)
 			)
@@ -2486,7 +2486,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fc90c6e6-72a7-4f57-93e9-3598a76d9881")
-		(property "Reference" "#PWR091"
+		(property "Reference" "#PWR093"
 			(at 101.6 120.65 0)
 			(hide yes)
 			(show_name no)
@@ -2547,7 +2547,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR091")
+					(reference "#PWR093")
 					(unit 1)
 				)
 			)
@@ -2565,7 +2565,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fdbc0504-e7f2-4f4e-ba9c-d4b7275d750f")
-		(property "Reference" "#PWR089"
+		(property "Reference" "#PWR091"
 			(at 76.2 120.65 0)
 			(hide yes)
 			(show_name no)
@@ -2626,7 +2626,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/a6d9fe37-ad54-4bf5-83d7-818de1255168"
-					(reference "#PWR089")
+					(reference "#PWR091")
 					(unit 1)
 				)
 			)

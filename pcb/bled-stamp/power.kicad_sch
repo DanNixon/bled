@@ -2590,6 +2590,12 @@
 		(uuid "0e1c6611-d5dc-4b52-91a3-972f80b5b4f0")
 	)
 	(junction
+		(at 149.86 46.99)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "16d78923-8583-41a6-b1f3-4180f30036a2")
+	)
+	(junction
 		(at 63.5 167.64)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2757,6 +2763,12 @@
 		(color 0 0 0 0)
 		(uuid "f7286de7-bbd2-4f72-b9f5-96942872fe27")
 	)
+	(junction
+		(at 254 55.88)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fb0e4b65-57e9-40a6-b6a7-1f35359fc086")
+	)
 	(no_connect
 		(at 55.88 93.98)
 		(uuid "12ea3bfd-6eb7-41a9-b190-976ef16f46c3")
@@ -2785,7 +2797,7 @@
 	)
 	(wire
 		(pts
-			(xy 139.7 46.99) (xy 158.75 46.99)
+			(xy 139.7 46.99) (xy 149.86 46.99)
 		)
 		(stroke
 			(width 0)
@@ -2905,6 +2917,16 @@
 	)
 	(wire
 		(pts
+			(xy 241.3 54.61) (xy 241.3 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1b8e1c9a-b294-4d86-80d6-ca48fad787a9")
+	)
+	(wire
+		(pts
 			(xy 53.34 50.8) (xy 53.34 58.42)
 		)
 		(stroke
@@ -2942,6 +2964,16 @@
 			(type default)
 		)
 		(uuid "2d5462e2-2ba7-4883-85d2-26186759e970")
+	)
+	(wire
+		(pts
+			(xy 149.86 46.99) (xy 158.75 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2e1672d1-ac63-4201-8ca8-0210c9d6a63f")
 	)
 	(wire
 		(pts
@@ -3155,7 +3187,7 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 55.88) (xy 266.7 55.88)
+			(xy 241.3 55.88) (xy 254 55.88)
 		)
 		(stroke
 			(width 0)
@@ -3395,7 +3427,7 @@
 	)
 	(wire
 		(pts
-			(xy 254 54.61) (xy 254 57.15)
+			(xy 254 54.61) (xy 254 55.88)
 		)
 		(stroke
 			(width 0)
@@ -3465,6 +3497,16 @@
 	)
 	(wire
 		(pts
+			(xy 149.86 46.99) (xy 149.86 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b6f66410-61f4-485e-bba0-415b20cb6177")
+	)
+	(wire
+		(pts
 			(xy 53.34 114.3) (xy 55.88 114.3)
 		)
 		(stroke
@@ -3515,13 +3557,13 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 54.61) (xy 241.3 55.88)
+			(xy 254 55.88) (xy 266.7 55.88)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c73f6a85-6497-486f-85f1-d56abf573199")
+		(uuid "c9c5a261-1172-4e97-9d1d-662d5cb34458")
 	)
 	(wire
 		(pts
@@ -3592,6 +3634,16 @@
 			(type default)
 		)
 		(uuid "d8037bb9-6907-499c-8d5b-565c4b552ac3")
+	)
+	(wire
+		(pts
+			(xy 254 55.88) (xy 254 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d850545d-7b73-4384-bfb3-aee42af3e38c")
 	)
 	(wire
 		(pts
@@ -4243,7 +4295,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "06fa1a5e-5b66-46b5-bf79-039daceb917e")
-		(property "Reference" "#PWR061"
+		(property "Reference" "#PWR063"
 			(at 127 173.99 0)
 			(hide yes)
 			(show_name no)
@@ -4303,7 +4355,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR061")
+					(reference "#PWR063")
 					(unit 1)
 				)
 			)
@@ -4691,7 +4743,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2162ed90-09ee-4d68-9b56-dd94299b49a4")
-		(property "Reference" "#PWR053"
+		(property "Reference" "#PWR055"
 			(at 25.4 87.63 0)
 			(hide yes)
 			(show_name no)
@@ -4751,7 +4803,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR053")
+					(reference "#PWR055")
 					(unit 1)
 				)
 			)
@@ -4769,7 +4821,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "34337773-5d68-48d3-86fb-14ae68e7eafc")
-		(property "Reference" "#PWR056"
+		(property "Reference" "#PWR058"
 			(at 53.34 128.27 0)
 			(hide yes)
 			(show_name no)
@@ -4829,7 +4881,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR056")
+					(reference "#PWR058")
 					(unit 1)
 				)
 			)
@@ -4847,7 +4899,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3ecc8a51-d78a-4920-81a0-6a866e6a094d")
-		(property "Reference" "#PWR069"
+		(property "Reference" "#PWR071"
 			(at 269.24 48.26 0)
 			(hide yes)
 			(show_name no)
@@ -4907,7 +4959,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR069")
+					(reference "#PWR071")
 					(unit 1)
 				)
 			)
@@ -4925,7 +4977,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4035d9a7-278a-485b-b6b0-d8d7bc99b332")
-		(property "Reference" "#PWR065"
+		(property "Reference" "#PWR067"
 			(at 158.75 107.95 0)
 			(hide yes)
 			(show_name no)
@@ -4985,7 +5037,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR065")
+					(reference "#PWR067")
 					(unit 1)
 				)
 			)
@@ -5003,7 +5055,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "489f9150-c3fd-407a-902e-3c8f36ca2aeb")
-		(property "Reference" "#PWR063"
+		(property "Reference" "#PWR065"
 			(at 152.4 189.23 0)
 			(hide yes)
 			(show_name no)
@@ -5063,7 +5115,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR063")
+					(reference "#PWR065")
 					(unit 1)
 				)
 			)
@@ -5657,7 +5709,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "606688d3-4ebb-431e-8a08-f65fccf7001c")
-		(property "Reference" "R11"
+		(property "Reference" "R13"
 			(at 27.94 76.1999 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5732,7 +5784,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "R11")
+					(reference "R13")
 					(unit 1)
 				)
 			)
@@ -5750,7 +5802,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6275dda5-5d24-403b-905c-5dd07af67e60")
-		(property "Reference" "#PWR054"
+		(property "Reference" "#PWR056"
 			(at 44.45 54.61 0)
 			(hide yes)
 			(show_name no)
@@ -5810,7 +5862,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR054")
+					(reference "#PWR056")
 					(unit 1)
 				)
 			)
@@ -6107,7 +6159,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9119d3e9-1e82-48d3-b849-a91006d0a5ee")
-		(property "Reference" "#PWR058"
+		(property "Reference" "#PWR060"
 			(at 57.15 182.88 0)
 			(hide yes)
 			(show_name no)
@@ -6167,7 +6219,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR058")
+					(reference "#PWR060")
 					(unit 1)
 				)
 			)
@@ -6185,7 +6237,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "929d6d48-55c8-4196-a735-e40bcd899294")
-		(property "Reference" "#PWR067"
+		(property "Reference" "#PWR069"
 			(at 209.55 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -6245,7 +6297,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR067")
+					(reference "#PWR069")
 					(unit 1)
 				)
 			)
@@ -6263,7 +6315,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9a25631e-c925-4891-a576-30792914d2ed")
-		(property "Reference" "R15"
+		(property "Reference" "R16"
 			(at 129.54 172.7199 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6338,7 +6390,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "R15")
+					(reference "R16")
 					(unit 1)
 				)
 			)
@@ -6356,7 +6408,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a73eb820-8c31-4dfe-901e-007ce0d660e1")
-		(property "Reference" "#PWR060"
+		(property "Reference" "#PWR062"
 			(at 127 120.65 0)
 			(hide yes)
 			(show_name no)
@@ -6416,7 +6468,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR060")
+					(reference "#PWR062")
 					(unit 1)
 				)
 			)
@@ -6434,7 +6486,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a79eac6b-e67e-450d-8574-dfe11382b391")
-		(property "Reference" "#PWR066"
+		(property "Reference" "#PWR068"
 			(at 198.12 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -6494,84 +6546,6 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR066")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 254 57.15 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a825c2fa-d409-4caf-81e0-0e5144224e05")
-		(property "Reference" "#PWR068"
-			(at 254 63.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 254 62.23 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 254 57.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 254 57.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 254 57.15 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d0be11be-ba05-46a6-a3b6-0713cf0fb13d")
-		)
-		(instances
-			(project "bled-stamp"
-				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
 					(reference "#PWR068")
 					(unit 1)
 				)
@@ -6590,7 +6564,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ad1a42db-936f-4d87-902d-3d3b7f7edf72")
-		(property "Reference" "R13"
+		(property "Reference" "R14"
 			(at 129.54 93.9799 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6665,7 +6639,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "R13")
+					(reference "R14")
 					(unit 1)
 				)
 			)
@@ -6787,7 +6761,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b1f49b06-34b9-4efc-bef8-98c53d5b5068")
-		(property "Reference" "#PWR064"
+		(property "Reference" "#PWR066"
 			(at 158.75 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -6847,7 +6821,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR064")
+					(reference "#PWR066")
 					(unit 1)
 				)
 			)
@@ -6970,7 +6944,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "bdc31f0c-4d4b-4a12-a6a7-95dab5edb493")
-		(property "Reference" "#PWR055"
+		(property "Reference" "#PWR057"
 			(at 53.34 54.61 0)
 			(hide yes)
 			(show_name no)
@@ -7030,7 +7004,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR055")
+					(reference "#PWR057")
 					(unit 1)
 				)
 			)
@@ -7239,6 +7213,84 @@
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
 					(reference "D8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 254 57.15 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c4e2f858-6718-4f2e-9f48-d4aa2970bc57")
+		(property "Reference" "#PWR070"
+			(at 254 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 254 62.23 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 254 57.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 57.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 254 57.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "32b27bf0-7957-408f-af83-1e4a3dfb7525")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
+					(reference "#PWR070")
 					(unit 1)
 				)
 			)
@@ -7535,7 +7587,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cb792f7c-dfd7-4ba5-b214-a8a5d8341692")
-		(property "Reference" "#PWR062"
+		(property "Reference" "#PWR064"
 			(at 133.35 80.01 0)
 			(hide yes)
 			(show_name no)
@@ -7595,7 +7647,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR062")
+					(reference "#PWR064")
 					(unit 1)
 				)
 			)
@@ -7613,7 +7665,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d542819c-ba2d-4974-8d27-31d0315c4572")
-		(property "Reference" "R14"
+		(property "Reference" "R15"
 			(at 129.54 106.6799 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7688,7 +7740,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "R14")
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -7706,7 +7758,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "dfb12022-01c2-49ed-a912-f2a254367059")
-		(property "Reference" "#PWR052"
+		(property "Reference" "#PWR054"
 			(at 25.4 72.39 0)
 			(hide yes)
 			(show_name no)
@@ -7766,7 +7818,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR052")
+					(reference "#PWR054")
 					(unit 1)
 				)
 			)
@@ -7784,7 +7836,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e4f11487-b39c-429d-81dd-6bde226c6369")
-		(property "Reference" "#PWR057"
+		(property "Reference" "#PWR059"
 			(at 57.15 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -7844,7 +7896,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR057")
+					(reference "#PWR059")
 					(unit 1)
 				)
 			)
@@ -7945,6 +7997,84 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 149.86 58.42 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ecab3e7a-5d33-4874-8dea-7c4e2e9f7258")
+		(property "Reference" "#PWR096"
+			(at 149.86 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 149.86 63.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 149.86 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 149.86 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8bf212b7-6951-47eb-bbcc-e99dfcdba5dc")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
+					(reference "#PWR096")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 99.06 121.92 0)
 		(unit 1)
 		(body_style 1)
@@ -7955,7 +8085,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "eee67e4d-e889-4126-8191-cd6e51e726a7")
-		(property "Reference" "#PWR059"
+		(property "Reference" "#PWR061"
 			(at 99.06 128.27 0)
 			(hide yes)
 			(show_name no)
@@ -8015,7 +8145,7 @@
 		(instances
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
-					(reference "#PWR059")
+					(reference "#PWR061")
 					(unit 1)
 				)
 			)
@@ -8109,6 +8239,99 @@
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
 					(reference "C22")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 149.86 54.61 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f84ee502-7f92-4f37-b1c1-960d0a010ebb")
+		(property "Reference" "C39"
+			(at 153.67 53.3399 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "4.7u"
+			(at 153.67 55.8799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 150.8252 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 149.86 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C23733"
+			(at 149.86 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "95d1e9a8-41e7-4904-b2e4-ee423f7396db")
+		)
+		(pin "2"
+			(uuid "1a8d0a58-34db-4e3c-b0ad-5172161aad16")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/ae769c2e-e387-4a13-97cf-3ca85ed64c8e"
+					(reference "C39")
 					(unit 1)
 				)
 			)
