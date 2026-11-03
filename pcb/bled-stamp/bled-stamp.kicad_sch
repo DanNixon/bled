@@ -10763,7 +10763,7 @@
 	)
 	(symbol
 		(lib_id "bled:AOTA-B201610S3R3-101-T")
-		(at 81.28 35.56 270)
+		(at 81.28 35.56 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10774,25 +10774,25 @@
 		(fields_autoplaced yes)
 		(uuid "f6bc67a5-f1d4-422c-a28b-281d32525d5d")
 		(property "Reference" "L1"
-			(at 85.09 34.2899 90)
+			(at 82.55 34.2899 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.524 1.524)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "AOTA-B201610S3R3-101-T"
-			(at 85.09 36.8299 90)
+			(at 82.55 36.8299 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.524 1.524)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "bled:IND_AOTA-B201610S_2p0x1p6x1p0_ABR-L"
