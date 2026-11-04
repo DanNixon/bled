@@ -3733,6 +3733,16 @@
 	)
 	(wire
 		(pts
+			(xy 104.14 93.98) (xy 101.6 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8bd8b7fd-2178-4efb-8e36-75e055aeb74a")
+	)
+	(wire
+		(pts
 			(xy 191.77 36.83) (xy 190.5 36.83)
 		)
 		(stroke
@@ -3760,6 +3770,16 @@
 			(type default)
 		)
 		(uuid "9347266b-10ce-46d4-b24b-a315bb3582f4")
+	)
+	(wire
+		(pts
+			(xy 104.14 101.6) (xy 101.6 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "93f486d0-23ba-49b9-bdab-c47e92745c51")
 	)
 	(wire
 		(pts
@@ -3963,6 +3983,16 @@
 	)
 	(wire
 		(pts
+			(xy 104.14 96.52) (xy 101.6 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c944a9de-637b-4d74-aa42-a3ffd0dbe7ba")
+	)
+	(wire
+		(pts
 			(xy 48.26 78.74) (xy 50.8 78.74)
 		)
 		(stroke
@@ -4103,6 +4133,16 @@
 	)
 	(wire
 		(pts
+			(xy 104.14 99.06) (xy 101.6 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f12d5e82-5c75-4445-a211-df7064a26a2d")
+	)
+	(wire
+		(pts
 			(xy 207.01 139.7) (xy 203.2 139.7)
 		)
 		(stroke
@@ -4202,7 +4242,7 @@
 		(uuid "3e2f0be5-4ab1-4dd5-8057-6c72d708e123")
 	)
 	(label "BTN_C"
-		(at 104.14 124.46 0)
+		(at 104.14 119.38 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4252,7 +4292,7 @@
 		(uuid "83bc2899-4fb7-4e21-8e79-3517a7c8b8c9")
 	)
 	(label "BTN_A"
-		(at 104.14 119.38 0)
+		(at 104.14 124.46 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4541,7 +4581,7 @@
 	)
 	(global_label "WL_GSPI_SCK"
 		(shape input)
-		(at 127 109.22 0)
+		(at 104.14 93.98 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4551,7 +4591,7 @@
 		)
 		(uuid "6e84ba9e-9114-4723-b4cf-2e84595b386d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 142.5037 109.22 0)
+			(at 119.6437 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4565,7 +4605,7 @@
 	)
 	(global_label "WL_GSPI_DATA"
 		(shape input)
-		(at 127 106.68 0)
+		(at 104.14 101.6 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4575,7 +4615,7 @@
 		)
 		(uuid "7680fe73-2b6d-4c9a-8e82-cc2b0547e0f2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 143.169 106.68 0)
+			(at 120.309 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4637,7 +4677,7 @@
 	)
 	(global_label "WL_GSPI_CS"
 		(shape input)
-		(at 127 104.14 0)
+		(at 104.14 99.06 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4647,7 +4687,7 @@
 		)
 		(uuid "91f7d58c-3c6d-4f07-842a-e8e6ead8a6cb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 141.2337 104.14 0)
+			(at 118.3737 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4661,7 +4701,7 @@
 	)
 	(global_label "WL_POWER"
 		(shape input)
-		(at 127 101.6 0)
+		(at 104.14 96.52 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4671,7 +4711,7 @@
 		)
 		(uuid "abfa1b62-3180-4e88-946b-df0d58edcc35")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 139.9032 101.6 0)
+			(at 117.0432 96.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
