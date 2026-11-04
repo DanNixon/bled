@@ -52,7 +52,7 @@
         "zones": {
           "border_display_style": 2,
           "border_hatch_pitch": 0.5,
-          "corner_radius": 0.5,
+          "corner_radius": 0.25,
           "corner_smoothing": 2,
           "fill_mode": 0,
           "hatch_gap": 1.5,
@@ -76,7 +76,16 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "via_dangling|103250000|78000000|0a1ac32a-eea7-439a-a909-44e05e4cd5b7|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "via_dangling|103250000|78750000|65cbf0f4-6c9e-401f-a9de-461defd61eb0|00000000-0000-0000-0000-000000000000",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -151,7 +160,7 @@
         "min_copper_edge_clearance": 0.2,
         "min_groove_width": 0.0,
         "min_hole_clearance": 0.25,
-        "min_hole_to_hole": 0.45,
+        "min_hole_to_hole": 0.2,
         "min_microvia_diameter": 0.2,
         "min_microvia_drill": 0.1,
         "min_resolved_spokes": 2,
@@ -715,7 +724,7 @@
         "uuid": "3e025044-e694-4110-8cfc-0d811f19f9a3"
       }
     ],
-    "used_designators": "#PWR1-97,A1,C1-54,D1-12,J1-7,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
+    "used_designators": "#PWR1-103,A1,C1-54,D1-12,J1-9,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
     "variants": []
   },
   "sheets": [
