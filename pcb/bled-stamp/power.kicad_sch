@@ -3785,6 +3785,26 @@
 		)
 		(uuid "fed3b271-8b76-4a2e-a470-9b96a1c51f69")
 	)
+	(label "SYS_REG_IN"
+		(at 156.21 46.99 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0a08a1e2-b415-4fff-a58e-6098638e1284")
+	)
+	(label "PMIC_SYS"
+		(at 114.3 73.66 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "559647dd-5cec-49dc-b90c-d055a6d6221c")
+	)
 	(label "STAT"
 		(at 127 186.69 270)
 		(effects
@@ -3794,6 +3814,16 @@
 			(justify right bottom)
 		)
 		(uuid "91ff431b-c52b-4eb2-a8f5-8f5706b9d3f0")
+	)
+	(label "PMIC_SW"
+		(at 97.79 68.58 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "bcda808f-9fbd-4db3-9433-9f80b2488a56")
 	)
 	(label "Q_ON"
 		(at 99.06 101.6 0)
