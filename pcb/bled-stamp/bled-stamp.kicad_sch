@@ -4202,7 +4202,7 @@
 		(uuid "3e2f0be5-4ab1-4dd5-8057-6c72d708e123")
 	)
 	(label "BTN_C"
-		(at 104.14 127 0)
+		(at 104.14 124.46 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4252,7 +4252,7 @@
 		(uuid "83bc2899-4fb7-4e21-8e79-3517a7c8b8c9")
 	)
 	(label "BTN_A"
-		(at 104.14 121.92 0)
+		(at 104.14 119.38 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4342,7 +4342,7 @@
 		(uuid "df198024-8ff8-4f1f-94d8-d94862f6d21e")
 	)
 	(label "LED"
-		(at 104.14 119.38 0)
+		(at 104.14 127 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4352,7 +4352,7 @@
 		(uuid "f83916c2-e7e8-4061-999a-5a834f6076b5")
 	)
 	(label "BTN_B"
-		(at 104.14 124.46 0)
+		(at 104.14 121.92 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4373,7 +4373,7 @@
 	)
 	(global_label "PMIC_OTG"
 		(shape input)
-		(at 104.14 68.58 0)
+		(at 104.14 71.12 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4383,7 +4383,7 @@
 		)
 		(uuid "0bf80716-88cb-455b-80cb-777b79aa70e1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 116.2571 68.58 0)
+			(at 116.2571 71.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4781,7 +4781,7 @@
 	)
 	(global_label "PMIC_INT"
 		(shape input)
-		(at 104.14 71.12 0)
+		(at 104.14 68.58 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4791,7 +4791,7 @@
 		)
 		(uuid "e3ed52f6-0e7d-49f4-a518-141c63541037")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 115.5919 71.12 0)
+			(at 115.5919 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
