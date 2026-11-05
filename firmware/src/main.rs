@@ -97,6 +97,9 @@ async fn main(spawner: Spawner) {
 
         spawner.spawn(unwrap!(usb::task(usb_builder)));
     } else {
+        #[cfg(any(feature = "board-stamp", feature = "board-stamp-rm2"))]
+        spawner.spawn(unwrap!(stamp_bms::task(r.bms)));
+
         let sd = SdCardStorage::new(sd);
 
         config::init(&sd).await;

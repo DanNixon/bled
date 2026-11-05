@@ -19,3 +19,6 @@ pub(crate) use stamp::*;
 mod stamp_rm2;
 #[cfg(feature = "board-stamp-rm2")]
 pub(crate) use stamp_rm2::*;
+
+#[cfg(any(feature = "board-stamp", feature = "board-stamp-rm2"))]
+pub(crate) mod stamp_bms;
