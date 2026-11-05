@@ -3713,7 +3713,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x01_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Square_1pin"
 			(at 198.12 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -4590,7 +4590,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x01_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Square_1pin"
 			(at 246.38 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -4667,7 +4667,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x01_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Square_1pin"
 			(at 198.12 50.8 0)
 			(hide yes)
 			(show_name no)
@@ -5434,7 +5434,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x01_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Square_1pin"
 			(at 246.38 50.8 0)
 			(hide yes)
 			(show_name no)
@@ -5590,7 +5590,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x10_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Stamp_Left"
 			(at 198.12 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -6238,7 +6238,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.00mm:PinHeader_1x10_P2.00mm_Vertical"
+		(property "Footprint" "bled:Castellation_Stamp_Right"
 			(at 246.38 73.66 0)
 			(hide yes)
 			(show_name no)
