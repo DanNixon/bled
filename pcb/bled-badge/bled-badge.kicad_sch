@@ -161,6 +161,9 @@
 			(embedded_fonts no)
 		)
 		(symbol "bled:BLED_Stamp"
+			(pin_numbers
+				(hide yes)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -243,43 +246,7 @@
 							)
 						)
 					)
-					(number ""
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_out line
-					(at 1.27 21.59 270)
-					(length 2.54)
-					(name "5V"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number ""
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_out line
-					(at 3.81 21.59 270)
-					(length 2.54)
-					(name "3.3V"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number ""
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -308,7 +275,7 @@
 				(pin input line
 					(at -15.24 2.54 0)
 					(length 2.54)
-					(name "PWR"
+					(name "PWR_ON"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -352,6 +319,60 @@
 						)
 					)
 					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 1.27 21.59 270)
+					(length 2.54)
+					(name "5V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 1.27 21.59 270)
+					(length 2.54)
+					(name "5V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 1.27 21.59 270)
+					(length 2.54)
+					(name "5V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -431,6 +452,78 @@
 						)
 					)
 				)
+				(pin power_out line
+					(at 0 -21.59 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 0 -21.59 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 0 -21.59 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 0 -21.59 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 				(pin power_in line
 					(at -1.27 21.59 270)
 					(length 2.54)
@@ -503,10 +596,28 @@
 						)
 					)
 				)
+				(pin power_out line
+					(at 3.81 21.59 270)
+					(length 2.54)
+					(name "3.3V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "21"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 				(pin bidirectional line
 					(at 15.24 8.89 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_27"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -524,7 +635,7 @@
 				(pin bidirectional line
 					(at 15.24 6.35 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_26"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -542,7 +653,7 @@
 				(pin bidirectional line
 					(at 15.24 3.81 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_21"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -560,7 +671,7 @@
 				(pin bidirectional line
 					(at 15.24 1.27 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_20"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -578,7 +689,7 @@
 				(pin bidirectional line
 					(at 15.24 -1.27 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_19"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -596,7 +707,7 @@
 				(pin bidirectional line
 					(at 15.24 -3.81 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_18"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -614,7 +725,7 @@
 				(pin bidirectional line
 					(at 15.24 -6.35 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_17"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -632,7 +743,7 @@
 				(pin bidirectional line
 					(at 15.24 -8.89 180)
 					(length 2.54)
-					(name "IO_x"
+					(name "IO_16"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -640,6 +751,24 @@
 						)
 					)
 					(number "29"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 0 -21.59 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "30"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -988,14 +1117,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e750cfa0-5cb6-4132-a668-38d962ba1866")
-	)
-	(no_connect
-		(at 87.63 105.41)
-		(uuid "cab6accb-0a69-43d1-8964-7ad502b72b36")
-	)
-	(no_connect
-		(at 85.09 105.41)
-		(uuid "d8a13a2b-2eb8-4ad4-9302-47f16d984e10")
 	)
 	(wire
 		(pts
@@ -1398,7 +1519,7 @@
 		(uuid "c527a0a9-d7c3-4733-88b4-e6183e0ca28a")
 	)
 	(label "CH1_IN"
-		(at 213.36 69.85 180)
+		(at 213.36 95.25 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1408,7 +1529,7 @@
 		(uuid "de1718b8-d9c5-42b0-85fb-0fd26982fd91")
 	)
 	(label "CH2_IN"
-		(at 213.36 95.25 180)
+		(at 213.36 69.85 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2269,13 +2390,13 @@
 		(pin "2"
 			(uuid "4791d53c-6130-4c63-8362-e6e0859016af")
 		)
-		(pin ""
+		(pin "30"
 			(uuid "015afec1-3aa0-4e97-97ea-9cdb6bae119c")
 		)
-		(pin ""
+		(pin "1"
 			(uuid "8c7ceca3-6879-4938-bc6b-5fe2d7d14b32")
 		)
-		(pin ""
+		(pin "13"
 			(uuid "163e3664-5b61-4843-97e1-892ddc65e46b")
 		)
 		(pin "22"
@@ -2328,6 +2449,27 @@
 		)
 		(pin "26"
 			(uuid "0d59e75a-1b2f-4bb2-aac4-87906097adf7")
+		)
+		(pin "14"
+			(uuid "6496d89f-1c60-454c-b68e-e539eaeea023")
+		)
+		(pin "15"
+			(uuid "0375900f-e9a1-4d08-b48d-b39a05430f78")
+		)
+		(pin "16"
+			(uuid "221fd676-35fd-493a-be20-228d7a44d9c4")
+		)
+		(pin "8"
+			(uuid "ef368c14-ffda-4b0c-8e3d-9c899ef16918")
+		)
+		(pin "7"
+			(uuid "1238a949-0231-47e7-82e4-c85d7dd3b19b")
+		)
+		(pin "6"
+			(uuid "af9387f9-f54a-4a86-a2a2-2313cbede17a")
+		)
+		(pin "21"
+			(uuid "f1018577-52ca-4436-b58e-20d14b9b48da")
 		)
 		(instances
 			(project "bled-badge"

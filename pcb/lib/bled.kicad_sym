@@ -880,6 +880,9 @@
 		(embedded_fonts no)
 	)
 	(symbol "BLED_Stamp"
+		(pin_numbers
+			(hide yes)
+		)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -962,43 +965,7 @@
 						)
 					)
 				)
-				(number ""
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 1.27 21.59 270)
-				(length 2.54)
-				(name "5V"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number ""
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 3.81 21.59 270)
-				(length 2.54)
-				(name "3.3V"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number ""
+				(number "1"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1027,7 +994,7 @@
 			(pin input line
 				(at -15.24 2.54 0)
 				(length 2.54)
-				(name "PWR"
+				(name "PWR_ON"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1071,6 +1038,60 @@
 					)
 				)
 				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 1.27 21.59 270)
+				(length 2.54)
+				(name "5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 1.27 21.59 270)
+				(length 2.54)
+				(name "5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 1.27 21.59 270)
+				(length 2.54)
+				(name "5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1150,6 +1171,78 @@
 					)
 				)
 			)
+			(pin power_out line
+				(at 0 -21.59 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 0 -21.59 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 0 -21.59 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 0 -21.59 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
 			(pin power_in line
 				(at -1.27 21.59 270)
 				(length 2.54)
@@ -1222,10 +1315,28 @@
 					)
 				)
 			)
+			(pin power_out line
+				(at 3.81 21.59 270)
+				(length 2.54)
+				(name "3.3V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "21"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
 			(pin bidirectional line
 				(at 15.24 8.89 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_27"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1243,7 +1354,7 @@
 			(pin bidirectional line
 				(at 15.24 6.35 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_26"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1261,7 +1372,7 @@
 			(pin bidirectional line
 				(at 15.24 3.81 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_21"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1279,7 +1390,7 @@
 			(pin bidirectional line
 				(at 15.24 1.27 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_20"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1297,7 +1408,7 @@
 			(pin bidirectional line
 				(at 15.24 -1.27 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_19"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1315,7 +1426,7 @@
 			(pin bidirectional line
 				(at 15.24 -3.81 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_18"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1333,7 +1444,7 @@
 			(pin bidirectional line
 				(at 15.24 -6.35 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_17"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1351,7 +1462,7 @@
 			(pin bidirectional line
 				(at 15.24 -8.89 180)
 				(length 2.54)
-				(name "IO_x"
+				(name "IO_16"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1359,6 +1470,24 @@
 					)
 				)
 				(number "29"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 0 -21.59 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "30"
 					(effects
 						(font
 							(size 1.27 1.27)
