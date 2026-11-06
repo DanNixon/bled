@@ -41,3 +41,8 @@ fmt: fmt-nix
 
 fmt-nix:
     alejandra -q .
+
+fab-pcbs:
+    @just run-sub pcb/bled-badge fab
+    @just run-sub pcb/bled-pico-w-backpack fab
+    @just run-sub pcb/bled-stamp fab
