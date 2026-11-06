@@ -90,6 +90,18 @@
           ""
         ],
         [
+          "copper_edge_clearance|113000000|74825000|924b06d8-13a3-4f7c-9725-5b8083d422a3|a2a3dacc-37f0-4d28-9106-cf04c31c94ca",
+          ""
+        ],
+        [
+          "copper_edge_clearance|113000000|76825000|924b06d8-13a3-4f7c-9725-5b8083d422a3|f4ce3042-eab7-4980-a879-acc8851c7c78",
+          ""
+        ],
+        [
+          "copper_edge_clearance|113000000|78825000|924b06d8-13a3-4f7c-9725-5b8083d422a3|dc11573e-f297-453d-8e05-50e37dd9c384",
+          ""
+        ],
+        [
           "copper_edge_clearance|113000000|83175000|924b06d8-13a3-4f7c-9725-5b8083d422a3|6be9d1bc-e46f-4c8c-8653-4f69c6a61164",
           ""
         ],
@@ -131,6 +143,18 @@
         ],
         [
           "copper_edge_clearance|87000000|65825000|8789cc10-f47b-4940-80ff-547aedbf3fde|2a272bd4-acb7-4c9c-ab8e-c662289d5bc3",
+          ""
+        ],
+        [
+          "copper_edge_clearance|87000000|76175000|8789cc10-f47b-4940-80ff-547aedbf3fde|d47866db-4bcc-42f4-9bba-bd1d003e6e30",
+          ""
+        ],
+        [
+          "copper_edge_clearance|87000000|78175000|8789cc10-f47b-4940-80ff-547aedbf3fde|43eed83a-984d-4049-b730-74ad3cfd05b4",
+          ""
+        ],
+        [
+          "copper_edge_clearance|87000000|80175000|8789cc10-f47b-4940-80ff-547aedbf3fde|647fb96d-aeeb-4ce2-9324-5afbe2ea2c43",
           ""
         ],
         [
@@ -820,7 +844,7 @@
         "uuid": "3e025044-e694-4110-8cfc-0d811f19f9a3"
       }
     ],
-    "used_designators": "#PWR1-103,A1,C1-54,D1-12,J1-9,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
+    "used_designators": "#PWR1-103,A1,C1-54,D1-12,J1-11,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
     "variants": []
   },
   "sheets": [

@@ -3825,16 +3825,6 @@
 		)
 		(uuid "bcda808f-9fbd-4db3-9433-9f80b2488a56")
 	)
-	(label "Q_ON"
-		(at 99.06 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ce42762e-1249-4fb7-a1c8-a0b800ff3484")
-	)
 	(label "STAT"
 		(at 53.34 78.74 180)
 		(effects
@@ -3845,15 +3835,53 @@
 		)
 		(uuid "eb4ec85d-d312-4683-880b-3964d7317b92")
 	)
-	(label "Q_ON"
+	(global_label "Q_ON"
+		(shape input)
 		(at 152.4 172.72 90)
+		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify left)
 		)
-		(uuid "ebe1abba-3ee7-4a60-a9d9-0a0302296611")
+		(uuid "59345331-b0bd-4330-8bda-6702512275dc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 164.7757 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "Q_ON"
+		(shape input)
+		(at 99.06 101.6 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "6c697e40-f8fa-4ff7-9e34-f5130f867df4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.0043 101.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 	)
 	(global_label "PMIC_INT"
 		(shape input)
