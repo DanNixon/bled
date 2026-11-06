@@ -2355,7 +2355,7 @@
 	(footprint "LOGO"
 		(layer "F.Cu")
 		(uuid "249d0838-1a9d-4f45-9f49-bc1c0ce9a725")
-		(at 89.75 105.75 -90)
+		(at 89.75 105.5 90)
 		(property "Reference" "G***"
 			(at 0 0 90)
 			(layer "F.SilkS")
@@ -22202,7 +22202,7 @@
 			(justify right bottom)
 		)
 	)
-	(gr_text "github.com/DanNixon/bled\n2026-11-05"
+	(gr_text "github.com/DanNixon/bled\n2026-11-06"
 		(at 109.25 111 90)
 		(layer "F.SilkS")
 		(uuid "f5faaf32-1e7e-45ca-92a1-6c119ea04d3e")
@@ -22212,6 +22212,19 @@
 				(thickness 0.1)
 			)
 			(justify left top)
+		)
+	)
+	(gr_text "Stamp"
+		(at 89.75 99.5 90)
+		(layer "F.SilkS")
+		(uuid "af40db4a-12d9-47db-89ae-cc1ce258ee00")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left)
 		)
 	)
 	(gr_text "GND"
