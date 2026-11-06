@@ -683,7 +683,7 @@
         "uuid": "3e025044-e694-4110-8cfc-0d811f19f9a3"
       }
     ],
-    "used_designators": "#PWR1-22,A1,C1-6,D1-600,J1,JP1-2,R1-4,RN1,SW1-4,TP1-20",
+    "used_designators": "#PWR1-22,A1,C1-8,C27-34,D1-600,J1,JP1-2,R1-4,RN1,SW1-4,TP1-20",
     "variants": []
   },
   "sheets": [
@@ -693,19 +693,19 @@
     ],
     [
       "637790d7-b402-4bbb-b0d1-9b05a6baddb9",
-      "LED channel 1"
+      "LED channel 0"
     ],
     [
       "0dd43cf6-4ab5-454c-98bb-bd62c174ab63",
-      "LED channel 2"
+      "LED channel 1"
     ],
     [
       "f7015891-a9dd-402e-b9c6-100053161d49",
-      "LED channel 3"
+      "LED channel 2"
     ],
     [
       "6bc0b8e1-a7eb-4783-9dee-5fd9caf1df4c",
-      "LED channel 4"
+      "LED channel 3"
     ]
   ],
   "text_variables": {},
