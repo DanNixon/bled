@@ -5206,7 +5206,7 @@
 				)
 			)
 		)
-		(property "JLCPCB_CORRECTION" "0;-1.5;0"
+		(property "JLCPCB_CORRECTION" "0;-1;0"
 			(at 88.9 63.5 0)
 			(hide yes)
 			(show_name no)
