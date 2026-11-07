@@ -5206,6 +5206,17 @@
 				)
 			)
 		)
+		(property "JLCPCB_CORRECTION" "0;-2;0"
+			(at 88.9 63.5 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "A5"
 			(uuid "3e1a3152-1175-40e5-8c07-32952bc03795")
 		)

@@ -1994,6 +1994,17 @@
 				)
 			)
 		)
+		(property "JLCPCB_CORRECTION" "2;0;90"
+			(at 139.7 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "SH"
 			(uuid "936e4103-9dbe-4c33-92bb-1524231c82e6")
 		)
