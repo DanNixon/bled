@@ -1994,7 +1994,7 @@
 				)
 			)
 		)
-		(property "JLCPCB_CORRECTION" "2;0;180"
+		(property "JLCPCB_CORRECTION" "0;-1.5;180"
 			(at 139.7 58.42 0)
 			(hide yes)
 			(show_name no)
