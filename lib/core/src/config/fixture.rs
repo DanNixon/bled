@@ -89,6 +89,25 @@ impl Fixtures {
         Some(start..end)
     }
 
+    /// Gets the global pixel buffer index for a pixel within a fixture.
+    pub fn fixture_pixel_index<const OUTPUT_CHANNEL_COUNT: usize>(
+        &self,
+        fixture_index: usize,
+        pixel_index: usize,
+    ) -> Option<usize> {
+        let fixture = self.0.get(fixture_index)?;
+        let mut remaining = pixel_index;
+        for span in fixture.spans() {
+            let span_len = *span.length() as usize;
+            if remaining < span_len {
+                let range = self.span_pixel_range::<OUTPUT_CHANNEL_COUNT>(span)?;
+                return Some(range.start as usize + remaining);
+            }
+            remaining -= span_len;
+        }
+        None
+    }
+
     /// Gets the required length of output channels.
     pub fn channel_lengths<const OUTPUT_CHANNEL_COUNT: usize>(
         &self,
@@ -243,8 +262,8 @@ mod tests {
 
     #[test]
     fn types_have_known_size() {
-        assert_eq!(core::mem::size_of::<Fixture>(), 360);
-        assert_eq!(core::mem::size_of::<Fixtures>(), 2888);
+        assert_eq!(core::mem::size_of::<Fixture>(), 368);
+        assert_eq!(core::mem::size_of::<Fixtures>(), 2952);
     }
 
     #[test]
@@ -597,5 +616,25 @@ mod span_helper_tests {
         assert_eq!(fixtures.span_pixel_range_at::<4>(0, 1), Some(3..6));
         assert_eq!(fixtures.span_pixel_range_at::<4>(1, 0), Some(6..7));
         assert_eq!(fixtures.span_pixel_range_at::<4>(2, 0), None);
+    }
+
+    #[test]
+    fn resolves_fixture_pixel_index() {
+        let fixtures = fixtures();
+
+        // Fixture 0: span "a" (0..2), span "b" (3..6) -> total 5 pixels
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 0), Some(0));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 1), Some(1));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 2), Some(3));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 3), Some(4));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 4), Some(5));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(0, 5), None);
+
+        // Fixture 1: span "c" (6..7) -> total 1 pixel
+        assert_eq!(fixtures.fixture_pixel_index::<4>(1, 0), Some(6));
+        assert_eq!(fixtures.fixture_pixel_index::<4>(1, 1), None);
+
+        // Non-existent fixture
+        assert_eq!(fixtures.fixture_pixel_index::<4>(2, 0), None);
     }
 }

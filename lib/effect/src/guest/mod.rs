@@ -52,5 +52,9 @@ unsafe impl<T> Sync for GuestState<T> {}
 pub mod prelude {
     pub use super::{Context, Effect, Frame};
     pub use crate::wasm_effect;
-    pub use bled_core::{RGB8, config::Fixtures, effect::abi::export::StepResult};
+    pub use bled_core::{
+        RGB8,
+        config::{Fixtures, MAX_FIXTURE_COUNT, Matrix2d, PixelLayout, Point, Size},
+        effect::abi::export::StepResult,
+    };
 }

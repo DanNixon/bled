@@ -53,6 +53,7 @@ impl Effect for SpanColourChase {
             (brightness, 0, brightness),
             (brightness, brightness, 0),
             (brightness, brightness, brightness),
+            (0, 0, 0),
         ];
 
         let total_spans = self.fixtures.span_count();

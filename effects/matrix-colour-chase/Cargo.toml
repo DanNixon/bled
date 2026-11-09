@@ -1,0 +1,18 @@
+[package]
+name = "matrix-colour-chase"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bled-effect = { path = "../../lib/effect" }
+heapless = "0.9"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
