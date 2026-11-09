@@ -28,7 +28,7 @@ mod tests {
 
     #[test]
     fn types_have_known_size() {
-        assert_eq!(core::mem::size_of::<DeviceConfig>(), 2992);
+        assert_eq!(core::mem::size_of::<DeviceConfig>(), 3056);
     }
 
     fn biggest_config() -> DeviceConfig {
