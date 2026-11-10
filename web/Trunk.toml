@@ -1,0 +1,8 @@
+[build]
+target = "index.html"
+dist = "dist"
+
+[[hooks]]
+stage = "pre_build"
+command = "sh"
+command_arguments = ["-c", "cargo build --bin non_existent_dummy_build_trigger 2>/dev/null || true; tailwindcss -i style/main.css -o style/output.css --minify"]

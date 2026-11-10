@@ -1,7 +1,8 @@
 default: check
 
 build:
-    wasm-pack build --target web --out-dir app/pkg
+    @tailwindcss -i style/main.css -o style/output.css --minify
+    @trunk build --release
 
 test:
     cargo test
@@ -10,10 +11,11 @@ fmt:
     cargo fmt
 
 clippy:
+    cargo clippy --target wasm32-unknown-unknown -- -D warnings
     cargo clippy -- -D warnings
 
 check: clippy test
     cargo fmt --check
 
-serve: build
-    python3 -m http.server 8080 --directory app
+serve:
+    trunk serve --port 8080
