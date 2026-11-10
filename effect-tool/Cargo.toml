@@ -1,0 +1,21 @@
+[package]
+name = "effect-tool"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lints.rust]
+unused_crate_dependencies = "deny"
+
+[[bin]]
+name = "effect-tool"
+test = false
+bench = false
+
+[dependencies]
+anyhow = "1.0"
+bled-core = { path = "../lib/core" }
+clap = { version = "4.5", features = ["derive"] }
+teeny-rpc = { version = "0.3.0", default-features = false, features = ["std"] }
+tokio = { version = "1.44", features = ["macros", "rt", "time"] }
+tokio-serial = { version = "5.5", default-features = false }

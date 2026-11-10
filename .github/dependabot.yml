@@ -11,6 +11,7 @@ updates:
       - core
       - firmware
       - web
+      - effect-tool
     schedule:
       interval: quarterly
     groups:

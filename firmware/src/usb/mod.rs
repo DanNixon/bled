@@ -16,7 +16,7 @@ bind_interrupts!(struct Irqs {
 pub(super) fn init(usb: Peri<'static, USB>) -> Builder<'static, Driver<'static, USB>> {
     let driver = Driver::new(usb, Irqs);
 
-    let mut config = embassy_usb::Config::new(0xc0de, 0xcafe);
+    let mut config = embassy_usb::Config::new(bled_core::usb::USB_VID, bled_core::usb::USB_PID);
     config.manufacturer = Some("Dan Nixon");
     config.product = Some("BLED");
     config.serial_number = Some(embassy_rp::uid::uid_hex());

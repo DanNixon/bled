@@ -2,7 +2,8 @@ use crate::sdcard::{ReadFileError, SdCardStorage};
 use bled_core::{
     ChannelNumber,
     config::{
-        DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan,
+        CONFIG_PATH, DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE,
+        PixelLayout, PixelSpan,
     },
 };
 use defmt::{error, info, warn};
@@ -24,9 +25,6 @@ pub(crate) fn get() -> &'static DeviceConfig {
         .try_get()
         .expect("device config accessed before initialization")
 }
-
-/// File name of the config file on the SD card.
-const CONFIG_PATH: &str = "/config.json";
 
 #[inline(never)]
 async fn boot_time_load(sd: &SdCardStorage) -> DeviceConfig {

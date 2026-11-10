@@ -17,11 +17,13 @@ check: check-nix-fmt check-typos check-effects
     @just run-sub lib/effect check
     @just run-sub firmware check
     @just run-sub web check
+    @just run-sub effect-tool check
 
 
 build: build-effects
     @just run-sub firmware build
     @just run-sub web build
+    @just run-sub effect-tool build
 
 check-effects:
     @just run-sub effects/span-colour-chase check

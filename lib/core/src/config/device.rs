@@ -2,6 +2,9 @@ use crate::{NameString, PathString, config::Fixtures};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
+/// File name of the config file on the SD card.
+pub const CONFIG_PATH: &str = "/config.json";
+
 /// Maximum allowable size of the config file in bytes when encoded as JSON.
 pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 5;
 
