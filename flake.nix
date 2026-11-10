@@ -21,6 +21,8 @@
         elf2uf2-rs
         wasm-pack
         binaryen
+        trunk
+        tailwindcss_3
 
         # PCB tools
         kikit
