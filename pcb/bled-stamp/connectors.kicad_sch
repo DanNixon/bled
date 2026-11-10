@@ -1642,7 +1642,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://jlcpcb.com/partdetail/XUNPU-TYPEC_304ACP16/C2982555"
+			(property "Datasheet" "https://jlcpcb.com/partdetail/XUNPU-TYPEC_304SACP16/C720630"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1665,7 +1665,7 @@
 					)
 				)
 			)
-			(property "LCSC" "C2982555"
+			(property "LCSC" "C720630"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -5172,7 +5172,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "kicad-embed://C2982555.pdf"
+		(property "Datasheet" "https://jlcpcb.com/partdetail/XUNPU-TYPEC_304SACP16/C720630"
 			(at 88.9 63.5 0)
 			(hide yes)
 			(show_name no)
@@ -5195,7 +5195,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C2982555"
+		(property "LCSC" "C720630"
 			(at 88.9 63.5 0)
 			(hide yes)
 			(show_name no)
