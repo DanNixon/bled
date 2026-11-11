@@ -28,7 +28,14 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
         });
     };
 
+    let reboot_dialog_visible = RwSignal::new(false);
+
+    let on_reboot_cancel = BoxCallback::new(move || {
+        reboot_dialog_visible.set(false);
+    });
+
     let on_reboot = BoxCallback::new(move || {
+        reboot_dialog_visible.set(false);
         let dev = d3.clone();
         spawn_local(async move {
             dev.reboot().await;
@@ -58,8 +65,11 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
                     <DialogButton
                         appearance=Signal::derive(|| ButtonAppearance::Danger)
                         dialog_title="Reboot Device"
+                        dialog_visible=reboot_dialog_visible
                         primary_text="Reboot"
                         on_click_primary=on_reboot
+                        secondary_text="Cancel"
+                        on_click_secondary=on_reboot_cancel
                         button_children=DialogButtonChildren::builder().children(Box::new(|| view! { "Reboot Device" }.into_any())).build()
                     >
                         <p class="text-sm text-gray-300">
