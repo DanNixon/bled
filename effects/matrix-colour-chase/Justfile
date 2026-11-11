@@ -2,9 +2,8 @@ default: check
 
 build:
     cargo build --release --target wasm32-unknown-unknown
-    mkdir -p out
-    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/matrix_colour_chase.wasm -o out/matrix-colour-chase.wasm
-    ls -l out/matrix-colour-chase.wasm
+    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/matrix_colour_chase.wasm -o target/wasm32-unknown-unknown/release/matrix-colour-chase.wasm
+    ls -l target/wasm32-unknown-unknown/release/matrix-colour-chase.wasm
 
 fmt:
     cargo fmt

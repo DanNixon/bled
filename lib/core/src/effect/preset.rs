@@ -23,6 +23,23 @@ pub struct EffectPreset {
     parameters: Vec<u8, 512>,
 }
 
+impl EffectPreset {
+    #[must_use]
+    pub fn new(
+        name: NameString,
+        module: PathString,
+        command: Vec<u8, 512>,
+        parameters: Vec<u8, 512>,
+    ) -> Self {
+        Self {
+            name,
+            module,
+            command,
+            parameters,
+        }
+    }
+}
+
 /// Maximum allowable size of an effect preset in bytes when encoded as JSON.
 pub const MAX_EFFECT_PRESET_JSON_SIZE: usize = 1024 * 5;
 
