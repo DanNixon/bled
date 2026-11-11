@@ -5,6 +5,5 @@ pub mod effect;
 pub mod file_staging;
 pub mod header;
 pub mod led_buffer;
-pub mod led_commit;
 pub mod led_pixels;
 pub mod main_panel;
