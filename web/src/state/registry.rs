@@ -101,8 +101,13 @@ impl DeviceRegistry {
         let tx_uuid = bled_core::ble::SERIAL_TX_UUID.to_string();
 
         let registry = *self;
+        let dev_id_slot = std::rc::Rc::new(std::cell::RefCell::new(None::<String>));
+        let dev_id_clone = dev_id_slot.clone();
         let on_disconnected = Closure::wrap(Box::new(move || {
             log("Bluetooth device disconnected", LogLevel::Error);
+            if let Some(id) = dev_id_clone.borrow().as_deref() {
+                registry.remove_device(id);
+            }
         }) as Box<dyn FnMut()>);
 
         self.pending.update(|p| *p += 1);
@@ -128,6 +133,7 @@ impl DeviceRegistry {
                     registry.selection.set(Some(TreeSelection::Device {
                         device_id: dev_id.clone(),
                     }));
+                    *dev_id_slot.borrow_mut() = Some(dev_id.clone());
 
                     log(
                         format!("Connected to {}", dev_clone.name),
@@ -160,8 +166,13 @@ impl DeviceRegistry {
 
     pub async fn add_serial_device(&self) {
         let registry = *self;
+        let dev_id_slot = std::rc::Rc::new(std::cell::RefCell::new(None::<String>));
+        let dev_id_clone = dev_id_slot.clone();
         let on_disconnected = Closure::wrap(Box::new(move || {
             log("Serial device disconnected", LogLevel::Error);
+            if let Some(id) = dev_id_clone.borrow().as_deref() {
+                registry.remove_device(id);
+            }
         }) as Box<dyn FnMut()>);
 
         self.pending.update(|p| *p += 1);
@@ -183,6 +194,7 @@ impl DeviceRegistry {
                     registry.selection.set(Some(TreeSelection::Device {
                         device_id: dev_id.clone(),
                     }));
+                    *dev_id_slot.borrow_mut() = Some(dev_id.clone());
 
                     log(
                         format!("Connected over USB Serial ({})", dev_clone.name),
