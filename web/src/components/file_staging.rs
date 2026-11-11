@@ -5,30 +5,229 @@ use bled_core::api::{DirEntry, DirEntryType};
 use leptodon::button::{Button, ButtonAppearance};
 use leptodon::input::TextInput;
 use leptos::prelude::*;
+use std::collections::{HashMap, HashSet};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::{JsFuture, spawn_local};
 use web_sys::{Event, HtmlInputElement};
 
+struct FileTreeRenderParams<'a, F1, F2, F3>
+where
+    F1: Fn(String) + Clone + 'static,
+    F2: Fn(String) + Clone + 'static,
+    F3: Fn(String) + Clone + 'static,
+{
+    tree_data: &'a HashMap<String, Vec<DirEntry>>,
+    expanded: &'a HashSet<String>,
+    loading: &'a HashSet<String>,
+    selected_path: &'a str,
+    toggle_dir: &'a F1,
+    select_path: &'a F2,
+    read_file: &'a F3,
+}
+
+fn render_tree_dir<F1, F2, F3>(
+    dir_path: &str,
+    depth: usize,
+    params: &FileTreeRenderParams<'_, F1, F2, F3>,
+) -> Vec<AnyView>
+where
+    F1: Fn(String) + Clone + 'static,
+    F2: Fn(String) + Clone + 'static,
+    F3: Fn(String) + Clone + 'static,
+{
+    let mut views = Vec::new();
+
+    if let Some(entries) = params.tree_data.get(dir_path) {
+        if entries.is_empty() {
+            let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 1.25);
+            views.push(
+                view! {
+                    <div class="text-xs text-gray-500 italic py-1" style=pad>
+                        "(empty folder)"
+                    </div>
+                }
+                .into_any(),
+            );
+        } else {
+            for entry in entries {
+                let name = entry.name().to_string();
+                let full_path = if dir_path == "/" {
+                    format!("/{name}")
+                } else {
+                    format!("{}/{}", dir_path.trim_end_matches('/'), name)
+                };
+
+                let is_dir = matches!(entry.kind(), DirEntryType::Directory);
+                let is_selected = params.selected_path == full_path;
+
+                if is_dir {
+                    let is_expanded = params.expanded.contains(&full_path);
+                    let is_loading = params.loading.contains(&full_path);
+                    let full_path_toggle = full_path.clone();
+                    let full_path_select = full_path.clone();
+                    let toggle = params.toggle_dir.clone();
+                    let select = params.select_path.clone();
+
+                    let pad = format!("padding-left: {}rem", 0.5 + depth as f32 * 1.25);
+
+                    views.push(
+                        view! {
+                            <div
+                                class=leptodon::class_list![
+                                    "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs select-none group transition-colors",
+                                    ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_selected),
+                                    ("hover:bg-gray-800/70 text-gray-300", move || !is_selected)
+                                ]
+                                style=pad
+                                on:click=move |_| {
+                                    select(full_path_select.clone());
+                                }
+                            >
+                                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                    <button
+                                        type="button"
+                                        class="text-gray-400 hover:text-white w-4 text-center text-xs shrink-0"
+                                        on:click={
+                                            let full_path_toggle = full_path_toggle.clone();
+                                            let toggle = toggle.clone();
+                                            move |e: web_sys::MouseEvent| {
+                                                e.stop_propagation();
+                                                toggle(full_path_toggle.clone());
+                                            }
+                                        }
+                                    >
+                                        {if is_loading {
+                                            "⏳"
+                                        } else if is_expanded {
+                                            "▾"
+                                        } else {
+                                            "▸"
+                                        }}
+                                    </button>
+                                    <span class="text-sm shrink-0">{if is_expanded { "📂" } else { "📁" }}</span>
+                                    <span class="truncate font-medium">{name}</span>
+                                </div>
+                            </div>
+                        }
+                        .into_any(),
+                    );
+
+                    if is_expanded {
+                        let children = render_tree_dir(&full_path, depth + 1, params);
+                        views.extend(children);
+                    }
+                } else {
+                    let size = match entry.kind() {
+                        DirEntryType::File { size } => *size,
+                        _ => 0,
+                    };
+                    let size_str = format_bytes(size);
+                    let full_path_select = full_path.clone();
+                    let full_path_read = full_path.clone();
+                    let select = params.select_path.clone();
+                    let read = params.read_file.clone();
+
+                    let icon = if name.ends_with(".json") {
+                        "📋"
+                    } else if name.ends_with(".wasm") {
+                        "⚙️"
+                    } else if name.ends_with(".bin") || name.ends_with(".dat") {
+                        "💾"
+                    } else {
+                        "📄"
+                    };
+
+                    let pad = format!("padding-left: {}rem", 0.5 + depth as f32 * 1.25 + 1.25);
+
+                    views.push(
+                        view! {
+                            <div
+                                class=leptodon::class_list![
+                                    "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs group transition-colors",
+                                    ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_selected),
+                                    ("hover:bg-gray-800/70 text-gray-300", move || !is_selected)
+                                ]
+                                style=pad
+                                on:click=move |_| {
+                                    select(full_path_select.clone());
+                                }
+                                on:dblclick={
+                                    let full_path_read = full_path_read.clone();
+                                    let read = read.clone();
+                                    move |_| {
+                                        read(full_path_read.clone());
+                                    }
+                                }
+                            >
+                                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                    <span class="text-sm shrink-0">{icon}</span>
+                                    <span class="truncate font-mono">{name}</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="text-[11px] text-gray-500 font-mono">{size_str}</span>
+                                    <button
+                                        type="button"
+                                        class="hidden group-hover:inline-block px-1.5 py-0.5 text-[10px] rounded bg-gray-800 hover:bg-gray-700 text-gray-200"
+                                        title="Read into Editor"
+                                        on:click={
+                                            let full_path_read = full_path_read.clone();
+                                            let read = read.clone();
+                                            move |e: web_sys::MouseEvent| {
+                                                e.stop_propagation();
+                                                read(full_path_read.clone());
+                                            }
+                                        }
+                                    >
+                                        "Read"
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        .into_any(),
+                    );
+                }
+            }
+        }
+    } else if params.loading.contains(dir_path) {
+        let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 1.25);
+        views.push(
+            view! {
+                <div class="text-xs text-gray-400 italic py-1 flex items-center gap-1" style=pad>
+                    <span>"Loading..."</span>
+                </div>
+            }
+            .into_any(),
+        );
+    }
+
+    views
+}
+
 #[component]
 pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
-    let dir_path_sig = RwSignal::new("/".to_string());
     let remote_path_sig = RwSignal::new("/config.json".to_string());
-    let is_listing_sig = RwSignal::new(false);
     let progress_sig = RwSignal::new(None::<u8>);
-
     let editor_text_sig = RwSignal::new(String::new());
 
-    let dir_entries_sig = RwSignal::new(Vec::<DirEntry>::new());
+    let tree_data = RwSignal::new(HashMap::<String, Vec<DirEntry>>::new());
+    let expanded_dirs = RwSignal::new({
+        let mut set = HashSet::new();
+        set.insert("/".to_string());
+        set
+    });
+    let loading_dirs = RwSignal::new(HashSet::<String>::new());
 
-    let d_list = dev.clone();
-    let load_directory = move || {
-        let dev = d_list.clone();
-        let path = dir_path_sig.get_untracked();
-        is_listing_sig.set(true);
+    let d_fetch = dev.clone();
+    let fetch_dir = move |path: String| {
+        let dev = d_fetch.clone();
+        loading_dirs.update(|set| {
+            set.insert(path.clone());
+        });
 
+        let path_clone = path.clone();
         spawn_local(async move {
             let mut rpc = dev.rpc.lock().await;
-            match rpc.list_directory(&path).await {
+            match rpc.list_directory(&path_clone).await {
                 Ok(mut entries) => {
                     entries.sort_by(|a, b| {
                         let a_is_dir = matches!(a.kind(), DirEntryType::Directory);
@@ -39,76 +238,111 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
                             _ => a.name().cmp(b.name()),
                         }
                     });
-                    dir_entries_sig.set(entries);
+                    tree_data.update(|map| {
+                        map.insert(path_clone.clone(), entries);
+                    });
                 }
                 Err(e) => {
-                    log(format!("Failed to list directory: {e}"), LogLevel::Error);
-                    dir_entries_sig.set(Vec::new());
+                    log(
+                        format!("Failed to list directory {path_clone}: {e}"),
+                        LogLevel::Error,
+                    );
+                    tree_data.update(|map| {
+                        map.remove(&path_clone);
+                    });
                 }
             }
-            is_listing_sig.set(false);
+            loading_dirs.update(|set| {
+                set.remove(&path_clone);
+            });
         });
     };
 
-    Effect::new({
-        let load_directory = load_directory.clone();
-        move || {
-            let _ = dir_path_sig.get();
-            load_directory();
-        }
-    });
+    // Initial load of root directory
+    {
+        let fetch_dir = fetch_dir.clone();
+        Effect::new(move || {
+            fetch_dir("/".to_string());
+        });
+    }
 
-    let on_dir_up = move |_| {
-        let cur = dir_path_sig.get_untracked();
-        let norm = cur.trim_end_matches('/');
-        let parent = match norm.rfind('/') {
-            Some(idx) if idx > 0 => &norm[..idx],
-            _ => "/",
-        };
-        dir_path_sig.set(parent.to_string());
+    let toggle_dir = {
+        let fetch_dir = fetch_dir.clone();
+        move |path: String| {
+            let is_open = expanded_dirs.get_untracked().contains(&path);
+            if is_open {
+                expanded_dirs.update(|set| {
+                    set.remove(&path);
+                });
+            } else {
+                expanded_dirs.update(|set| {
+                    set.insert(path.clone());
+                });
+                if !tree_data.get_untracked().contains_key(&path) {
+                    fetch_dir(path);
+                }
+            }
+        }
+    };
+
+    let refresh_tree = {
+        let fetch_dir = fetch_dir.clone();
+        move || {
+            let expanded = expanded_dirs.get_untracked();
+            fetch_dir("/".to_string());
+            for dir in expanded {
+                if dir != "/" {
+                    fetch_dir(dir);
+                }
+            }
+        }
     };
 
     let d_read = dev.clone();
-    let trigger_read_file = move || {
+    let trigger_read_file = {
         let dev = d_read.clone();
-        let path = remote_path_sig.get_untracked();
-        if path.is_empty() {
-            log("Please specify a remote path", LogLevel::Error);
-            return;
-        }
-
-        spawn_local(async move {
-            progress_sig.set(Some(5));
-            let mut rpc = dev.rpc.lock().await;
-            match rpc
-                .read_file_chunked(&path, Some(|pct| progress_sig.set(Some(pct))))
-                .await
-            {
-                Ok(bytes) => {
-                    let filename = path.split('/').next_back().unwrap_or("file").to_string();
-                    dev.staged_filename.set(filename);
-                    dev.staged_data.set(bytes.clone());
-
-                    if let Ok(text) = String::from_utf8(bytes) {
-                        editor_text_sig.set(text);
-                        dev.staged_is_hex.set(false);
-                    } else {
-                        dev.staged_is_hex.set(true);
-                    }
-                    log(format!("[{}] Read {path}", dev.name), LogLevel::Success);
-                }
-                Err(e) => log(
-                    format!("[{}] Failed reading file: {e}", dev.name),
-                    LogLevel::Error,
-                ),
+        move |path: String| {
+            let dev = dev.clone();
+            if path.is_empty() {
+                log("Please specify a remote path", LogLevel::Error);
+                return;
             }
-            progress_sig.set(None);
-        });
+
+            remote_path_sig.set(path.clone());
+
+            spawn_local(async move {
+                progress_sig.set(Some(5));
+                let mut rpc = dev.rpc.lock().await;
+                match rpc
+                    .read_file_chunked(&path, Some(|pct| progress_sig.set(Some(pct))))
+                    .await
+                {
+                    Ok(bytes) => {
+                        let filename = path.split('/').next_back().unwrap_or("file").to_string();
+                        dev.staged_filename.set(filename);
+                        dev.staged_data.set(bytes.clone());
+
+                        if let Ok(text) = String::from_utf8(bytes) {
+                            editor_text_sig.set(text);
+                            dev.staged_is_hex.set(false);
+                        } else {
+                            dev.staged_is_hex.set(true);
+                        }
+                        log(format!("[{}] Read {path}", dev.name), LogLevel::Success);
+                    }
+                    Err(e) => log(
+                        format!("[{}] Failed reading file: {e}", dev.name),
+                        LogLevel::Error,
+                    ),
+                }
+                progress_sig.set(None);
+            });
+        }
     };
 
     let d_write = dev.clone();
     let on_write_file = {
-        let load_directory = load_directory.clone();
+        let refresh_tree = refresh_tree.clone();
         move || {
             let dev = d_write.clone();
             let path = remote_path_sig.get_untracked();
@@ -129,7 +363,7 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
                 return;
             }
 
-            let load_dir = load_directory.clone();
+            let refresh = refresh_tree.clone();
             spawn_local(async move {
                 progress_sig.set(Some(5));
                 let mut rpc = dev.rpc.lock().await;
@@ -142,7 +376,7 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
                             format!("[{}] Successfully wrote {path}", dev.name),
                             LogLevel::Success,
                         );
-                        load_dir();
+                        refresh();
                     }
                     Err(e) => log(
                         format!("[{}] Failed writing file: {e}", dev.name),
@@ -156,18 +390,18 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
 
     let d_del = dev.clone();
     let on_delete_file = {
-        let load_directory = load_directory.clone();
+        let refresh_tree = refresh_tree.clone();
         move || {
             let dev = d_del.clone();
             let path = remote_path_sig.get_untracked();
-            let load_dir = load_directory.clone();
+            let refresh = refresh_tree.clone();
 
             spawn_local(async move {
                 let mut rpc = dev.rpc.lock().await;
                 match rpc.file_delete(&path).await {
                     Ok(()) => {
                         log(format!("[{}] Deleted {path}", dev.name), LogLevel::Success);
-                        load_dir();
+                        refresh();
                     }
                     Err(e) => log(
                         format!("[{}] Failed deleting file: {e}", dev.name),
@@ -232,12 +466,16 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
         }
     };
 
+    let select_path = move |path: String| {
+        remote_path_sig.set(path);
+    };
+
     view! {
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3">
                 <div>
                     <h3 class="text-base font-semibold text-white">"File Management"</h3>
-                    <p class="text-xs text-gray-400">"Buffer between files on disk and files on device"</p>
+                    <p class="text-xs text-gray-400">"SD card tree file browser and staging buffer"</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
@@ -260,134 +498,114 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
                 </div>
             </div>
 
-            // Directory Browser
+            // Tree File Explorer
             <div class="space-y-2 bg-gray-950/60 p-3.5 rounded-xl border border-gray-800">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 flex-1 min-w-[240px]">
-                        <span class="text-xs font-medium text-gray-400">"Directory:"</span>
-                        <div class="w-48">
-                            <TextInput value=dir_path_sig />
-                        </div>
-                        <Button appearance=ButtonAppearance::Secondary on_click={
-                            let load_dir = load_directory.clone();
-                            move |_| load_dir()
-                        }>
-                            "Refresh"
-                        </Button>
-                        <Button appearance=ButtonAppearance::Secondary on_click=on_dir_up>
-                            "⬆ Up"
-                        </Button>
-                    </div>
+                <div class="flex items-center justify-between border-b border-gray-800/80 pb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                        "Device Storage"
+                    </span>
+                    <Button appearance=ButtonAppearance::Secondary on_click={
+                        let refresh = refresh_tree.clone();
+                        move |_| refresh()
+                    }>
+                        "Refresh Tree"
+                    </Button>
                 </div>
 
-                <div class="max-h-56 overflow-auto border border-gray-800 rounded-lg">
-                    <table class="w-full text-left text-xs text-gray-300">
-                        <thead class="bg-gray-800/80 text-gray-400 uppercase text-[10px] sticky top-0">
-                            <tr>
-                                <th class="p-2 w-8"></th>
-                                <th class="p-2">"Name"</th>
-                                <th class="p-2 w-24">"Size"</th>
-                                <th class="p-2 w-32 text-right">"Actions"</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800/60 font-mono">
-                            {
-                                let trigger_read = trigger_read_file.clone();
-                                move || {
-                                    let entries = dir_entries_sig.get();
-                                    let cur_dir = dir_path_sig.get();
+                <div class="max-h-72 overflow-y-auto font-mono py-1 space-y-0.5 border border-gray-800/60 rounded-lg bg-gray-900/40 p-2">
+                    // Root /
+                    {
+                        let toggle_dir = toggle_dir.clone();
+                        let trigger_read = trigger_read_file.clone();
 
-                                    if entries.is_empty() {
+                        move || {
+                            let data = tree_data.get();
+                            let expanded = expanded_dirs.get();
+                            let loading = loading_dirs.get();
+                            let cur_sel = remote_path_sig.get();
+
+                            let is_root_expanded = expanded.contains("/");
+                            let is_root_loading = loading.contains("/");
+                            let is_root_sel = cur_sel == "/";
+
+                            let toggle_root = toggle_dir.clone();
+
+                            let params = FileTreeRenderParams {
+                                tree_data: &data,
+                                expanded: &expanded,
+                                loading: &loading,
+                                selected_path: &cur_sel,
+                                toggle_dir: &toggle_dir,
+                                select_path: &select_path,
+                                read_file: &trigger_read,
+                            };
+
+                            view! {
+                                <div>
+                                    <div
+                                        class=leptodon::class_list![
+                                            "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs select-none transition-colors",
+                                            ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_root_sel),
+                                            ("hover:bg-gray-800/70 text-gray-200", move || !is_root_sel)
+                                        ]
+                                        on:click=move |_| {
+                                            select_path("/".to_string());
+                                        }
+                                    >
+                                        <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                            <button
+                                                type="button"
+                                                class="text-gray-400 hover:text-white w-4 text-center text-xs shrink-0"
+                                                on:click={
+                                                    let toggle = toggle_root.clone();
+                                                    move |e: web_sys::MouseEvent| {
+                                                        e.stop_propagation();
+                                                        toggle("/".to_string());
+                                                    }
+                                                }
+                                            >
+                                                {if is_root_loading {
+                                                    "⏳"
+                                                } else if is_root_expanded {
+                                                    "▾"
+                                                } else {
+                                                    "▸"
+                                                }}
+                                            </button>
+                                            <span class="text-sm shrink-0">"💾"</span>
+                                            <span class="font-bold truncate">"/ (SD Card Root)"</span>
+                                        </div>
+                                    </div>
+
+                                    {if is_root_expanded {
                                         view! {
-                                            <tr>
-                                                <td colspan="4" class="p-4 text-center text-gray-500 italic">
-                                                    {if is_listing_sig.get() { "Listing directory..." } else { "Directory is empty." }}
-                                                </td>
-                                            </tr>
+                                            <div class="border-l border-gray-800/80 ml-3.5 space-y-0.5 mt-0.5">
+                                                {render_tree_dir("/", 0, &params)}
+                                            </div>
                                         }.into_any()
                                     } else {
-                                        entries.into_iter().map(|entry| {
-                                            let name = entry.name().to_string();
-                                            let is_dir = matches!(entry.kind(), DirEntryType::Directory);
-                                            let size_str = match entry.kind() {
-                                                DirEntryType::File { size } => format_bytes(*size),
-                                                DirEntryType::Directory => "—".into(),
-                                            };
-
-                                            let full_path = if cur_dir == "/" {
-                                                format!("/{name}")
-                                            } else {
-                                                format!("{}/{}", cur_dir.trim_end_matches('/'), name)
-                                            };
-                                            let full_path_sel = full_path.clone();
-                                            let full_path_read = full_path.clone();
-                                            let trigger_read = trigger_read.clone();
-
-                                            view! {
-                                                <tr class="hover:bg-gray-800/40 transition-colors">
-                                                    <td class="p-2 text-center">{if is_dir { "📁" } else { "📄" }}</td>
-                                                    <td class="p-2 font-medium text-white">{name}</td>
-                                                    <td class="p-2 text-gray-400">{size_str}</td>
-                                                    <td class="p-2 text-right">
-                                                        <div class="flex items-center justify-end gap-1">
-                                                            {if is_dir {
-                                                                let full_path = full_path.clone();
-                                                                view! {
-                                                                    <button
-                                                                        type="button"
-                                                                        class="px-2 py-0.5 text-[11px] rounded bg-gray-800 hover:bg-gray-700 text-gray-200"
-                                                                        on:click=move |_| {
-                                                                            dir_path_sig.set(full_path.clone());
-                                                                        }
-                                                                    >
-                                                                        "Open"
-                                                                    </button>
-                                                                }.into_any()
-                                                            } else {
-                                                                view! {
-                                                                    <>
-                                                                        <button
-                                                                            type="button"
-                                                                            class="px-2 py-0.5 text-[11px] rounded bg-gray-800 hover:bg-gray-700 text-gray-200"
-                                                                            on:click=move |_| {
-                                                                                remote_path_sig.set(full_path_sel.clone());
-                                                                            }
-                                                                        >
-                                                                            "Select"
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            class="px-2 py-0.5 text-[11px] rounded bg-oa-blue/20 hover:bg-oa-blue/30 text-oa-blue font-semibold"
-                                                                            on:click=move |_| {
-                                                                                remote_path_sig.set(full_path_read.clone());
-                                                                                trigger_read();
-                                                                            }
-                                                                        >
-                                                                            "Read"
-                                                                        </button>
-                                                                    </>
-                                                                }.into_any()
-                                                            }}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        }).collect_view().into_any()
-                                    }
-                                }
+                                        ().into_any()
+                                    }}
+                                </div>
                             }
-                        </tbody>
-                    </table>
+                        }
+                    }
                 </div>
             </div>
 
             // Remote Path Actions Toolbar
             <div class="flex flex-wrap items-end justify-between gap-3 pt-2 border-t border-gray-800">
                 <div class="flex-1 min-w-[260px]">
-                    <TextInput label="Remote Path on Device" value=remote_path_sig />
+                    <TextInput label="Selected Path on Device" value=remote_path_sig />
                 </div>
                 <div class="flex items-center gap-2">
-                    <Button appearance=ButtonAppearance::Primary on_click=move |_| trigger_read_file()>
+                    <Button appearance=ButtonAppearance::Primary on_click={
+                        let trigger_read = trigger_read_file.clone();
+                        move |_| {
+                            let path = remote_path_sig.get_untracked();
+                            trigger_read(path);
+                        }
+                    }>
                         "Read from Device"
                     </Button>
                     <Button appearance=ButtonAppearance::Primary on_click=move |_| on_write_file()>
