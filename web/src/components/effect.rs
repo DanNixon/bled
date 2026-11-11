@@ -16,36 +16,20 @@ pub fn EffectPanel(dev: ConnectedDevice) -> impl IntoView {
     let cmd_text_sig = RwSignal::new(bytes_to_hex(&dev.effect_command_bytes.get_untracked()));
     let param_text_sig = RwSignal::new(bytes_to_hex(&dev.effect_param_bytes.get_untracked()));
 
-    // Sync when device active effect updates
+    // Sync when device active effect and buffers update
     Effect::watch(
         {
             let dev = dev.clone();
-            move || dev.active_effect_path.get()
+            move || (
+                dev.active_effect_path.get(),
+                dev.effect_command_bytes.get(),
+                dev.effect_param_bytes.get(),
+            )
         },
-        move |p, _, _| {
-            path_sig.set(p.clone());
-        },
-        false,
-    );
-
-    Effect::watch(
-        {
-            let dev = dev.clone();
-            move || dev.effect_command_bytes.get()
-        },
-        move |bytes, _, _| {
-            cmd_text_sig.set(bytes_to_hex(bytes));
-        },
-        false,
-    );
-
-    Effect::watch(
-        {
-            let dev = dev.clone();
-            move || dev.effect_param_bytes.get()
-        },
-        move |bytes, _, _| {
-            param_text_sig.set(bytes_to_hex(bytes));
+        move |(path, cmd_bytes, param_bytes), _, _| {
+            path_sig.set(path.clone());
+            cmd_text_sig.set(bytes_to_hex(cmd_bytes));
+            param_text_sig.set(bytes_to_hex(param_bytes));
         },
         false,
     );
