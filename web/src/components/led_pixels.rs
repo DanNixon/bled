@@ -12,9 +12,50 @@ pub fn LedPixels(
     span_idx: Option<usize>,
     channel_idx: Option<usize>,
 ) -> impl IntoView {
+    let initial_count = {
+        let cfg = dev.config.get_untracked();
+        if let Some(cfg) = cfg {
+            if let (Some(f_idx), Some(s_idx)) = (fixture_idx, span_idx) {
+                cfg.fixtures
+                    .get(f_idx)
+                    .and_then(|f| f.spans.get(s_idx))
+                    .map(|s| s.length as u32)
+                    .unwrap_or(1)
+            } else if let Some(f_idx) = fixture_idx {
+                cfg.fixtures
+                    .get(f_idx)
+                    .map(|f| f.total_pixels as u32)
+                    .unwrap_or(1)
+            } else {
+                1
+            }
+        } else {
+            1
+        }
+    };
+
     let start_sig = RwSignal::new(0u32);
-    let count_sig = RwSignal::new(1u32);
+    let count_sig = RwSignal::new(initial_count);
     let auto_commit_sig = RwSignal::new(true);
+
+    // Sync default pixel count if config updates
+    Effect::watch(
+        move || dev.config.get(),
+        move |cfg_opt, _, _| {
+            if let Some(cfg) = cfg_opt {
+                if let (Some(f_idx), Some(s_idx)) = (fixture_idx, span_idx) {
+                    if let Some(span) = cfg.fixtures.get(f_idx).and_then(|f| f.spans.get(s_idx)) {
+                        count_sig.set(span.length as u32);
+                    }
+                } else if let Some(f_idx) = fixture_idx
+                    && let Some(fixture) = cfg.fixtures.get(f_idx)
+                {
+                    count_sig.set(fixture.total_pixels as u32);
+                }
+            }
+        },
+        false,
+    );
 
     let r_sig = RwSignal::new(255u8);
     let g_sig = RwSignal::new(100u8);
