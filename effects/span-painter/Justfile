@@ -2,9 +2,8 @@ default: check
 
 build:
     cargo build --release --target wasm32-unknown-unknown
-    mkdir -p out
-    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/span_painter.wasm -o out/span-painter.wasm
-    ls -l out/span-painter.wasm
+    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/span_painter.wasm -o target/wasm32-unknown-unknown/release/span_painter.wasm
+    ls -l target/wasm32-unknown-unknown/release/span_painter.wasm
 
 fmt:
     cargo fmt

@@ -2,9 +2,8 @@ default: check
 
 build:
     cargo build --release --target wasm32-unknown-unknown
-    mkdir -p out
-    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/span_colour_chase.wasm -o out/span-colour-chase.wasm
-    ls -l out/span-colour-chase.wasm
+    wasm-opt -Oz --strip-debug target/wasm32-unknown-unknown/release/span_colour_chase.wasm -o target/wasm32-unknown-unknown/release/span_colour_chase.wasm
+    ls -l target/wasm32-unknown-unknown/release/span_colour_chase.wasm
 
 fmt:
     cargo fmt
