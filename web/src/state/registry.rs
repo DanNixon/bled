@@ -140,8 +140,9 @@ impl DeviceRegistry {
                         LogLevel::Success,
                     );
                     spawn_local(async move {
-                        dev_clone.load_config().await;
                         dev_clone.refresh_info().await;
+                        dev_clone.load_config().await;
+                        dev_clone.refresh_led_buf_info().await;
                     });
                 }
                 Err(e) => log(
@@ -201,8 +202,9 @@ impl DeviceRegistry {
                         LogLevel::Success,
                     );
                     spawn_local(async move {
-                        dev_clone.load_config().await;
                         dev_clone.refresh_info().await;
+                        dev_clone.load_config().await;
+                        dev_clone.refresh_led_buf_info().await;
                     });
                 }
                 Err(e) => log(

@@ -9,7 +9,6 @@ use wasm_bindgen_futures::spawn_local;
 #[component]
 pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
     let d1 = dev.clone();
-    let d2 = dev.clone();
     let d3 = dev.clone();
     let d_cfg = dev.clone();
     let d_info = dev.clone();
@@ -18,13 +17,8 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
         let dev = d1.clone();
         spawn_local(async move {
             dev.refresh_info().await;
-        });
-    };
-
-    let on_reload_config = move |_| {
-        let dev = d2.clone();
-        spawn_local(async move {
             dev.load_config().await;
+            dev.refresh_led_buf_info().await;
         });
     };
 
@@ -64,9 +58,6 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
                 <div class="flex items-center gap-2">
                     <Button appearance=ButtonAppearance::Secondary on_click=on_refresh>
                         "Refresh Info"
-                    </Button>
-                    <Button appearance=ButtonAppearance::Secondary on_click=on_reload_config>
-                        "Reload Config"
                     </Button>
                     <DialogButton
                         appearance=Signal::derive(|| ButtonAppearance::Danger)
