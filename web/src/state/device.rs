@@ -28,7 +28,6 @@ pub struct ConnectedDevice {
     pub effect_param_len: RwSignal<Option<u64>>,
     pub led_buf_capacity: RwSignal<Option<u32>>,
     pub led_buf_size: RwSignal<Option<u32>>,
-    pub led_buf_dump: RwSignal<Vec<u8>>,
 }
 
 // Implement Send & Sync for ConnectedDevice since it is used exclusively on the browser main thread
@@ -70,7 +69,6 @@ impl ConnectedDevice {
             effect_param_len: RwSignal::new(None),
             led_buf_capacity: RwSignal::new(None),
             led_buf_size: RwSignal::new(None),
-            led_buf_dump: RwSignal::new(Vec::new()),
         }
     }
 

@@ -1,7 +1,6 @@
 use super::device_info::DeviceInfoPanel;
 use super::effect::EffectPanel;
 use super::file_staging::FileStaging;
-use super::led_buffer::LedBuffer;
 use super::led_pixels::LedPixels;
 use crate::state::{DeviceRegistry, TreeSelection};
 use leptos::context::use_context;
@@ -22,7 +21,6 @@ pub fn MainPanel() -> impl IntoView {
                         view! {
                             <div class="space-y-6">
                                 <DeviceInfoPanel dev=dev.clone() />
-                                <LedBuffer dev=dev.clone() />
                             </div>
                         }.into_any()
                     }
