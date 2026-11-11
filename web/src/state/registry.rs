@@ -58,6 +58,13 @@ impl Default for DeviceRegistry {
     }
 }
 
+fn js_error_to_string(err: wasm_bindgen::JsValue) -> String {
+    js_sys::Object::from(err)
+        .to_string()
+        .as_string()
+        .unwrap_or_default()
+}
+
 impl DeviceRegistry {
     pub fn new() -> Self {
         Self {
@@ -95,6 +102,41 @@ impl DeviceRegistry {
         }
     }
 
+    fn attach_connected_device(
+        &self,
+        handle: wasm_bindgen::JsValue,
+        dev_id_slot: &std::rc::Rc<std::cell::RefCell<Option<String>>>,
+        success_msg_prefix: &str,
+    ) {
+        match RpcClient::new(handle) {
+            Ok(rpc) => {
+                let dev = ConnectedDevice::new(rpc);
+                let dev_id = dev.id.clone();
+                let dev_clone = dev.clone();
+
+                self.devices.update(|list| list.push(dev));
+                self.selection.set(Some(TreeSelection::Device {
+                    device_id: dev_id.clone(),
+                }));
+                *dev_id_slot.borrow_mut() = Some(dev_id.clone());
+
+                log(
+                    format!("{success_msg_prefix} ({})", dev_clone.name),
+                    LogLevel::Success,
+                );
+                spawn_local(async move {
+                    dev_clone.refresh_info().await;
+                    dev_clone.load_config().await;
+                    dev_clone.refresh_led_buf_info().await;
+                });
+            }
+            Err(e) => log(
+                format!("Failed to initialize RPC client: {e}"),
+                LogLevel::Error,
+            ),
+        }
+    }
+
     pub async fn add_ble_device(&self) {
         let service_uuid = bled_core::ble::SERIAL_SERVICE_UUID.to_string();
         let rx_uuid = bled_core::ble::SERIAL_RX_UUID.to_string();
@@ -123,38 +165,11 @@ impl DeviceRegistry {
         self.pending.update(|p| *p -= 1);
 
         match res {
-            Ok(handle) => match RpcClient::new(handle) {
-                Ok(rpc) => {
-                    let dev = ConnectedDevice::new(rpc);
-                    let dev_id = dev.id.clone();
-                    let dev_clone = dev.clone();
-
-                    registry.devices.update(|list| list.push(dev));
-                    registry.selection.set(Some(TreeSelection::Device {
-                        device_id: dev_id.clone(),
-                    }));
-                    *dev_id_slot.borrow_mut() = Some(dev_id.clone());
-
-                    log(
-                        format!("Connected to {}", dev_clone.name),
-                        LogLevel::Success,
-                    );
-                    spawn_local(async move {
-                        dev_clone.refresh_info().await;
-                        dev_clone.load_config().await;
-                        dev_clone.refresh_led_buf_info().await;
-                    });
-                }
-                Err(e) => log(
-                    format!("Failed to initialize RPC client: {e}"),
-                    LogLevel::Error,
-                ),
-            },
+            Ok(handle) => {
+                registry.attach_connected_device(handle, &dev_id_slot, "Connected to");
+            }
             Err(e) => {
-                let err_str = js_sys::Object::from(e)
-                    .to_string()
-                    .as_string()
-                    .unwrap_or_default();
+                let err_str = js_error_to_string(e);
                 if !err_str.contains("User cancelled") && !err_str.contains("NotFoundError") {
                     log(
                         format!("Bluetooth connection failed: {err_str}"),
@@ -185,38 +200,11 @@ impl DeviceRegistry {
         self.pending.update(|p| *p -= 1);
 
         match res {
-            Ok(handle) => match RpcClient::new(handle) {
-                Ok(rpc) => {
-                    let dev = ConnectedDevice::new(rpc);
-                    let dev_id = dev.id.clone();
-                    let dev_clone = dev.clone();
-
-                    registry.devices.update(|list| list.push(dev));
-                    registry.selection.set(Some(TreeSelection::Device {
-                        device_id: dev_id.clone(),
-                    }));
-                    *dev_id_slot.borrow_mut() = Some(dev_id.clone());
-
-                    log(
-                        format!("Connected over USB Serial ({})", dev_clone.name),
-                        LogLevel::Success,
-                    );
-                    spawn_local(async move {
-                        dev_clone.refresh_info().await;
-                        dev_clone.load_config().await;
-                        dev_clone.refresh_led_buf_info().await;
-                    });
-                }
-                Err(e) => log(
-                    format!("Failed to initialize RPC client: {e}"),
-                    LogLevel::Error,
-                ),
-            },
+            Ok(handle) => {
+                registry.attach_connected_device(handle, &dev_id_slot, "Connected over USB Serial");
+            }
             Err(e) => {
-                let err_str = js_sys::Object::from(e)
-                    .to_string()
-                    .as_string()
-                    .unwrap_or_default();
+                let err_str = js_error_to_string(e);
                 if !err_str.contains("User cancelled") && !err_str.contains("NotFoundError") {
                     log(
                         format!("Serial connection failed: {err_str}"),
