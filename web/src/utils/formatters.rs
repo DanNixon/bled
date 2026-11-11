@@ -33,6 +33,62 @@ pub fn format_uptime(ms: u64) -> String {
     out
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HexRow {
+    pub offset_str: String,
+    pub hex_left: String,
+    pub hex_right: String,
+    pub ascii: String,
+}
+
+#[must_use]
+pub fn format_hex_rows(bytes: &[u8], max_bytes: usize) -> (Vec<HexRow>, usize) {
+    if bytes.is_empty() {
+        return (Vec::new(), 0);
+    }
+    let len = bytes.len().min(max_bytes);
+    let mut rows = Vec::new();
+
+    for (chunk_idx, chunk) in bytes[..len].chunks(16).enumerate() {
+        let offset = chunk_idx * 16;
+        let offset_str = format!("{offset:06X}");
+
+        let mut left_bytes = Vec::new();
+        let mut right_bytes = Vec::new();
+        let mut ascii = String::new();
+
+        for (i, b) in chunk.iter().enumerate() {
+            let hex = format!("{b:02X}");
+            if i < 8 {
+                left_bytes.push(hex);
+            } else {
+                right_bytes.push(hex);
+            }
+            if (32..=126).contains(b) {
+                ascii.push(*b as char);
+            } else {
+                ascii.push('·');
+            }
+        }
+
+        while left_bytes.len() < 8 {
+            left_bytes.push("  ".to_string());
+        }
+        while right_bytes.len() < 8 {
+            right_bytes.push("  ".to_string());
+        }
+
+        rows.push(HexRow {
+            offset_str,
+            hex_left: left_bytes.join(" "),
+            hex_right: right_bytes.join(" "),
+            ascii,
+        });
+    }
+
+    (rows, bytes.len().saturating_sub(max_bytes))
+}
+
 #[must_use]
 pub fn render_hex_dump(bytes: &[u8], max_bytes: usize) -> String {
     if bytes.is_empty() {
@@ -110,6 +166,15 @@ pub fn parse_hex(text: &str) -> Result<Vec<u8>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_format_hex_rows() {
+        let (rows, rem) = format_hex_rows(b"Hello, World!\x00\x01\x02", 32);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].offset_str, "000000");
+        assert_eq!(rows[0].ascii, "Hello, World!···");
+        assert_eq!(rem, 0);
+    }
 
     #[test]
     fn test_format_bytes() {

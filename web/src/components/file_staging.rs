@@ -1,6 +1,6 @@
 use crate::state::{ConnectedDevice, LogLevel, log};
 use crate::transport::bridge;
-use crate::utils::formatters::{format_bytes, render_hex_dump};
+use crate::utils::formatters::{format_bytes, format_hex_rows};
 use bled_core::api::{DirEntry, DirEntryType};
 use leptodon::button::{Button, ButtonAppearance};
 use leptodon::input::TextInput;
@@ -25,6 +25,20 @@ where
     read_file: &'a F3,
 }
 
+fn file_icon(name: &str) -> &'static str {
+    if name.ends_with(".json") {
+        "📋"
+    } else if name.ends_with(".wasm") {
+        "⚙️"
+    } else if name.ends_with(".bin") || name.ends_with(".dat") {
+        "💾"
+    } else if name.ends_with(".txt") || name.ends_with(".md") {
+        "📝"
+    } else {
+        "📄"
+    }
+}
+
 fn render_tree_dir<F1, F2, F3>(
     dir_path: &str,
     depth: usize,
@@ -39,10 +53,10 @@ where
 
     if let Some(entries) = params.tree_data.get(dir_path) {
         if entries.is_empty() {
-            let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 1.25);
+            let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 1.0);
             views.push(
                 view! {
-                    <div class="text-xs text-gray-500 italic py-1" style=pad>
+                    <div class="text-[11px] text-gray-500 italic py-1" style=pad>
                         "(empty folder)"
                     </div>
                 }
@@ -68,15 +82,15 @@ where
                     let toggle = params.toggle_dir.clone();
                     let select = params.select_path.clone();
 
-                    let pad = format!("padding-left: {}rem", 0.5 + depth as f32 * 1.25);
+                    let pad = format!("padding-left: {}rem", 0.35 + depth as f32 * 0.85);
 
                     views.push(
                         view! {
                             <div
                                 class=leptodon::class_list![
-                                    "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs select-none group transition-colors",
-                                    ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_selected),
-                                    ("hover:bg-gray-800/70 text-gray-300", move || !is_selected)
+                                    "flex items-center justify-between py-1 px-1.5 rounded-lg cursor-pointer text-xs select-none group transition-all",
+                                    ("bg-oa-blue/20 text-oa-blue font-semibold border-l-2 border-oa-blue pl-1.5", move || is_selected),
+                                    ("hover:bg-gray-800/80 text-gray-300", move || !is_selected)
                                 ]
                                 style=pad
                                 on:click=move |_| {
@@ -104,7 +118,7 @@ where
                                             "▸"
                                         }}
                                     </button>
-                                    <span class="text-sm shrink-0">{if is_expanded { "📂" } else { "📁" }}</span>
+                                    <span class="text-xs shrink-0">{if is_expanded { "📂" } else { "📁" }}</span>
                                     <span class="truncate font-medium">{name}</span>
                                 </div>
                             </div>
@@ -126,26 +140,17 @@ where
                     let full_path_read = full_path.clone();
                     let select = params.select_path.clone();
                     let read = params.read_file.clone();
+                    let icon = file_icon(&name);
 
-                    let icon = if name.ends_with(".json") {
-                        "📋"
-                    } else if name.ends_with(".wasm") {
-                        "⚙️"
-                    } else if name.ends_with(".bin") || name.ends_with(".dat") {
-                        "💾"
-                    } else {
-                        "📄"
-                    };
-
-                    let pad = format!("padding-left: {}rem", 0.5 + depth as f32 * 1.25 + 1.25);
+                    let pad = format!("padding-left: {}rem", 0.35 + depth as f32 * 0.85 + 1.1);
 
                     views.push(
                         view! {
                             <div
                                 class=leptodon::class_list![
-                                    "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs group transition-colors",
-                                    ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_selected),
-                                    ("hover:bg-gray-800/70 text-gray-300", move || !is_selected)
+                                    "flex items-center justify-between py-1 px-1.5 rounded-lg cursor-pointer text-xs group transition-all",
+                                    ("bg-oa-blue/20 text-oa-blue font-semibold border-l-2 border-oa-blue pl-1.5", move || is_selected),
+                                    ("hover:bg-gray-800/80 text-gray-300", move || !is_selected)
                                 ]
                                 style=pad
                                 on:click=move |_| {
@@ -160,14 +165,14 @@ where
                                 }
                             >
                                 <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                                    <span class="text-sm shrink-0">{icon}</span>
+                                    <span class="text-xs shrink-0">{icon}</span>
                                     <span class="truncate font-mono">{name}</span>
                                 </div>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[11px] text-gray-500 font-mono">{size_str}</span>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <span class="text-[10px] text-gray-500 font-mono">{size_str}</span>
                                     <button
                                         type="button"
-                                        class="hidden group-hover:inline-block px-1.5 py-0.5 text-[10px] rounded bg-gray-800 hover:bg-gray-700 text-gray-200"
+                                        class="hidden group-hover:inline-block px-1.5 py-0.5 text-[10px] rounded bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700"
                                         title="Read into Editor"
                                         on:click={
                                             let full_path_read = full_path_read.clone();
@@ -189,10 +194,10 @@ where
             }
         }
     } else if params.loading.contains(dir_path) {
-        let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 1.25);
+        let pad = format!("padding-left: {}rem", 0.75 + depth as f32 * 0.85);
         views.push(
             view! {
-                <div class="text-xs text-gray-400 italic py-1 flex items-center gap-1" style=pad>
+                <div class="text-[11px] text-gray-400 italic py-1 flex items-center gap-1" style=pad>
                     <span>"Loading..."</span>
                 </div>
             }
@@ -208,6 +213,7 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
     let remote_path_sig = RwSignal::new("/config.json".to_string());
     let progress_sig = RwSignal::new(None::<u8>);
     let editor_text_sig = RwSignal::new(String::new());
+    let copied_sig = RwSignal::new(false);
 
     let tree_data = RwSignal::new(HashMap::<String, Vec<DirEntry>>::new());
     let expanded_dirs = RwSignal::new({
@@ -466,19 +472,52 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
         }
     };
 
+    let on_copy_clipboard = {
+        let dev = dev.clone();
+        move |_| {
+            let is_hex = dev.staged_is_hex.get_untracked();
+            let text = if is_hex {
+                let data = dev.staged_data.get_untracked();
+                crate::utils::formatters::render_hex_dump(&data, 8192)
+            } else {
+                editor_text_sig.get_untracked()
+            };
+
+            if let Some(window) = web_sys::window() {
+                let clipboard = window.navigator().clipboard();
+                let _ = clipboard.write_text(&text);
+                copied_sig.set(true);
+                log("Copied contents to clipboard", LogLevel::Info);
+
+                let cb = wasm_bindgen::closure::Closure::once(move || {
+                    copied_sig.set(false);
+                });
+                let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(
+                    cb.as_ref().unchecked_ref(),
+                    1800,
+                );
+                cb.forget();
+            }
+        }
+    };
+
     let select_path = move |path: String| {
         remote_path_sig.set(path);
     };
 
     view! {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3">
+        <div class="space-y-4">
+            // Section Header
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm">
                 <div>
-                    <h3 class="text-base font-semibold text-white">"File Management"</h3>
-                    <p class="text-xs text-gray-400">"SD card tree file browser and staging buffer"</p>
+                    <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                        <span>"File Manager"</span>
+                        <span class="text-xs text-gray-400 font-mono font-normal">"• SD Storage & Staging"</span>
+                    </h2>
+                    <p class="text-xs text-gray-400">"Browse device storage, inspect, edit, and stage configuration and binaries"</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                    <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm">
                         "Load from Disk"
                         <input type="file" on:change=on_disk_load class="hidden" />
                     </label>
@@ -498,181 +537,295 @@ pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
                 </div>
             </div>
 
-            // Tree File Explorer
-            <div class="space-y-2 bg-gray-950/60 p-3.5 rounded-xl border border-gray-800">
-                <div class="flex items-center justify-between border-b border-gray-800/80 pb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        "Device Storage"
-                    </span>
-                    <Button appearance=ButtonAppearance::Secondary on_click={
-                        let refresh = refresh_tree.clone();
-                        move |_| refresh()
-                    }>
-                        "Refresh Tree"
-                    </Button>
-                </div>
+            // Main Split: Storage Tree (Left) and Modern File Viewer / Editor (Right)
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                // Left Column: Tree File Explorer
+                <div class="lg:col-span-5 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm flex flex-col space-y-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-300">
+                                "Storage Tree"
+                            </span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 font-mono">
+                                {move || format!("{} dirs", tree_data.get().len())}
+                            </span>
+                        </div>
+                        <Button appearance=ButtonAppearance::Minimal on_click={
+                            let refresh = refresh_tree.clone();
+                            move |_| refresh()
+                        }>
+                            "Refresh"
+                        </Button>
+                    </div>
 
-                <div class="max-h-72 overflow-y-auto font-mono py-1 space-y-0.5 border border-gray-800/60 rounded-lg bg-gray-900/40 p-2">
-                    // Root /
-                    {
-                        let toggle_dir = toggle_dir.clone();
-                        let trigger_read = trigger_read_file.clone();
+                    <div class="h-[460px] overflow-y-auto font-mono py-1 space-y-0.5 border border-gray-800/80 rounded-xl bg-gray-950 p-2.5">
+                        // Root /
+                        {
+                            let toggle_dir = toggle_dir.clone();
+                            let trigger_read = trigger_read_file.clone();
 
-                        move || {
-                            let data = tree_data.get();
-                            let expanded = expanded_dirs.get();
-                            let loading = loading_dirs.get();
-                            let cur_sel = remote_path_sig.get();
+                            move || {
+                                let data = tree_data.get();
+                                let expanded = expanded_dirs.get();
+                                let loading = loading_dirs.get();
+                                let cur_sel = remote_path_sig.get();
 
-                            let is_root_expanded = expanded.contains("/");
-                            let is_root_loading = loading.contains("/");
-                            let is_root_sel = cur_sel == "/";
+                                let is_root_expanded = expanded.contains("/");
+                                let is_root_loading = loading.contains("/");
+                                let is_root_sel = cur_sel == "/";
 
-                            let toggle_root = toggle_dir.clone();
+                                let toggle_root = toggle_dir.clone();
 
-                            let params = FileTreeRenderParams {
-                                tree_data: &data,
-                                expanded: &expanded,
-                                loading: &loading,
-                                selected_path: &cur_sel,
-                                toggle_dir: &toggle_dir,
-                                select_path: &select_path,
-                                read_file: &trigger_read,
-                            };
+                                let params = FileTreeRenderParams {
+                                    tree_data: &data,
+                                    expanded: &expanded,
+                                    loading: &loading,
+                                    selected_path: &cur_sel,
+                                    toggle_dir: &toggle_dir,
+                                    select_path: &select_path,
+                                    read_file: &trigger_read,
+                                };
 
-                            view! {
-                                <div>
-                                    <div
-                                        class=leptodon::class_list![
-                                            "flex items-center justify-between py-1 px-2 rounded cursor-pointer text-xs select-none transition-colors",
-                                            ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_root_sel),
-                                            ("hover:bg-gray-800/70 text-gray-200", move || !is_root_sel)
-                                        ]
-                                        on:click=move |_| {
-                                            select_path("/".to_string());
-                                        }
-                                    >
-                                        <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                                            <button
-                                                type="button"
-                                                class="text-gray-400 hover:text-white w-4 text-center text-xs shrink-0"
-                                                on:click={
-                                                    let toggle = toggle_root.clone();
-                                                    move |e: web_sys::MouseEvent| {
-                                                        e.stop_propagation();
-                                                        toggle("/".to_string());
+                                view! {
+                                    <div>
+                                        <div
+                                            class=leptodon::class_list![
+                                                "flex items-center justify-between py-1 px-1.5 rounded-lg cursor-pointer text-xs select-none transition-all",
+                                                ("bg-oa-blue/20 text-oa-blue font-semibold border-l-2 border-oa-blue pl-1.5", move || is_root_sel),
+                                                ("hover:bg-gray-800/80 text-gray-200", move || !is_root_sel)
+                                            ]
+                                            on:click=move |_| {
+                                                select_path("/".to_string());
+                                            }
+                                        >
+                                            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                                <button
+                                                    type="button"
+                                                    class="text-gray-400 hover:text-white w-4 text-center text-xs shrink-0"
+                                                    on:click={
+                                                        let toggle = toggle_root.clone();
+                                                        move |e: web_sys::MouseEvent| {
+                                                            e.stop_propagation();
+                                                            toggle("/".to_string());
+                                                        }
                                                     }
-                                                }
-                                            >
-                                                {if is_root_loading {
-                                                    "⏳"
-                                                } else if is_root_expanded {
-                                                    "▾"
-                                                } else {
-                                                    "▸"
-                                                }}
-                                            </button>
-                                            <span class="text-sm shrink-0">"💾"</span>
-                                            <span class="font-bold truncate">"/ (SD Card Root)"</span>
-                                        </div>
-                                    </div>
-
-                                    {if is_root_expanded {
-                                        view! {
-                                            <div class="border-l border-gray-800/80 ml-3.5 space-y-0.5 mt-0.5">
-                                                {render_tree_dir("/", 0, &params)}
+                                                >
+                                                    {if is_root_loading {
+                                                        "⏳"
+                                                    } else if is_root_expanded {
+                                                        "▾"
+                                                    } else {
+                                                        "▸"
+                                                    }}
+                                                </button>
+                                                <span class="text-xs shrink-0">"💾"</span>
+                                                <span class="font-bold truncate">"/ (SD Card Root)"</span>
                                             </div>
-                                        }.into_any()
-                                    } else {
-                                        ().into_any()
-                                    }}
-                                </div>
+                                        </div>
+
+                                        {if is_root_expanded {
+                                            view! {
+                                                <div class="border-l border-gray-800 ml-2.5 space-y-0.5 mt-0.5">
+                                                    {render_tree_dir("/", 0, &params)}
+                                                </div>
+                                            }.into_any()
+                                        } else {
+                                            ().into_any()
+                                        }}
+                                    </div>
+                                }
                             }
                         }
-                    }
-                </div>
-            </div>
-
-            // Remote Path Actions Toolbar
-            <div class="flex flex-wrap items-end justify-between gap-3 pt-2 border-t border-gray-800">
-                <div class="flex-1 min-w-[260px]">
-                    <TextInput label="Selected Path on Device" value=remote_path_sig />
-                </div>
-                <div class="flex items-center gap-2">
-                    <Button appearance=ButtonAppearance::Primary on_click={
-                        let trigger_read = trigger_read_file.clone();
-                        move |_| {
-                            let path = remote_path_sig.get_untracked();
-                            trigger_read(path);
-                        }
-                    }>
-                        "Read from Device"
-                    </Button>
-                    <Button appearance=ButtonAppearance::Primary on_click=move |_| on_write_file()>
-                        "Write to Device"
-                    </Button>
-                    <Button appearance=ButtonAppearance::Danger on_click=move |_| on_delete_file()>
-                        "Delete"
-                    </Button>
-                </div>
-            </div>
-
-            {move || {
-                if let Some(pct) = progress_sig.get() {
-                    view! {
-                        <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                            <div class="bg-oa-blue h-2 transition-all duration-200" style=format!("width: {pct}%")></div>
-                        </div>
-                    }.into_any()
-                } else {
-                    ().into_any()
-                }
-            }}
-
-            // Editor / Staging Viewer
-            <div class="space-y-2 pt-2 border-t border-gray-800">
-                <div class="flex items-center justify-between text-xs text-gray-400">
-                    <div class="flex items-center gap-3">
-                        <span>"Staged: " <strong class="text-white">{move || {
-                            let f = dev.staged_filename.get();
-                            if f.is_empty() { "<In-Memory Buffer>".into() } else { f }
-                        }}</strong></span>
-                        <span>"Size: " <strong class="text-white">{move || {
-                            let d = dev.staged_data.get();
-                            format_bytes(d.len() as u64)
-                        }}</strong></span>
-                        <span>"Mode: " <strong class="text-oa-blue">{move || if dev.staged_is_hex.get() { "Binary (Hex View)" } else { "Text (UTF-8)" }}</strong></span>
                     </div>
-                    <Button appearance=ButtonAppearance::Secondary on_click={
-                        let dev = dev.clone();
-                        move |_| {
-                            let cur = dev.staged_is_hex.get_untracked();
-                            dev.staged_is_hex.set(!cur);
-                        }
-                    }>
-                        {move || if dev.staged_is_hex.get() { "View Text" } else { "View Hex" }}
-                    </Button>
+
+                    <p class="text-[11px] text-gray-500 italic">
+                        "Double-click any file to read it directly into the viewer."
+                    </p>
                 </div>
 
-                {move || {
-                    let is_hex = dev.staged_is_hex.get();
-                    if is_hex {
-                        let data = dev.staged_data.get();
-                        view! {
-                            <pre class="w-full bg-gray-950 p-3 rounded-lg border border-gray-800 text-xs font-mono text-gray-300 max-h-80 overflow-auto">
-                                {render_hex_dump(&data, 4096)}
-                            </pre>
-                        }.into_any()
-                    } else {
-                        view! {
-                            <textarea
-                                class="w-full bg-gray-950 p-3 rounded-lg border border-gray-800 text-xs font-mono text-gray-200 h-64 focus:outline-none focus:ring-1 focus:ring-oa-blue"
-                                bind:value=editor_text_sig
-                                placeholder="File contents will appear here. Load from disk, read from device, or type directly..."
-                            ></textarea>
-                        }.into_any()
-                    }
-                }}
+                // Right Column: Modern File Viewer / Staging Editor
+                <div class="lg:col-span-7 bg-gray-900 border border-gray-800 rounded-xl p-4 shadow-sm flex flex-col space-y-3.5">
+                    // Viewer Header Bar
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-lg">
+                                {move || {
+                                    let f = dev.staged_filename.get();
+                                    file_icon(&f)
+                                }}
+                            </span>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-white font-mono truncate">
+                                        {move || {
+                                            let f = dev.staged_filename.get();
+                                            if f.is_empty() { "<In-Memory Staging Buffer>".to_string() } else { f }
+                                        }}
+                                    </span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700 text-gray-300 font-mono shrink-0">
+                                        {move || {
+                                            let is_hex = dev.staged_is_hex.get();
+                                            let len = if is_hex {
+                                                dev.staged_data.get().len()
+                                            } else {
+                                                editor_text_sig.get().len()
+                                            };
+                                            format_bytes(len as u64)
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <Button appearance=ButtonAppearance::Minimal on_click=on_copy_clipboard>
+                                {move || if copied_sig.get() { "Copied ✓" } else { "Copy" }}
+                            </Button>
+                            <Button appearance=ButtonAppearance::Secondary on_click={
+                                let dev = dev.clone();
+                                move |_| {
+                                    let cur = dev.staged_is_hex.get_untracked();
+                                    dev.staged_is_hex.set(!cur);
+                                }
+                            }>
+                                {move || if dev.staged_is_hex.get() { "Switch to Text" } else { "Switch to Hex" }}
+                            </Button>
+                        </div>
+                    </div>
+
+                    // Remote Actions Toolbar
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                        <div class="sm:col-span-6">
+                            <TextInput label="Device File Path" value=remote_path_sig />
+                        </div>
+                        <div class="sm:col-span-6 flex items-center justify-end gap-1.5">
+                            <Button appearance=ButtonAppearance::Primary on_click={
+                                let trigger_read = trigger_read_file.clone();
+                                move |_| {
+                                    let path = remote_path_sig.get_untracked();
+                                    trigger_read(path);
+                                }
+                            }>
+                                "Read"
+                            </Button>
+                            <Button appearance=ButtonAppearance::Primary on_click=move |_| on_write_file()>
+                                "Write"
+                            </Button>
+                            <Button appearance=ButtonAppearance::Danger on_click=move |_| on_delete_file()>
+                                "Delete"
+                            </Button>
+                        </div>
+                    </div>
+
+                    // Progress indicator
+                    {move || {
+                        if let Some(pct) = progress_sig.get() {
+                            view! {
+                                <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-oa-blue h-1.5 transition-all duration-150" style=format!("width: {pct}%")></div>
+                                </div>
+                            }.into_any()
+                        } else {
+                            ().into_any()
+                        }
+                    }}
+
+                    // Modern Content Viewer Container
+                    <div class="border border-gray-800 rounded-xl overflow-hidden bg-gray-950 flex flex-col">
+                        // Viewer Mode Bar
+                        <div class="flex items-center justify-between px-3 py-1.5 bg-gray-900/90 border-b border-gray-800 text-[11px] text-gray-400 font-mono">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                <span>{move || if dev.staged_is_hex.get() { "BINARY HEX DUMP" } else { "UTF-8 CODE EDITOR" }}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span>{move || {
+                                    if dev.staged_is_hex.get() {
+                                        let data = dev.staged_data.get();
+                                        format!("{} bytes", data.len())
+                                    } else {
+                                        let text = editor_text_sig.get();
+                                        let lines = text.lines().count().max(1);
+                                        format!("{lines} lines • {} chars", text.len())
+                                    }
+                                }}</span>
+                            </div>
+                        </div>
+
+                        // Main Content Area
+                        {move || {
+                            let is_hex = dev.staged_is_hex.get();
+                            let data = dev.staged_data.get();
+                            let text = editor_text_sig.get();
+
+                            if is_hex && data.is_empty() && text.is_empty() || !is_hex && text.is_empty() && data.is_empty() {
+                                view! {
+                                    <div class="h-80 flex flex-col items-center justify-center p-6 text-center space-y-2">
+                                        <span class="text-3xl text-gray-600">"📄"</span>
+                                        <p class="text-sm font-medium text-gray-400">"No file staged in buffer"</p>
+                                        <p class="text-xs text-gray-600 max-w-sm">
+                                            "Select a file from the Storage Tree and click Read, load from disk, or type directly into the editor."
+                                        </p>
+                                    </div>
+                                }.into_any()
+                            } else if is_hex {
+                                let (rows, truncated_bytes) = format_hex_rows(&data, 8192);
+                                view! {
+                                    <div class="h-96 overflow-auto font-mono text-[11px] p-2.5 space-y-0.5 select-text">
+                                        <div class="grid grid-cols-12 gap-2 text-gray-500 border-b border-gray-800/80 pb-1 mb-1 font-semibold text-[10px] uppercase tracking-wider">
+                                            <div class="col-span-2 text-cyan-400/90">"Offset"</div>
+                                            <div class="col-span-4 text-gray-400">"00 01 02 03 04 05 06 07"</div>
+                                            <div class="col-span-4 text-gray-400">"08 09 0A 0B 0C 0D 0E 0F"</div>
+                                            <div class="col-span-2 text-emerald-400/90 border-l border-gray-800 pl-2">"ASCII"</div>
+                                        </div>
+                                        {rows.into_iter().map(|row| {
+                                            view! {
+                                                <div class="grid grid-cols-12 gap-2 py-0.5 hover:bg-gray-900/60 rounded px-1 transition-colors">
+                                                    <div class="col-span-2 text-cyan-400/80 font-semibold select-none">{row.offset_str}</div>
+                                                    <div class="col-span-4 text-gray-300 font-mono tracking-wider">{row.hex_left}</div>
+                                                    <div class="col-span-4 text-gray-400 font-mono tracking-wider">{row.hex_right}</div>
+                                                    <div class="col-span-2 text-emerald-400 font-mono border-l border-gray-800 pl-2 truncate">{row.ascii}</div>
+                                                </div>
+                                            }
+                                        }).collect_view()}
+
+                                        {if truncated_bytes > 0 {
+                                            view! {
+                                                <div class="text-center py-2 text-amber-500/80 text-xs italic border-t border-gray-800 mt-2">
+                                                    {format!("... ({} more bytes truncated in preview)", truncated_bytes)}
+                                                </div>
+                                            }.into_any()
+                                        } else {
+                                            ().into_any()
+                                        }}
+                                    </div>
+                                }.into_any()
+                            } else {
+                                let lines_count = text.lines().count().max(1);
+                                let line_numbers = (1..=lines_count)
+                                    .map(|n| n.to_string())
+                                    .collect::<Vec<_>>()
+                                    .join("\n");
+
+                                view! {
+                                    <div class="flex h-96 relative bg-gray-950 font-mono text-xs">
+                                        // Line numbers gutter
+                                        <div class="select-none py-3 px-2.5 text-right text-gray-600 bg-gray-950 border-r border-gray-800/80 font-mono text-[11px] leading-relaxed w-10 shrink-0 overflow-hidden">
+                                            <pre>{line_numbers}</pre>
+                                        </div>
+                                        // Text editor
+                                        <textarea
+                                            class="flex-1 bg-transparent p-3 text-gray-200 text-xs font-mono leading-relaxed focus:outline-none resize-none overflow-auto"
+                                            bind:value=editor_text_sig
+                                            placeholder="File contents will appear here. Type directly, read from device, or load from disk..."
+                                            spellcheck="false"
+                                        ></textarea>
+                                    </div>
+                                }.into_any()
+                            }
+                        }}
+                    </div>
+                </div>
             </div>
         </div>
     }
