@@ -91,39 +91,22 @@ pub fn format_hex_rows(bytes: &[u8], max_bytes: usize) -> (Vec<HexRow>, usize) {
 
 #[must_use]
 pub fn render_hex_dump(bytes: &[u8], max_bytes: usize) -> String {
-    if bytes.is_empty() {
+    let (rows, truncated) = format_hex_rows(bytes, max_bytes);
+    if rows.is_empty() {
         return String::new();
     }
-    let len = bytes.len().min(max_bytes);
     let mut out = String::new();
-
-    for (chunk_idx, chunk) in bytes[..len].chunks(16).enumerate() {
-        let offset = chunk_idx * 16;
-        let mut hex_part = String::new();
-        let mut ascii_part = String::new();
-
-        for b in chunk {
-            hex_part.push_str(&format!("{b:02x} "));
-            if (32..=126).contains(b) {
-                ascii_part.push(*b as char);
-            } else {
-                ascii_part.push('.');
-            }
-        }
-
-        // Pad hex part to 48 chars (16 * 3)
-        while hex_part.len() < 48 {
-            hex_part.push(' ');
-        }
-
-        out.push_str(&format!("{offset:06x}:  {hex_part} |{ascii_part}|\n"));
-    }
-
-    if bytes.len() > max_bytes {
+    for row in rows {
         out.push_str(&format!(
-            "... ({} more bytes truncated in preview)",
-            bytes.len() - max_bytes
+            "{}:  {}  {} |{}|\n",
+            row.offset_str.to_lowercase(),
+            row.hex_left.to_lowercase(),
+            row.hex_right.to_lowercase(),
+            row.ascii.replace('·', ".")
         ));
+    }
+    if truncated > 0 {
+        out.push_str(&format!("... ({truncated} more bytes truncated in preview)"));
     }
     out
 }
@@ -139,11 +122,10 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
 
 pub fn parse_hex(text: &str) -> Result<Vec<u8>, String> {
     let clean = text
-        .trim()
         .replace("0x", "")
         .replace("0X", "")
         .chars()
-        .filter(|c| !c.is_whitespace() && *c != ',' && *c != ':' && *c != '_' && *c != '-')
+        .filter(|c| c.is_ascii_hexdigit())
         .collect::<String>();
 
     if clean.is_empty() {
