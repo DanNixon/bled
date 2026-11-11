@@ -28,6 +28,7 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
         });
     };
 
+    let registry = leptos::context::use_context::<crate::state::DeviceRegistry>();
     let reboot_dialog_visible = RwSignal::new(false);
 
     let on_reboot_cancel = BoxCallback::new(move || {
@@ -37,8 +38,13 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
     let on_reboot = BoxCallback::new(move || {
         reboot_dialog_visible.set(false);
         let dev = d3.clone();
+        let reg = registry;
         spawn_local(async move {
+            let dev_id = dev.id.clone();
             dev.reboot().await;
+            if let Some(r) = reg {
+                r.remove_device(&dev_id);
+            }
         });
     });
 

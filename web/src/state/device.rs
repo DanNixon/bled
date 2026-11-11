@@ -142,6 +142,7 @@ impl ConnectedDevice {
             LogLevel::Info,
         );
         let _ = rpc.reboot().await;
+        rpc.disconnect();
     }
 
     pub async fn commit(&self) {
