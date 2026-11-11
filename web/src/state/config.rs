@@ -73,6 +73,7 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
         let layout_name = match fixture.layout() {
             PixelLayout::LinearArray(_) => "Linear Array".into(),
             PixelLayout::CircularArray(_) => "Circular Array".into(),
+            PixelLayout::Matrix2d(_) => "2D Matrix".into(),
         };
 
         let mut spans = Vec::new();
@@ -130,13 +131,13 @@ mod tests {
     use super::*;
     use bled_core::{
         ChannelNumber,
-        config::{Fixture, Fixtures, LinearArray, PixelSpan},
+        config::{CircularArray, Fixture, Fixtures, LinearArray, Matrix2d, PixelSpan},
     };
 
     #[test]
     fn test_normalize_config() {
-        let fixture = Fixture::new(
-            "test-fixture".try_into().unwrap(),
+        let fixture1 = Fixture::new(
+            "fix-linear".try_into().unwrap(),
             PixelLayout::LinearArray(LinearArray::default()),
             [
                 PixelSpan::new("a".try_into().unwrap(), ChannelNumber::new(0), 0, 4),
@@ -145,18 +146,47 @@ mod tests {
             .try_into()
             .unwrap(),
         );
+        let fixture2 = Fixture::new(
+            "fix-circular".try_into().unwrap(),
+            PixelLayout::CircularArray(CircularArray::default()),
+            [PixelSpan::new(
+                "c".try_into().unwrap(),
+                ChannelNumber::new(2),
+                0,
+                8,
+            )]
+            .try_into()
+            .unwrap(),
+        );
+        let fixture3 = Fixture::new(
+            "fix-matrix".try_into().unwrap(),
+            PixelLayout::Matrix2d(Matrix2d::default()),
+            [PixelSpan::new(
+                "d".try_into().unwrap(),
+                ChannelNumber::new(3),
+                0,
+                16,
+            )]
+            .try_into()
+            .unwrap(),
+        );
 
         let config = DeviceConfig {
             name: "test-device".try_into().unwrap(),
-            fixtures: Fixtures::new([fixture].into()),
+            fixtures: Fixtures::new([fixture1, fixture2, fixture3].into()),
             default_effect: None,
         };
 
         let norm = normalize_config(&config);
         assert_eq!(norm.name, "test-device");
-        assert_eq!(norm.fixtures.len(), 1);
+        assert_eq!(norm.fixtures.len(), 3);
+        assert_eq!(norm.fixtures[0].layout_name, "Linear Array");
+        assert_eq!(norm.fixtures[1].layout_name, "Circular Array");
+        assert_eq!(norm.fixtures[2].layout_name, "2D Matrix");
         assert_eq!(norm.channel_lengths[0], 4);
         assert_eq!(norm.channel_lengths[1], 7);
+        assert_eq!(norm.channel_lengths[2], 8);
+        assert_eq!(norm.channel_lengths[3], 16);
         assert_eq!(norm.channel_offsets[0], 0);
         assert_eq!(norm.channel_offsets[1], 12);
         assert_eq!(norm.fixtures[0].spans[0].byte_offset, 0);
