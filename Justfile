@@ -25,11 +25,13 @@ build: build-effects
 
 check-effects:
     @just run-sub effects/matrix-colour-chase check
+    @just run-sub effects/matrix-game-of-life check
     @just run-sub effects/span-colour-chase check
     @just run-sub effects/span-painter check
 
 build-effects:
     @just run-sub effects/matrix-colour-chase build
+    @just run-sub effects/matrix-game-of-life build
     @just run-sub effects/span-colour-chase build
     @just run-sub effects/span-painter build
 
