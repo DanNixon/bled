@@ -33,6 +33,33 @@ build-effects:
     @just run-sub effects/span-colour-chase build
     @just run-sub effects/span-painter build
 
+dist-effects: build-effects
+    @rm -rf effects/dist
+    @for cargo_toml in effects/*/Cargo.toml; do \
+        [ -f "$cargo_toml" ] || continue; \
+        dir=$(dirname "$cargo_toml"); \
+        name=$(basename "$dir"); \
+        name=$(echo "$name" | tr '-' '_'); \
+        if [ -f "$dir/target/wasm32-unknown-unknown/release/$name.wasm" ]; then \
+            wasm="$dir/target/wasm32-unknown-unknown/release/$name.wasm"; \
+        else \
+            wasm=""; \
+        fi; \
+        if [ -n "$wasm" ]; then \
+            mkdir -p "effects/dist/$name"; \
+            cp "$wasm" "effects/dist/$name/$name.wasm"; \
+        fi; \
+        presets_dir="$dir/target/wasm32-unknown-unknown/release/presets"; \
+        if [ -d "$presets_dir" ]; then \
+            for preset in "$presets_dir"/*.json; do \
+                if [ -f "$preset" ]; then \
+                    mkdir -p "effects/dist/$name/presets"; \
+                    cp "$preset" "effects/dist/$name/presets/"; \
+                fi; \
+            done; \
+        fi; \
+    done
+
 check-nix-fmt:
     alejandra -q -c .
 
