@@ -1,0 +1,19 @@
+[package]
+name = "matrix-game-of-life"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bled-effect = { path = "../../lib/effect" }
+heapless = "0.9"
+rand = { version = "0.9", default-features = false, features = ["small_rng"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
