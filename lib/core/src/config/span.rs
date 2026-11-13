@@ -19,7 +19,7 @@ pub struct PixelSpan {
     length: PixelIndex,
 
     /// The brightness limit for pixels in the span.
-    #[serde(default)]
+    #[serde(default, rename = "limit")]
     brightness_limit: BrightnessLimit,
 }
 
@@ -69,7 +69,7 @@ mod tests {
                 "channel":1,
                 "start":0,
                 "length":4,
-                "brightness_limit":{
+                "limit":{
                     "mode":"rescale",
                     "limit":{"r":64,"g":128,"b":255}
                 }

@@ -60,7 +60,7 @@ export function normaliseConfig(raw) {
       const start = Number(span.start);
       const length = Number(span.length);
       const byteOffset = (channelOffsets[channel] ?? 0) + start * 3;
-      const rawLimit = span.brightness_limit ?? span.brightnessLimit;
+      const rawLimit = span.limit;
       const brightnessLimit = {
         mode: rawLimit?.mode ?? 'clamp',
         limit: {
