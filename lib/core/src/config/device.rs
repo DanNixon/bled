@@ -3,7 +3,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 /// Maximum allowable size of the config file in bytes when encoded as JSON.
-pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 5;
+pub const MAX_CONFIG_JSON_SIZE: usize = 1024 * 10;
 
 /// Maximum allowable size of the config file in bytes when encoded as Postcard.
 pub const MAX_CONFIG_POSTCARD_SIZE: usize = 1024 * 3;

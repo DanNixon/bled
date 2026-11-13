@@ -1,5 +1,6 @@
 use bled_core::{
     RGB8,
+    config::ChannelBrightnessLimits,
     pixel_buffer::{PixelDataBuffer, PixelDataChannelSize},
 };
 use defmt::{debug, info, unwrap};
@@ -41,12 +42,17 @@ pub(crate) async fn draw() {
 
 #[embassy_executor::task]
 pub(super) async fn task(r: super::LedResources) -> ! {
-    let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] = crate::config::get()
-        .fixtures()
+    let fixtures = crate::config::get().fixtures();
+
+    let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] = fixtures
         .channel_lengths::<CHANNEL_COUNT>()
         .unwrap()
         .map(PixelDataChannelSize::new::<RGB8>);
     unwrap!(CHANNEL_DATA.lock().await.try_reshape(channel_sizes));
+
+    let brightness_limits = unwrap!(ChannelBrightnessLimits::<CHANNEL_COUNT>::from_fixtures(
+        fixtures
+    ));
 
     let mut pio = Pio::new(r.pio, super::Irqs);
     let program = PioWs2812Program::new(&mut pio.common);
@@ -92,11 +98,12 @@ pub(super) async fn task(r: super::LedResources) -> ! {
 
         for channel in 0..CHANNEL_COUNT {
             if let Ok(pixels) = data.try_channel::<RGB8>(channel) {
+                let pixels = unwrap!(brightness_limits.apply_channel(channel, pixels));
                 match channel {
-                    0 => channel_0.write(pixels.iter().copied()).await.unwrap(),
-                    1 => channel_1.write(pixels.iter().copied()).await.unwrap(),
-                    2 => channel_2.write(pixels.iter().copied()).await.unwrap(),
-                    3 => channel_3.write(pixels.iter().copied()).await.unwrap(),
+                    0 => channel_0.write(pixels).await.unwrap(),
+                    1 => channel_1.write(pixels).await.unwrap(),
+                    2 => channel_2.write(pixels).await.unwrap(),
+                    3 => channel_3.write(pixels).await.unwrap(),
                     _ => unreachable!(),
                 }
             }

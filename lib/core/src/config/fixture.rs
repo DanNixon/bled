@@ -223,6 +223,9 @@ pub enum FixturesValidationError {
 /// Maximum number of spans that may be used in a single fixture.
 pub const MAX_SPAN_PER_FIXTURE_COUNT: usize = 8;
 
+/// Maximum total number of spans across all fixtures on a device.
+pub const MAX_TOTAL_SPAN_COUNT: usize = MAX_FIXTURE_COUNT * MAX_SPAN_PER_FIXTURE_COUNT;
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Getters)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
