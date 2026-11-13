@@ -60,6 +60,15 @@ export function normaliseConfig(raw) {
       const start = Number(span.start);
       const length = Number(span.length);
       const byteOffset = (channelOffsets[channel] ?? 0) + start * 3;
+      const rawLimit = span.brightness_limit ?? span.brightnessLimit;
+      const brightnessLimit = {
+        mode: rawLimit?.mode ?? 'clamp',
+        limit: {
+          r: Number(rawLimit?.limit?.r ?? 255),
+          g: Number(rawLimit?.limit?.g ?? 255),
+          b: Number(rawLimit?.limit?.b ?? 255),
+        },
+      };
       return {
         index: spanIndex,
         name: span.name || `Span ${spanIndex + 1}`,
@@ -68,6 +77,7 @@ export function normaliseConfig(raw) {
         length,
         byteOffset,
         byteLength: length * 3,
+        brightnessLimit,
       };
     });
 

@@ -25,8 +25,11 @@ pub fn decode_device_config(data: &[u8]) -> Result<JsValue, JsError> {
 mod tests {
     use super::*;
     use bled_core::{
-        ChannelNumber,
-        config::{DeviceConfig, Fixture, Fixtures, LinearArray, PixelLayout, PixelSpan},
+        ChannelNumber, RGB8,
+        config::{
+            BrightnessLimit, BrightnessLimitMode, DeviceConfig, Fixture, Fixtures, LinearArray,
+            PixelLayout, PixelSpan,
+        },
     };
 
     #[test]
@@ -39,7 +42,16 @@ mod tests {
                     "layout": { "linear_array": {} },
                     "spans": [
                         { "name": "a", "channel": 0, "start": 0, "length": 1 },
-                        { "name": "b", "channel": 1, "start": 0, "length": 1 }
+                        {
+                            "name": "b",
+                            "channel": 1,
+                            "start": 0,
+                            "length": 1,
+                            "brightness_limit": {
+                                "mode": "rescale",
+                                "limit": { "r": 63, "g": 127, "b": 255 }
+                            }
+                        }
                     ]
                 }
             ],
@@ -51,6 +63,14 @@ mod tests {
         assert_eq!(decoded.fixtures().as_slice().len(), 1);
         assert_eq!(decoded.fixtures().as_slice()[0].name().as_str(), "onboard");
         assert_eq!(decoded.fixtures().as_slice()[0].spans().len(), 2);
+        assert_eq!(
+            *decoded.fixtures().as_slice()[0].spans()[0].brightness_limit(),
+            BrightnessLimit::default()
+        );
+        assert_eq!(
+            *decoded.fixtures().as_slice()[0].spans()[1].brightness_limit(),
+            BrightnessLimit::new(BrightnessLimitMode::Rescale, RGB8::new(63, 127, 255))
+        );
         assert!(decoded.default_effect().is_none());
     }
 
@@ -64,6 +84,7 @@ mod tests {
                 ChannelNumber::new(0),
                 0,
                 4,
+                BrightnessLimit::default(),
             )]
             .try_into()
             .unwrap(),

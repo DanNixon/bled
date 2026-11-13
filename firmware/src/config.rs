@@ -2,7 +2,8 @@ use crate::sdcard::{ReadFileError, SdCardStorage};
 use bled_core::{
     ChannelNumber,
     config::{
-        DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE, PixelLayout, PixelSpan,
+        BrightnessLimit, DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE,
+        PixelLayout, PixelSpan,
     },
 };
 use defmt::{error, info, warn};
@@ -96,10 +97,34 @@ fn default_config() -> DeviceConfig {
         "onboard".try_into().unwrap(),
         PixelLayout::LinearArray(LinearArray::default()),
         [
-            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(0), 0, 1),
-            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(1), 0, 1),
-            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(2), 0, 1),
-            PixelSpan::new("led".try_into().unwrap(), ChannelNumber::new(3), 0, 1),
+            PixelSpan::new(
+                "led".try_into().unwrap(),
+                ChannelNumber::new(0),
+                0,
+                1,
+                BrightnessLimit::default(),
+            ),
+            PixelSpan::new(
+                "led".try_into().unwrap(),
+                ChannelNumber::new(1),
+                0,
+                1,
+                BrightnessLimit::default(),
+            ),
+            PixelSpan::new(
+                "led".try_into().unwrap(),
+                ChannelNumber::new(2),
+                0,
+                1,
+                BrightnessLimit::default(),
+            ),
+            PixelSpan::new(
+                "led".try_into().unwrap(),
+                ChannelNumber::new(3),
+                0,
+                1,
+                BrightnessLimit::default(),
+            ),
         ]
         .into(),
     );

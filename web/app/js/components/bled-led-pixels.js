@@ -20,6 +20,10 @@ export class BledLedPixels extends HTMLElement {
             <label for="pixelTargetDisplay">Target</label>
             <input type="text" id="pixelTargetDisplay" readonly style="background: var(--card-bg-subtle, rgba(0,0,0,0.15)); color: var(--text-primary); cursor: default;">
           </div>
+          <div id="pixelBrightnessLimitGroup" class="form-group" style="flex: 2; display: none;">
+            <label for="pixelBrightnessLimitDisplay">Brightness Limit</label>
+            <input type="text" id="pixelBrightnessLimitDisplay" readonly style="background: var(--card-bg-subtle, rgba(0,0,0,0.15)); color: var(--text-primary); cursor: default;">
+          </div>
           <div class="form-group" style="flex: 1;">
             <label for="pixelStart">Start Pixel</label>
             <input type="number" id="pixelStart" value="0" min="0" max="65535">
@@ -83,6 +87,8 @@ export class BledLedPixels extends HTMLElement {
     // Elements
     this.pixelTarget = this.querySelector('#pixelTarget');
     this.pixelTargetDisplay = this.querySelector('#pixelTargetDisplay');
+    this.pixelBrightnessLimitGroup = this.querySelector('#pixelBrightnessLimitGroup');
+    this.pixelBrightnessLimitDisplay = this.querySelector('#pixelBrightnessLimitDisplay');
     this.pixelStart = this.querySelector('#pixelStart');
     this.pixelCount = this.querySelector('#pixelCount');
     this.colorPreview = this.querySelector('#colorPreview');
@@ -158,6 +164,14 @@ export class BledLedPixels extends HTMLElement {
         const desc = `${fixture.name} / ${span.name} — Ch ${span.channel} [${span.start}..${span.start + span.length - 1}] (${span.length} px)`;
         this.pixelTarget.textContent = desc;
         this.pixelTargetDisplay.value = `${fixture.name} / ${span.name}`;
+        if (span.brightnessLimit) {
+          const modeLabel = span.brightnessLimit.mode.charAt(0).toUpperCase() + span.brightnessLimit.mode.slice(1);
+          const { r, g, b } = span.brightnessLimit.limit;
+          this.pixelBrightnessLimitDisplay.value = `${modeLabel} (R: ${r}, G: ${g}, B: ${b})`;
+          this.pixelBrightnessLimitGroup.style.display = '';
+        } else {
+          this.pixelBrightnessLimitGroup.style.display = 'none';
+        }
         this.pixelStart.value = 0;
         this.pixelCount.value = Math.max(1, span.length);
         this.btnSetColours.disabled = span.length < 1;
@@ -165,6 +179,7 @@ export class BledLedPixels extends HTMLElement {
         const desc = `${fixture.name}: entire fixture (${fixture.totalPixels} px, ${fixture.layoutName})`;
         this.pixelTarget.textContent = desc;
         this.pixelTargetDisplay.value = fixture.name;
+        this.pixelBrightnessLimitGroup.style.display = 'none';
         this.pixelStart.value = 0;
         this.pixelCount.value = Math.max(1, fixture.totalPixels);
         this.btnSetColours.disabled = fixture.totalPixels < 1;
@@ -177,6 +192,7 @@ export class BledLedPixels extends HTMLElement {
         : `${channel.name}: entire channel (${channel.length} pixels)`;
       this.pixelTarget.textContent = desc;
       this.pixelTargetDisplay.value = segment ? `${channel.name} / ${segment.name}` : channel.name;
+      this.pixelBrightnessLimitGroup.style.display = 'none';
       this.pixelStart.value = start;
       this.pixelCount.value = Math.max(1, count);
       this.btnSetColours.disabled = count < 1;
