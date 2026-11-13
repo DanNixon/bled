@@ -2,10 +2,11 @@ mod circular_array;
 mod linear_array;
 mod matrix_2d;
 
-pub use circular_array::CircularArray;
+pub use circular_array::*;
+pub use linear_array::*;
+pub use matrix_2d::*;
+
 pub use embedded_graphics::geometry::{Point, Size};
-pub use linear_array::LinearArray;
-pub use matrix_2d::Matrix2d;
 
 use serde::{Deserialize, Serialize};
 
