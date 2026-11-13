@@ -47,7 +47,7 @@ mod tests {
                             "channel": 1,
                             "start": 0,
                             "length": 1,
-                            "brightness_limit": {
+                            "limit": {
                                 "mode": "rescale",
                                 "limit": { "r": 63, "g": 127, "b": 255 }
                             }

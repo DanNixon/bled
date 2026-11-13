@@ -256,7 +256,7 @@ mod tests {
                             "channel": 0,
                             "start": 4,
                             "length": 2,
-                            "brightness_limit": {
+                            "limit": {
                                 "mode": "rescale",
                                 "limit": {"r": 100, "g": 50, "b": 255}
                             }
@@ -278,7 +278,7 @@ mod tests {
                             "channel": 0,
                             "start": 1,
                             "length": 2,
-                            "brightness_limit": {
+                            "limit": {
                                 "mode": "clamp",
                                 "limit": {"r": 60, "g": 70, "b": 80}
                             }
