@@ -127,6 +127,7 @@ async fn main(spawner: Spawner) {
 
 fn device_info() -> DeviceInfo {
     DeviceInfo::new(
+        config::device_name().clone(),
         git_version::git_version!().try_into().unwrap(),
         boot_reason(),
         Instant::now().as_millis(),

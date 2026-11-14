@@ -229,6 +229,25 @@ impl SdCardStorage {
     }
 
     #[inline(never)]
+    pub(crate) async fn rename_file(&self, from_path: &str, to_path: &str) -> Result<(), FsError> {
+        self.with_filesystem(|fs| {
+            match fs.remove_file(to_path) {
+                Ok(()) | Err(ExFatError::FileNotFound) => {}
+                Err(e) => {
+                    warn!("failed to delete existing target file {}: {}", to_path, e);
+                    return Err(e);
+                }
+            }
+
+            fs.rename(from_path, to_path).map_err(|e| {
+                warn!("failed to rename file {} to {}: {}", from_path, to_path, e);
+                e
+            })
+        })
+        .await
+    }
+
+    #[inline(never)]
     pub(crate) async fn open_dir(&self, path: &str) -> Result<DirectoryIterator, FsError> {
         self.with_filesystem(|fs| {
             fs.read_dir(path).map_err(|e| {

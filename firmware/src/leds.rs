@@ -1,6 +1,6 @@
 use bled_core::{
     RGB8,
-    config::ChannelBrightnessLimits,
+    config::{ChannelBrightnessLimits, Fixtures},
     pixel_buffer::{PixelDataBuffer, PixelDataChannelSize},
 };
 use defmt::{debug, unwrap};
@@ -21,6 +21,8 @@ pub(crate) const CHANNEL_COUNT: usize = 4;
 
 static CHANNEL_DATA: Mutex<CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY, CHANNEL_COUNT>> =
     Mutex::new(PixelDataBuffer::new());
+static BRIGHTNESS_LIMITS: Mutex<CriticalSectionRawMutex, ChannelBrightnessLimits<CHANNEL_COUNT>> =
+    Mutex::new(ChannelBrightnessLimits::new());
 
 static DRAW_MUTEX: Mutex<CriticalSectionRawMutex, ()> = Mutex::new(());
 static DRAW_REQUEST: Channel<CriticalSectionRawMutex, (), 1> = Channel::new();
@@ -29,6 +31,21 @@ static DRAW_COMPLETE: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 pub(crate) async fn data()
 -> MutexGuard<'static, CriticalSectionRawMutex, PixelDataBuffer<LED_MEMORY, CHANNEL_COUNT>> {
     CHANNEL_DATA.lock().await
+}
+
+/// Reshapes the LED pixel buffer and updates per-channel brightness limits for the given fixtures.
+pub(crate) async fn reconfigure(fixtures: &Fixtures) {
+    let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] =
+        unwrap!(fixtures.channel_lengths::<CHANNEL_COUNT>()).map(PixelDataChannelSize::new::<RGB8>);
+
+    let brightness_limits = unwrap!(ChannelBrightnessLimits::<CHANNEL_COUNT>::from_fixtures(
+        fixtures
+    ));
+
+    let mut data = CHANNEL_DATA.lock().await;
+    data.inner_mut().fill(0);
+    unwrap!(data.try_reshape(channel_sizes));
+    *BRIGHTNESS_LIMITS.lock().await = brightness_limits;
 }
 
 /// Renders the selected channels and returns after the physical write completes.
@@ -42,18 +59,6 @@ pub(crate) async fn draw() {
 
 #[embassy_executor::task]
 pub(super) async fn task(r: super::LedResources) -> ! {
-    let fixtures = crate::config::get().fixtures();
-
-    let channel_sizes: [PixelDataChannelSize; CHANNEL_COUNT] = fixtures
-        .channel_lengths::<CHANNEL_COUNT>()
-        .unwrap()
-        .map(PixelDataChannelSize::new::<RGB8>);
-    unwrap!(CHANNEL_DATA.lock().await.try_reshape(channel_sizes));
-
-    let brightness_limits = unwrap!(ChannelBrightnessLimits::<CHANNEL_COUNT>::from_fixtures(
-        fixtures
-    ));
-
     let mut pio = Pio::new(r.pio, super::Irqs);
     let program = PioWs2812Program::new(&mut pio.common);
 
@@ -95,6 +100,7 @@ pub(super) async fn task(r: super::LedResources) -> ! {
         debug!("Draw request");
 
         let data = CHANNEL_DATA.lock().await;
+        let brightness_limits = BRIGHTNESS_LIMITS.lock().await;
 
         for channel in 0..CHANNEL_COUNT {
             if let Ok(pixels) = data.try_channel::<RGB8>(channel) {

@@ -22,13 +22,25 @@ static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
 #[inline(never)]
 pub(crate) async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
-    let Some(path) = crate::config::get().default_effect.as_ref() else {
+    let Some(path) = crate::config::load_default_effect_path(sd).await else {
         info!("No default effect configured");
         return;
     };
 
-    if activate_effect(sd, Some(path.clone())).await.is_err() {
+    if activate_effect(sd, Some(path)).await.is_err() {
         warn!("Failed to load configured default effect");
+    }
+}
+
+/// Reloads the currently active effect, if any, using the active fixture configuration.
+#[inline(never)]
+pub(crate) async fn reload_active_effect(sd: &crate::sdcard::SdCardStorage) {
+    let Some(path) = active_effect_path().await else {
+        return;
+    };
+
+    if activate_effect(sd, Some(path)).await.is_err() {
+        warn!("Failed to reload active effect after fixture reload");
     }
 }
 
@@ -177,7 +189,9 @@ async fn load_effect_instance(
         }
     }
 
-    match EffectInstance::load(&wasm_bytes, crate::config::get()) {
+    let load_result =
+        crate::config::with_fixtures(|fixtures| EffectInstance::load(&wasm_bytes, fixtures)).await;
+    match load_result {
         Ok(effect) => Ok(effect),
         Err(e) => {
             error!("Failed to initialize effect: {}", defmt::Debug2Format(&e));

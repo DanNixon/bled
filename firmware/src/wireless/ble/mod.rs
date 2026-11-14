@@ -19,9 +19,7 @@ const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardStorage) {
     info!("Our BT address = {:?}", address);
 
-    let config = crate::config::get();
-    let device_name = config.name.clone();
-    let passkey = *config.ble_passkey.as_ref();
+    let device_name = crate::config::device_name().as_str();
 
     let mut resources: HostResources<
         DefaultPacketPool,
@@ -33,7 +31,6 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
         .set_io_capabilities(IoCapabilities::DisplayOnly)
-        .set_passkey(Some(passkey))
         .build();
 
     bonds::load(&stack, &sd).await;
@@ -42,7 +39,7 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
     let mut peripheral = stack.peripheral();
 
     let server = serial::Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
-        name: &device_name,
+        name: device_name,
         appearance: &appearance::UNKNOWN,
     }))
     .unwrap();
@@ -59,8 +56,11 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
 
     let srv_fut = async {
         loop {
-            match advertise::advertise(&device_name, &mut peripheral).await {
+            match advertise::advertise(device_name, &mut peripheral).await {
                 Ok(conn) => {
+                    let passkey = *crate::config::load_ble_passkey(&sd).await;
+                    stack.set_passkey(Some(passkey));
+
                     let conn = conn.with_attribute_server(&server).unwrap();
                     if let Err(e) = conn.raw().set_bondable(true) {
                         warn!("Failed to mark BLE connection as bondable: {:?}", e);

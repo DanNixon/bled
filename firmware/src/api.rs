@@ -14,7 +14,7 @@ use bled_core::{
         ApiError, Chunk, DirEntry, MAX_CHUNK_SIZE, RPC_ACK_TIMEOUT, RPC_CHANNEL_ID,
         RPC_FRAME_BUF_LEN, Request, Response,
     },
-    config::MAX_CONFIG_POSTCARD_SIZE,
+    config::MAX_FIXTURES_POSTCARD_SIZE,
 };
 use core::time::Duration;
 use defmt::{debug, warn};
@@ -58,19 +58,23 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             crate::status::reset();
             Response::Ok
         }
-        Request::ConfigStat => match config_bytes() {
-            Ok((_, config_length)) => Response::Size(config_length as u64),
+        Request::FixturesStat => match fixtures_bytes().await {
+            Ok((_, length)) => Response::Size(length as u64),
             Err(error) => Response::Error(error),
         },
-        Request::ConfigRead { offset, length } => match config_bytes() {
-            Ok((bytes, config_length)) => {
-                match read_window(Some(&bytes[..config_length]), offset, length) {
+        Request::FixturesRead { offset, length } => match fixtures_bytes().await {
+            Ok((bytes, fixtures_length)) => {
+                match read_window(Some(&bytes[..fixtures_length]), offset, length) {
                     Ok(data) => Response::Data(data),
                     Err(error) => Response::Error(error),
                 }
             }
             Err(error) => Response::Error(error),
         },
+        Request::FixturesReload => {
+            crate::config::reload_fixtures(sd).await;
+            Response::Ok
+        }
         Request::Commit => {
             leds::draw().await;
             Response::Ok
@@ -184,11 +188,14 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
     }
 }
 
-/// Encodes the active device configuration as Postcard.
-fn config_bytes() -> Result<([u8; MAX_CONFIG_POSTCARD_SIZE], usize), ApiError> {
-    let mut buffer = [0u8; MAX_CONFIG_POSTCARD_SIZE];
-    let length = bled_core::io::encode_postcard(crate::config::get(), &mut buffer)
-        .map_err(|_| ApiError::Internal)?;
+/// Encodes the active fixture configuration as Postcard.
+async fn fixtures_bytes() -> Result<([u8; MAX_FIXTURES_POSTCARD_SIZE], usize), ApiError> {
+    let mut buffer = [0u8; MAX_FIXTURES_POSTCARD_SIZE];
+    let length = crate::config::with_fixtures(|fixtures| {
+        bled_core::io::encode_postcard(fixtures, &mut buffer)
+    })
+    .await
+    .map_err(|_| ApiError::Internal)?;
     Ok((buffer, length))
 }
 

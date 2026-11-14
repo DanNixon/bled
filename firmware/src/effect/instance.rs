@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 use bled_core::{
-    config::{DeviceConfig, MAX_CONFIG_POSTCARD_SIZE},
+    config::{Fixtures, MAX_FIXTURES_POSTCARD_SIZE},
     effect::abi::{
         self, EFFECT_MANIFEST_SECTION_NAME,
         export::{InitResult, StepResult},
@@ -46,16 +46,15 @@ pub struct EffectInstance {
 
 impl EffectInstance {
     /// Compiles and initializes an effect from a WebAssembly binary.
-    pub fn load(wasm_bytes: &[u8], device_config: &DeviceConfig) -> Result<Self, EffectError> {
-        info!("creating device config for effect");
+    pub fn load(wasm_bytes: &[u8], fixtures: &Fixtures) -> Result<Self, EffectError> {
+        info!("creating fixture config for effect");
         let mut fixture_config_bytes = Vec::new();
         fixture_config_bytes
-            .try_reserve_exact(MAX_CONFIG_POSTCARD_SIZE)
+            .try_reserve_exact(MAX_FIXTURES_POSTCARD_SIZE)
             .map_err(|_| EffectError::AllocationFailed)?;
-        fixture_config_bytes.resize(MAX_CONFIG_POSTCARD_SIZE, 0);
-        let length =
-            bled_core::io::encode_postcard(device_config.fixtures(), &mut fixture_config_bytes)
-                .map_err(|_| EffectError::ConfigurationTooLarge)?;
+        fixture_config_bytes.resize(MAX_FIXTURES_POSTCARD_SIZE, 0);
+        let length = bled_core::io::encode_postcard(fixtures, &mut fixture_config_bytes)
+            .map_err(|_| EffectError::ConfigurationTooLarge)?;
         fixture_config_bytes.truncate(length);
 
         info!("loading effect");
