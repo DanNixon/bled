@@ -43,15 +43,17 @@ pub(crate) async fn activate_effect(
 
     // Load the effect, if a path is provided
     if let Some(module_path) = path {
-        let instance = match load_effect_instance(sd, module_path.as_str()).await {
-            Ok(instance) => instance,
-            Err(e) => {
-                warn!(
-                    "Effect failed to load as a WASM module ({}), will try to load a JSON preset",
-                    e
-                );
-                load_effect_preset(sd, module_path.as_str()).await?
-            }
+        let path_str = module_path.as_str();
+        let instance = if has_extension(path_str, "wasm") {
+            load_effect_instance(sd, path_str).await?
+        } else if has_extension(path_str, "json") {
+            load_effect_preset(sd, path_str).await?
+        } else {
+            error!(
+                "Unable to determine effect file type for '{}'; expected .wasm or .json",
+                path_str
+            );
+            return Err(());
         };
 
         info!("Loaded effect: {}", module_path.as_str());
@@ -63,6 +65,11 @@ pub(crate) async fn activate_effect(
     };
 
     Ok(())
+}
+
+fn has_extension(path: &str, ext: &str) -> bool {
+    path.rsplit_once('.')
+        .is_some_and(|(_, suffix)| suffix.eq_ignore_ascii_case(ext))
 }
 
 #[inline(never)]
