@@ -7,6 +7,7 @@ use bled_core::{
     },
 };
 use defmt::info;
+use embassy_rp::clocks::RoscRng;
 use wasmi::{
     Caller, Config, Engine, Extern, Linker, Memory, Module, Store, StoreLimits, StoreLimitsBuilder,
     TypedFunc,
@@ -133,6 +134,13 @@ impl EffectInstance {
 
                     i32::try_from(byte_count).unwrap_or(INVALID_IMPORT_RESULT)
                 },
+            )
+            .map_err(EffectError::Linker)?;
+        linker
+            .func_wrap(
+                abi::import::MODULE,
+                abi::import::ENTROPY,
+                |_caller: Caller<'_, HostState>| RoscRng.next_u64() as i64,
             )
             .map_err(EffectError::Linker)?;
 

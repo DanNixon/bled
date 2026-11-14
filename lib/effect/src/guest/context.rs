@@ -49,4 +49,19 @@ impl<'a> Context<'a> {
     pub fn parameters_mut(&mut self) -> &mut [u8] {
         self.parameters
     }
+
+    /// Return 64 bits of entropy from the host.
+    pub fn entropy_u64(&self) -> u64 {
+        super::runtime::entropy_u64()
+    }
+
+    /// Fill a byte array with entropy by chaining 64-bit calls to the host.
+    pub fn entropy<const N: usize>(&self) -> [u8; N] {
+        let mut buf = [0u8; N];
+        for chunk in buf.chunks_mut(8) {
+            let bytes = self.entropy_u64().to_le_bytes();
+            chunk.copy_from_slice(&bytes[..chunk.len()]);
+        }
+        buf
+    }
 }

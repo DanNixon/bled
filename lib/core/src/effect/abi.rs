@@ -3,7 +3,7 @@
 /// ABI version.
 /// The ABI version of the host and effect must match for the effect to be loaded.
 /// There are no backwards or future compatibility guarantees.
-pub const VERSION: i32 = 3;
+pub const VERSION: i32 = 4;
 
 /// Imports from the host to the guest.
 pub mod import {
@@ -18,6 +18,10 @@ pub mod import {
     /// Returns the number of bytes copied.
     /// `bled_fixture_config_read(dest_ptr: i32) -> i32`
     pub const FIXTURE_CONFIG_READ: &str = "bled_fixture_config_read";
+
+    /// Function returning 64 bits of host entropy.
+    /// `bled_entropy() -> i64`
+    pub const ENTROPY: &str = "bled_entropy";
 }
 
 /// Exports from the guest to the host.
