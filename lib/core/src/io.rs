@@ -21,6 +21,14 @@ pub fn decode_postcard<T: DeserializeOwned>(data: &[u8]) -> Result<T, postcard::
     postcard::from_bytes(data)
 }
 
+pub fn decode_postcard_in_place<'de, T: Deserialize<'de>>(
+    data: &'de [u8],
+    place: &mut T,
+) -> Result<(), postcard::Error> {
+    let mut deserializer = postcard::Deserializer::from_bytes(data);
+    T::deserialize_in_place(&mut deserializer, place)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,5 +67,12 @@ mod tests {
 
         let decoded = decode_postcard::<TestValue>(&data[..length]).unwrap();
         assert_eq!(decoded, value);
+
+        let mut in_place = TestValue {
+            count: 0,
+            enabled: false,
+        };
+        decode_postcard_in_place(&data[..length], &mut in_place).unwrap();
+        assert_eq!(in_place, value);
     }
 }

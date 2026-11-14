@@ -121,13 +121,12 @@ fn matrix_cell_count(matrix: &Matrix2d) -> Option<usize> {
 }
 
 struct MatrixGameOfLife {
-    fixtures: Fixtures,
     games: [LifeGame; 3],
     rng: SmallRng,
 }
 
 impl Effect for MatrixGameOfLife {
-    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
+    fn new(ctx: &mut Context<'_>) -> Result<Self, ()> {
         let delay_bytes = 500u16.to_le_bytes();
         ctx.parameters_mut()[0..2].copy_from_slice(&delay_bytes);
         ctx.parameters_mut()[2] = 255; // Red brightness
@@ -137,7 +136,7 @@ impl Effect for MatrixGameOfLife {
         let mut rng = SmallRng::from_seed(ctx.entropy());
         let mut games = [LifeGame::new(); 3];
 
-        let target_matrix = fixtures.as_slice().iter().find_map(|fixture| {
+        let target_matrix = ctx.fixtures().as_slice().iter().find_map(|fixture| {
             if let PixelLayout::Matrix2d(matrix) = fixture.layout() {
                 Some(*matrix)
             } else {
@@ -154,11 +153,7 @@ impl Effect for MatrixGameOfLife {
             game.randomize(&mut rng, total_cells);
         }
 
-        Ok(Self {
-            fixtures,
-            games,
-            rng,
-        })
+        Ok(Self { games, rng })
     }
 
     fn step_time(&self, ctx: &Context<'_>) -> u32 {
@@ -169,7 +164,7 @@ impl Effect for MatrixGameOfLife {
 
     fn step(&mut self, ctx: &mut Context<'_>, _timestamp_ms: u32) -> StepResult {
         let first_matrix =
-            self.fixtures
+            ctx.fixtures()
                 .as_slice()
                 .iter()
                 .enumerate()
@@ -217,6 +212,7 @@ impl Effect for MatrixGameOfLife {
         let g_bright = ctx.parameters()[3];
         let b_bright = ctx.parameters()[4];
 
+        let fixtures = ctx.fixtures();
         let pixels = ctx.frame_mut().pixels_mut();
 
         for row in 0..height {
@@ -245,9 +241,8 @@ impl Effect for MatrixGameOfLife {
                     return StepResult::Error;
                 };
 
-                let Some(global_pixel_idx) = self
-                    .fixtures
-                    .fixture_pixel_index::<4>(target_fixture_idx, local_pixel_idx)
+                let Some(global_pixel_idx) =
+                    fixtures.fixture_pixel_index::<4>(target_fixture_idx, local_pixel_idx)
                 else {
                     return StepResult::Error;
                 };

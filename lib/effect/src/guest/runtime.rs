@@ -31,6 +31,7 @@ pub struct Runtime<
     const PARAMETER_BYTES: usize,
 > {
     effect: Option<E>,
+    fixtures: Fixtures,
     frame: [u8; FRAME_BYTES],
     frame_len: usize,
     command: [u8; COMMAND_BYTES],
@@ -46,6 +47,7 @@ impl<E, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARAMETER_BY
     pub const fn new() -> Self {
         Self {
             effect: None,
+            fixtures: Fixtures::empty(),
             frame: [0; FRAME_BYTES],
             frame_len: 0,
             command: [0; COMMAND_BYTES],
@@ -82,17 +84,23 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
             return InitResult::ConfigParseError;
         }
 
-        let fixtures = match bled_core::io::decode_postcard::<Fixtures>(&self.config[..size]) {
-            Ok(fixtures) => fixtures,
-            Err(_) => return InitResult::ConfigParseError,
-        };
+        if bled_core::io::decode_postcard_in_place(&self.config[..size], &mut self.fixtures)
+            .is_err()
+        {
+            return InitResult::ConfigParseError;
+        }
 
-        self.init_from_fixtures(fixtures)
+        self.init_loaded_fixtures()
     }
 
     /// Initialize the effect using an already decoded fixture configuration.
     pub fn init_from_fixtures(&mut self, fixtures: Fixtures) -> InitResult {
-        let pixel_count = fixtures.total_length::<4>();
+        self.fixtures = fixtures;
+        self.init_loaded_fixtures()
+    }
+
+    fn init_loaded_fixtures(&mut self) -> InitResult {
+        let pixel_count = self.fixtures.total_length::<4>();
         let Some(frame_len) = pixel_count.checked_mul(3) else {
             return InitResult::FrameBufferError;
         };
@@ -105,11 +113,12 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
 
         let result = {
             let mut ctx = Context::new(
+                &self.fixtures,
                 &mut self.frame[..self.frame_len],
                 &mut self.command,
                 &mut self.parameters,
             );
-            E::new(&mut ctx, fixtures)
+            E::new(&mut ctx)
         };
 
         match result {
@@ -128,6 +137,7 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
         };
 
         let ctx = Context::new(
+            &self.fixtures,
             &mut self.frame[..self.frame_len],
             &mut self.command,
             &mut self.parameters,
@@ -145,6 +155,7 @@ impl<E: Effect, const FRAME_BYTES: usize, const COMMAND_BYTES: usize, const PARA
         };
 
         let mut ctx = Context::new(
+            &self.fixtures,
             &mut self.frame[..self.frame_len],
             &mut self.command,
             &mut self.parameters,
@@ -189,16 +200,13 @@ mod tests {
     use bled_core::RGB8;
     use bled_core::effect::abi::export::StepResult;
 
-    struct TestEffect {
-        _fixtures: Fixtures,
-    }
+    struct TestEffect;
 
     impl Effect for TestEffect {
-        fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
+        fn new(ctx: &mut Context<'_>) -> Result<Self, ()> {
+            assert_eq!(ctx.fixtures().span_count(), 1);
             ctx.parameters_mut()[0] = 7;
-            Ok(Self {
-                _fixtures: fixtures,
-            })
+            Ok(Self)
         }
 
         fn step_time(&self, _ctx: &Context<'_>) -> u32 {
@@ -214,7 +222,7 @@ mod tests {
     struct FailingEffect;
 
     impl Effect for FailingEffect {
-        fn new(_ctx: &mut Context<'_>, _fixtures: Fixtures) -> Result<Self, ()> {
+        fn new(_ctx: &mut Context<'_>) -> Result<Self, ()> {
             Err(())
         }
 

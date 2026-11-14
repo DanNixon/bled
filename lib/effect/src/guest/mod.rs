@@ -9,7 +9,6 @@ pub use context::Context;
 pub use frame::Frame;
 pub use runtime::Runtime;
 
-use bled_core::config::Fixtures;
 use bled_core::effect::abi::export::StepResult;
 use core::cell::UnsafeCell;
 
@@ -20,7 +19,7 @@ pub trait Effect: Sized {
     /// The runtime reports initialization failures as a generic ABI error, so
     /// effects return an opaque unit error here.
     #[allow(clippy::result_unit_err)]
-    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()>;
+    fn new(ctx: &mut Context<'_>) -> Result<Self, ()>;
 
     /// Return the desired interval until the next step, in milliseconds.
     fn step_time(&self, ctx: &Context<'_>) -> u32;
