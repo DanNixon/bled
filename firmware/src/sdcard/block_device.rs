@@ -1,6 +1,6 @@
 use crate::SdCardResources;
 use aligned::{A4, Aligned};
-use defmt::{Format, info, unwrap, warn};
+use defmt::{Format, debug, info, unwrap, warn};
 use embassy_rp::{
     gpio::{Input, Level, Output, Pull},
     mode::Blocking,
@@ -121,7 +121,7 @@ impl SdBlockDevice {
         if offset == 0 {
             warn!("No MBR partition entry found, assuming exFAT boot sector at sector 0");
         } else {
-            info!("exFAT partition offset: {}", offset);
+            debug!("exFAT partition offset: {}", offset);
         }
 
         self.partition_offset = Some(offset);
