@@ -2,7 +2,8 @@ import * as bled from '../../pkg/bled_wasm.js';
 import { log } from './logger.js';
 
 const DEVICE_OPERATIONS = [
-  'readDeviceInfo', 'rebootDevice', 'statFile', 'readFile', 'writeFile',
+  'readDeviceInfo', 'rebootDevice', 'statFixtures', 'readFixtures', 'reloadFixtures',
+  'statFile', 'readFile', 'writeFile',
   'deleteFile', 'listDirectory', 'setChannelPixels', 'setFixturePixels',
   'setSpanPixels', 'commit', 'commitChannels', 'readBufferInfo', 'readBuffer',
   'readBufferRange', 'writeBuffer', 'readActiveEffect', 'writeActiveEffect',
@@ -14,10 +15,11 @@ const DEVICE_OPERATIONS = [
 const WRITE_CHUNK_SIZE = 244;
 const toBytes = (value) => (value instanceof Uint8Array ? value : new Uint8Array(value));
 
-export function normaliseConfig(raw) {
-  if (!raw) return { name: 'unknown', fixtures: [], channelLengths: [], channelOffsets: [], channels: [] };
+export function normaliseConfig(raw, name = null) {
+  if (!raw) return { name: name || 'unknown', fixtures: [], channelLengths: [], channelOffsets: [], channels: [] };
 
-  const rawFixtures = raw.fixtures ?? [];
+  const rawFixtures = Array.isArray(raw) ? raw : (raw.fixtures ?? []);
+  const resolvedName = (!Array.isArray(raw) && raw.name) ? raw.name : (name || 'unnamed');
   let maxChannel = -1;
   for (const fixture of rawFixtures) {
     for (const span of fixture.spans ?? []) {
@@ -102,7 +104,7 @@ export function normaliseConfig(raw) {
   }));
 
   return {
-    name: raw.name || 'unnamed',
+    name: resolvedName,
     fixtures,
     channelLengths,
     channelOffsets,
@@ -187,6 +189,7 @@ export class BleDevice extends EventTarget {
     this.server = null;
     this.chars = {};
     this.rpc = null;
+    this.deviceName = null;
     this.config = null;
     this.configError = null;
     this._queue = Promise.resolve();
@@ -215,7 +218,7 @@ export class BleDevice extends EventTarget {
   }
 
   get displayName() {
-    return this.config?.name || this.bleName;
+    return this.deviceName || this.config?.name || this.bleName;
   }
 
   _log(message, level = 'info') {
@@ -326,24 +329,34 @@ export class BleDevice extends EventTarget {
     return discarded;
   }
 
-  async loadConfig() {
+  async loadConfig(reloadOnDevice = false) {
     this.config = null;
     this.configError = null;
     try {
-      const bytes = await this.readConfig();
-      this.config = normaliseConfig(bled.decode_device_config(bytes));
-      this._log(`Loaded config "${this.config.name}" with ${this.config.fixtures.length} fixture(s).`, 'success');
+      if (!this.deviceName) {
+        const info = await this.readDeviceInfo();
+        this.deviceName = info.name || null;
+      }
+      if (reloadOnDevice) {
+        await this.reloadFixtures();
+      }
+      const bytes = await this.readFixtures();
+      this.config = normaliseConfig(bled.decode_fixtures(bytes), this.deviceName || this.bleName);
+      this._log(`Loaded ${this.config.fixtures.length} fixture(s) for "${this.displayName}".`, 'success');
     } catch (error) {
       this.config = null;
       this.configError = error?.message ?? String(error);
-      this._log(`Could not read active config: ${this.configError}`, 'error');
+      this._log(`Could not read active fixtures: ${this.configError}`, 'error');
     }
     this.dispatchEvent(new CustomEvent('config'));
   }
 
   async readDeviceInfo() {
     const info = await this.rpc.read_device_info();
-    this._log(`Device Info: rev=${info.git_revision}, boot=${info.boot_reason}, uptime=${info.uptime_ms} ms, cap=${info.led_buffer_capacity} B, channels=${info.channel_count}`, 'success');
+    if (info.name) {
+      this.deviceName = info.name;
+    }
+    this._log(`Device Info: name=${info.name}, rev=${info.git_revision}, boot=${info.boot_reason}, uptime=${info.uptime_ms} ms, cap=${info.led_buffer_capacity} B, channels=${info.channel_count}`, 'success');
     return info;
   }
 
@@ -396,22 +409,28 @@ export class BleDevice extends EventTarget {
     await this.rpc.effect_parameter_write(toBytes(bytes));
   }
 
-  async statConfig() {
-    const size = await this.rpc.config_stat();
-    this._log(`Active config size: ${size} bytes`, 'success');
+  async statFixtures() {
+    const size = await this.rpc.fixtures_stat();
+    this._log(`Active fixtures size: ${size} bytes`, 'success');
     return { size };
   }
 
-  async readConfig(onProgress = null) {
-    this._log('Reading active config from device...');
-    const { size } = await this.statConfig();
+  async readFixtures(onProgress = null) {
+    this._log('Reading active fixtures from device...');
+    const { size } = await this.statFixtures();
     const bytes = await this._readRpcChunks(
-      (offset, length) => this.rpc.config_read(offset, length),
+      (offset, length) => this.rpc.fixtures_read(offset, length),
       size,
       onProgress,
     );
-    this._log(`Successfully read active config (${bytes.length} bytes).`, 'success');
+    this._log(`Successfully read active fixtures (${bytes.length} bytes).`, 'success');
     return bytes;
+  }
+
+  async reloadFixtures() {
+    this._log('Reloading fixtures on device...');
+    await this.rpc.fixtures_reload();
+    this._log('Successfully reloaded fixtures on device.', 'success');
   }
 
   async statFile(path) {

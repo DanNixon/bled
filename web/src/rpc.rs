@@ -117,15 +117,25 @@ impl RpcClient {
         expect_ok(self.call(Request::Reboot, RPC_RESPONSE_TIMEOUT).await?)
     }
 
-    pub async fn config_stat(&mut self) -> Result<f64, JsError> {
-        size(self.call(Request::ConfigStat, RPC_RESPONSE_TIMEOUT).await?)
-    }
-
-    pub async fn config_read(&mut self, offset: u32, length: u32) -> Result<Uint8Array, JsError> {
-        data(
-            self.call(Request::ConfigRead { offset, length }, RPC_RESPONSE_TIMEOUT)
+    pub async fn fixtures_stat(&mut self) -> Result<f64, JsError> {
+        size(
+            self.call(Request::FixturesStat, RPC_RESPONSE_TIMEOUT)
                 .await?,
         )
+    }
+
+    pub async fn fixtures_read(&mut self, offset: u32, length: u32) -> Result<Uint8Array, JsError> {
+        data(
+            self.call(
+                Request::FixturesRead { offset, length },
+                RPC_RESPONSE_TIMEOUT,
+            )
+            .await?,
+        )
+    }
+
+    pub async fn fixtures_reload(&mut self) -> Result<(), JsError> {
+        expect_ok(self.call(Request::FixturesReload, RPC_LOAD_TIMEOUT).await?)
     }
 
     pub async fn commit(&mut self) -> Result<(), JsError> {

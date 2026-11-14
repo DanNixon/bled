@@ -46,6 +46,7 @@ export class SerialDevice extends BleDevice {
   }
 
   get displayName() {
+    if (this.deviceName) return this.deviceName;
     if (this.config?.name) return this.config.name;
     const info = this.port?.getInfo?.() ?? {};
     const vendor = info.usbVendorId?.toString(16).padStart(4, '0');

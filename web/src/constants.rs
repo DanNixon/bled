@@ -43,13 +43,13 @@ pub fn max_span_per_fixture_count() -> usize {
 }
 
 #[wasm_bindgen]
-pub fn max_config_json_size() -> usize {
-    bled_core::config::MAX_CONFIG_JSON_SIZE
+pub fn max_fixtures_json_size() -> usize {
+    bled_core::config::MAX_FIXTURES_JSON_SIZE
 }
 
 #[wasm_bindgen]
-pub fn max_config_postcard_size() -> usize {
-    bled_core::config::MAX_CONFIG_POSTCARD_SIZE
+pub fn max_fixtures_postcard_size() -> usize {
+    bled_core::config::MAX_FIXTURES_POSTCARD_SIZE
 }
 
 #[wasm_bindgen]
