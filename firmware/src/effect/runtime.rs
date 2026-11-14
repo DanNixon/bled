@@ -259,7 +259,7 @@ pub(crate) async fn task() -> ! {
             debug!("Stepping effect");
             match effect.instance.step(elapsed_ms) {
                 Ok(StepResult::Changed) => {
-                    info!("Pixels changed after step, rendering");
+                    debug!("Pixels changed after step, rendering");
 
                     let mut channel_data = crate::leds::data().await;
                     match effect.instance.frame_size() {
