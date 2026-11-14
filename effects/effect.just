@@ -11,6 +11,8 @@ build:
 fmt:
     cargo fmt
 
-check:
+clippy:
+    cargo clippy --target wasm32-unknown-unknown -- -D warnings
+
+check: clippy
     cargo fmt --check
-    cargo check --target wasm32-unknown-unknown

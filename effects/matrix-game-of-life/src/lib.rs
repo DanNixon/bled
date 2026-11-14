@@ -103,11 +103,8 @@ impl LifeGame {
                 }
 
                 let alive = self.get(idx);
-                let next_alive = match (alive, live_neighbours) {
-                    (true, 2) | (true, 3) => true,
-                    (false, 3) => true,
-                    _ => false,
-                };
+                let next_alive =
+                    matches!((alive, live_neighbours), (true, 2) | (true, 3) | (false, 3));
                 next.set(idx, next_alive);
             }
         }

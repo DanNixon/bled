@@ -174,7 +174,6 @@ name = "matrix-game-of-life"
 version = "0.1.0"
 dependencies = [
  "bled-effect",
- "heapless 0.9.3",
  "rand",
 ]
 
