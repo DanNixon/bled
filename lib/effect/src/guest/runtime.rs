@@ -9,6 +9,18 @@ use bled_core::effect::abi::export::{InitResult, StepResult};
 unsafe extern "C" {
     fn bled_fixture_config_size() -> i32;
     fn bled_fixture_config_read(destination: i32) -> i32;
+    fn bled_entropy() -> i64;
+}
+
+pub(crate) fn entropy_u64() -> u64 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        unsafe { bled_entropy() as u64 }
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0
+    }
 }
 
 /// Owns an effect and all of the buffers used by the WASM ABI.
