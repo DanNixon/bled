@@ -3,7 +3,7 @@ use bled_core::{
     config::ChannelBrightnessLimits,
     pixel_buffer::{PixelDataBuffer, PixelDataChannelSize},
 };
-use defmt::{debug, info, unwrap};
+use defmt::{debug, unwrap};
 use embassy_rp::{
     pio::Pio,
     pio_programs::ws2812::{PioWs2812, PioWs2812Program},
@@ -92,7 +92,7 @@ pub(super) async fn task(r: super::LedResources) -> ! {
 
     loop {
         DRAW_REQUEST.receive().await;
-        info!("Draw request");
+        debug!("Draw request");
 
         let data = CHANNEL_DATA.lock().await;
 
