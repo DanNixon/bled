@@ -67,7 +67,7 @@ exfat-slim = { version = "0.7.0", default-features = false, features = ["defmt"]
 exfat-embedded = "0.1.3"
 getset = "0.1.7"
 git-version = "0.3.9"
-heapless = { version = "0.9", optional = true }
+heapless = { version = "0.9", features = ["serde"], optional = true }
 mbr-nostd = "0.1"
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
 portable-atomic = { version = "1.10.0", default-features = false, features = ["critical-section"] }
@@ -75,7 +75,7 @@ smart-leds = "0.4.0"
 static_cell = "2.1.0"
 teeny-rpc = { version = "0.3.0", default-features = false, features = ["no-std"] }
 thiserror = { version = "2.0.20", default-features = false }
-trouble-host = { version = "0.8.0", features = ["defmt", "gatt", "derive", "security"], optional = true }
+trouble-host = { version = "0.8.0", features = ["defmt", "gatt", "derive", "security", "serde"], optional = true }
 wasmi = { version = "2.0.0", default-features = false, features = ["validate"] }
 
 [patch.crates-io]

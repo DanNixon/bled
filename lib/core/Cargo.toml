@@ -12,6 +12,7 @@ defmt = [
   "dep:defmt",
   "embedded-graphics/defmt",
   "heapless/defmt",
+  "postcard/use-defmt",
   "serde-json-core/defmt",
   "rgb/defmt-03",
 ]

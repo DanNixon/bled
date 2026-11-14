@@ -26,6 +26,7 @@ mod tests {
     use super::*;
     use bled_core::{
         ChannelNumber, RGB8,
+        ble::BlePasskey,
         config::{
             BrightnessLimit, BrightnessLimitMode, DeviceConfig, Fixture, Fixtures, LinearArray,
             PixelLayout, PixelSpan,
@@ -36,6 +37,7 @@ mod tests {
     fn test_device_config_json_decoding() {
         let json = r#"{
             "name": "test-dev",
+            "ble_passkey": 123456,
             "fixtures": [
                 {
                     "name": "onboard",
@@ -60,6 +62,7 @@ mod tests {
 
         let decoded = internal_decode_device_config(json.as_bytes()).unwrap();
         assert_eq!(decoded.name().as_str(), "test-dev");
+        assert_eq!(*decoded.ble_passkey().as_ref(), 123_456);
         assert_eq!(decoded.fixtures().as_slice().len(), 1);
         assert_eq!(decoded.fixtures().as_slice()[0].name().as_str(), "onboard");
         assert_eq!(decoded.fixtures().as_slice()[0].spans().len(), 2);
@@ -91,6 +94,7 @@ mod tests {
         );
         let config = DeviceConfig {
             name: "dev-postcard".try_into().unwrap(),
+            ble_passkey: BlePasskey::try_new(654_321).unwrap(),
             fixtures: Fixtures::new([fixture].into()),
             default_effect: None,
         };

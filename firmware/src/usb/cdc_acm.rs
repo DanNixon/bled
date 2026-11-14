@@ -47,10 +47,7 @@ pub(crate) async fn task(
         wait_for_dtr(&control, true).await;
         info!("USB CDC RPC session opened");
 
-        let serving = api::serve(
-            EioTransport::<_, RPC_FRAME_BUF_LEN>::new(&mut io),
-            sd.clone(),
-        );
+        let serving = api::serve(EioTransport::<_, RPC_FRAME_BUF_LEN>::new(&mut io), &sd);
         let disconnected = wait_for_dtr(&control, false);
 
         match select(serving, disconnected).await {
