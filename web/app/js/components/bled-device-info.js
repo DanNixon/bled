@@ -13,7 +13,7 @@ export class BledDeviceInfo extends HTMLElement {
           </div>
           <div class="form-row">
             <button id="btnRefreshInfo" class="btn btn-secondary btn-sm">Refresh Info</button>
-            <button id="btnReloadConfig" class="btn btn-secondary btn-sm">Reload Config</button>
+            <button id="btnReloadConfig" class="btn btn-secondary btn-sm">Reload Fixtures</button>
             <button id="btnResetDevice" class="btn btn-danger btn-sm">Reboot Device</button>
           </div>
         </div>
@@ -52,7 +52,7 @@ export class BledDeviceInfo extends HTMLElement {
     this.infoBufferCapacity = this.querySelector('#infoBufferCapacity');
 
     this.querySelector('#btnRefreshInfo').onclick = () => this.refresh();
-    this.querySelector('#btnReloadConfig').onclick = () => this.device.loadConfig();
+    this.querySelector('#btnReloadConfig').onclick = () => this.device.loadConfig(true);
     this.querySelector('#btnResetDevice').onclick = () => this.resetDevice();
 
     this._onConfig = () => this._renderConfigState();
@@ -71,7 +71,7 @@ export class BledDeviceInfo extends HTMLElement {
     if (device.configError) {
       this.configWarning.style.display = 'block';
       this.configWarning.textContent =
-        `Could not read active config: ${device.configError}. No fixtures are available until it can be read.`;
+        `Could not read active fixtures: ${device.configError}. No fixtures are available until they can be read.`;
     } else {
       this.configWarning.style.display = 'none';
     }
@@ -80,6 +80,7 @@ export class BledDeviceInfo extends HTMLElement {
   async refresh() {
     try {
       const info = await this.device.readDeviceInfo();
+      this.deviceName.textContent = `(${this.device.displayName})`;
       this.infoGitRev.textContent = info.git_revision;
       this.infoBootReason.textContent = info.boot_reason;
       this.infoUptime.textContent = formatUptime(info.uptime_ms);

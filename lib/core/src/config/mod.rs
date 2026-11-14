@@ -1,11 +1,9 @@
 mod brightness_limit;
-mod device;
 mod fixture;
 mod layouts;
 mod span;
 
 pub use brightness_limit::*;
-pub use device::*;
 pub use fixture::*;
 pub use layouts::*;
 pub use span::*;

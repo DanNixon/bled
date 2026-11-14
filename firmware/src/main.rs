@@ -42,8 +42,6 @@ async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
     let r = split_resources!(p);
 
-    info!("{}", device_info());
-
     #[cfg(feature = "_wireless")]
     let (control, bt, bt_address) = {
         let (mut control, bt) = wireless::init(r.wireless, spawner).await;
@@ -101,6 +99,8 @@ async fn main(spawner: Spawner) {
 
         config::init(&sd).await;
 
+        info!("{}", device_info());
+
         effect::load_default_effect(&sd).await;
 
         let (sender, receiver, control) = usb::cdc_acm::init(&mut usb_builder);
@@ -127,6 +127,7 @@ async fn main(spawner: Spawner) {
 
 fn device_info() -> DeviceInfo {
     DeviceInfo::new(
+        config::device_name().clone(),
         git_version::git_version!().try_into().unwrap(),
         boot_reason(),
         Instant::now().as_millis(),

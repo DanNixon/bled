@@ -86,7 +86,7 @@ export class BledFileStaging extends HTMLElement {
         <div class="form-row" style="justify-content: space-between; align-items: flex-end;">
           <div class="form-group" style="flex: 1; min-width: 250px;">
             <label for="remotePathInput">Remote Path on Device</label>
-            <input type="text" id="remotePathInput" placeholder="/config.json" value="/config.json" maxlength="64">
+            <input type="text" id="remotePathInput" placeholder="/fixtures.json" value="/fixtures.json" maxlength="64">
           </div>
           <div class="form-row">
             <button id="btnStatFile" class="btn btn-secondary btn-sm">Stat</button>
@@ -186,7 +186,7 @@ export class BledFileStaging extends HTMLElement {
       reader.onload = () => {
         this.stagedData = new Uint8Array(reader.result);
         this.stagedFilename = file.name;
-        if (!this.remotePathInput.value || this.remotePathInput.value === '/config.json') {
+        if (!this.remotePathInput.value || this.remotePathInput.value === '/fixtures.json') {
           this.remotePathInput.value = `/${file.name}`;
         }
         this.isHexView = false;

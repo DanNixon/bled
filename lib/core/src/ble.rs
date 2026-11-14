@@ -9,10 +9,29 @@ use uuid::{Uuid, uuid};
 /// A 6 digit Bluetooth Low Energy pairing passkey.
 #[nutype(
     validate(less_or_equal = 999_999),
-    derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef),
+    default = 123_456,
+    derive(
+        Debug,
+        Copy,
+        Clone,
+        PartialEq,
+        Eq,
+        Default,
+        Serialize,
+        Deserialize,
+        AsRef,
+        Deref,
+        FromStr,
+    ),
     cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
 )]
 pub struct BlePasskey(u32);
+
+impl core::fmt::Display for BlePasskey {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{:06}", self.into_inner())
+    }
+}
 
 /// Emulated serial GATT service UUID (Nordic UART Service).
 pub const SERIAL_SERVICE_UUID: Uuid = uuid!("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
@@ -26,13 +45,34 @@ pub const SERIAL_TX_UUID: Uuid = uuid!("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::{fmt::Write, str::FromStr};
+    use heapless::String;
 
     #[test]
     fn passkey_validation_enforces_six_digits() {
+        assert_eq!(*BlePasskey::default(), 123_456);
         assert!(BlePasskey::try_new(0).is_ok());
         assert!(BlePasskey::try_new(123_456).is_ok());
         assert!(BlePasskey::try_new(999_999).is_ok());
         assert!(BlePasskey::try_new(1_000_000).is_err());
+    }
+
+    #[test]
+    fn passkey_from_str_parses_valid_passkey() {
+        assert_eq!(*BlePasskey::from_str("654321").unwrap(), 654_321);
+    }
+
+    #[test]
+    fn passkey_formatting_pads_to_six_digits() {
+        let mut formatted = String::<32>::new();
+        write!(formatted, "{}", BlePasskey::try_new(42).unwrap()).unwrap();
+        assert_eq!(formatted.as_str(), "000042");
+    }
+
+    #[test]
+    fn passkey_from_str_rejects_invalid_passkey() {
+        assert!(BlePasskey::from_str("1000000").is_err());
+        assert!(BlePasskey::from_str("abc").is_err());
     }
 
     #[test]
