@@ -1,10 +1,11 @@
 mod advertise;
+mod bonds;
 mod serial;
 
 use super::BtController;
 use crate::sdcard::SdCardStorage;
 use cyw43::Control;
-use defmt::{error, info};
+use defmt::{error, info, warn};
 use embassy_futures::join::join;
 use trouble_host::prelude::*;
 
@@ -18,13 +19,25 @@ const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardStorage) {
     info!("Our BT address = {:?}", address);
 
-    let device_name = crate::config::get().name.clone();
+    let config = crate::config::get();
+    let device_name = config.name.clone();
+    let passkey = *config.ble_passkey.as_ref();
 
-    let mut resources: HostResources<DefaultPacketPool, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX> =
-        HostResources::new();
+    let mut resources: HostResources<
+        DefaultPacketPool,
+        CONNECTIONS_MAX,
+        L2CAP_CHANNELS_MAX,
+        1,
+        { bonds::BONDS_MAX },
+    > = HostResources::new();
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
+        .set_io_capabilities(IoCapabilities::DisplayOnly)
+        .set_passkey(Some(passkey))
         .build();
+
+    bonds::load(&stack, &sd).await;
+
     let mut runner = stack.runner();
     let mut peripheral = stack.peripheral();
 
@@ -49,7 +62,10 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
             match advertise::advertise(&device_name, &mut peripheral).await {
                 Ok(conn) => {
                     let conn = conn.with_attribute_server(&server).unwrap();
-                    serial::run_connection(&server, &conn, rx_pipe, sd.clone()).await;
+                    if let Err(e) = conn.raw().set_bondable(true) {
+                        warn!("Failed to mark BLE connection as bondable: {:?}", e);
+                    }
+                    serial::run_connection(&stack, &server, &conn, rx_pipe, &sd).await;
                 }
                 Err(e) => error!("BLE advertising error: {}", e),
             }

@@ -1,6 +1,7 @@
 use crate::sdcard::{ReadFileError, SdCardStorage};
 use bled_core::{
     ChannelNumber,
+    ble::BlePasskey,
     config::{
         BrightnessLimit, DeviceConfig, Fixture, Fixtures, LinearArray, MAX_CONFIG_JSON_SIZE,
         PixelLayout, PixelSpan,
@@ -131,6 +132,7 @@ fn default_config() -> DeviceConfig {
 
     DeviceConfig {
         name: "bled-default".try_into().unwrap(),
+        ble_passkey: BlePasskey::try_new(123_456).unwrap(),
         fixtures: Fixtures::new([onboard_leds].into()),
         default_effect: None,
     }

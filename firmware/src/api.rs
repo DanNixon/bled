@@ -25,7 +25,7 @@ const REQUEST_IDLE_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Runs the RPC API server until the transport fails (e.g. the client
 /// disconnects).
-pub(crate) async fn serve<T: Transport>(transport: T, sd: SdCardStorage) {
+pub(crate) async fn serve<T: Transport>(transport: T, sd: &SdCardStorage) {
     let mut server = Server::<T, Request, Response, RPC_CHANNEL_ID, RPC_FRAME_BUF_LEN>::new(
         transport,
         RPC_ACK_TIMEOUT,
@@ -35,7 +35,7 @@ pub(crate) async fn serve<T: Transport>(transport: T, sd: SdCardStorage) {
         match server.wait_for_request(REQUEST_IDLE_TIMEOUT).await {
             Ok(request) => {
                 debug!("RPC request: {}", request);
-                let response = handle_request(&sd, request).await;
+                let response = handle_request(sd, request).await;
                 debug!("RPC response: {}", response);
 
                 match server.send_response(response).await {

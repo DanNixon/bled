@@ -14,6 +14,8 @@
 **BLED is a work in progress.** Although mostly feature complete, specifics of the effect API are subject to change.
 The web UI is likely to undergo significant changes, the current version is a mostly vibe coded prototype.
 
+Documentation can be found in [`docs/README.md`](docs/README.md).
+
 ## Building effects
 
 [`bled-effect`](lib/effect/README.md) is a helper library for building BLED effects in Rust and compiling them to WebAssembly. The [`effects`](effects) directory contains example effect crates.

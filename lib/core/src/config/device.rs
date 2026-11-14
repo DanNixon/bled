@@ -1,4 +1,4 @@
-use crate::{NameString, PathString, config::Fixtures};
+use crate::{NameString, PathString, ble::BlePasskey, config::Fixtures};
 use getset::Getters;
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +14,9 @@ pub const MAX_CONFIG_POSTCARD_SIZE: usize = 1024 * 3;
 pub struct DeviceConfig {
     /// Human-readable device name.
     pub name: NameString,
+
+    /// 6-digit passkey required for Bluetooth Low Energy pairing.
+    pub ble_passkey: BlePasskey,
 
     /// Light fixtures controlled by this device.
     pub fixtures: Fixtures,
@@ -37,7 +40,7 @@ mod tests {
 
     #[test]
     fn types_have_known_size() {
-        assert_eq!(core::mem::size_of::<DeviceConfig>(), 3056);
+        assert_eq!(core::mem::size_of::<DeviceConfig>(), 3064);
     }
 
     fn biggest_config() -> DeviceConfig {
@@ -97,6 +100,7 @@ mod tests {
 
         let config = DeviceConfig {
             name,
+            ble_passkey: BlePasskey::try_new(123_456).unwrap(),
             fixtures: Fixtures::new(fixtures),
             default_effect: Some(default_effect),
         };

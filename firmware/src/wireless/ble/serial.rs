@@ -4,6 +4,7 @@
 //! bidirectional byte stream over BLE. The device API RPC server
 //! ([`crate::api`]) runs over this stream.
 
+use super::bonds;
 use crate::{api, sdcard::SdCardStorage};
 use bled_core::{
     api::RPC_FRAME_BUF_LEN,
@@ -34,7 +35,7 @@ const MAX_NOTIFY_PAYLOAD: usize = 244;
 /// failing a transmission.
 const SUBSCRIBE_TIMEOUT: Duration = Duration::from_secs(5);
 
-#[gatt_server]
+#[gatt_server(connections_max = bonds::BONDS_MAX)]
 pub(super) struct Server {
     serial_service: SerialService,
 }
@@ -46,7 +47,12 @@ pub(super) struct SerialService {
     tx: (),
 
     /// Serial data from host to device.
-    #[characteristic(uuid = SERIAL_RX_UUID.as_u128(), write, write_without_response)]
+    #[characteristic(
+        uuid = SERIAL_RX_UUID.as_u128(),
+        write,
+        write_without_response,
+        permissions(authenticated)
+    )]
     rx: (),
 }
 
@@ -63,16 +69,17 @@ pub(super) fn init_rx_pipe() -> &'static SerialPipe {
 
 /// Runs the RPC server over the emulated serial connection until the client
 /// disconnects.
-pub(super) async fn run_connection<P: PacketPool>(
+pub(super) async fn run_connection<C: Controller, P: PacketPool>(
+    stack: &Stack<'_, C, P>,
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
     rx: &'static SerialPipe,
-    sd: SdCardStorage,
+    sd: &SdCardStorage,
 ) {
     rx.clear();
     info!("Serial connection opened");
 
-    let events = gatt_events_task(conn, server, rx);
+    let events = gatt_events_task(stack, conn, server, rx, sd);
     let rpc = api::serve(
         BleSerialTransport::new(rx, conn, server.serial_service.tx),
         sd,
@@ -86,20 +93,50 @@ pub(super) async fn run_connection<P: PacketPool>(
 
 /// Dispatches GATT write events into the serial receive pipe until the
 /// connection is closed.
-async fn gatt_events_task<P: PacketPool>(
+async fn gatt_events_task<C: Controller, P: PacketPool>(
+    stack: &Stack<'_, C, P>,
     conn: &GattConnection<'_, '_, P>,
     server: &Server<'_>,
     rx: &SerialPipe,
+    sd: &SdCardStorage,
 ) {
     let rx_handle = server.serial_service.rx.handle;
 
     let reason = loop {
         match conn.next().await {
             GattConnectionEvent::Disconnected { reason } => break reason,
+            GattConnectionEvent::PassKeyDisplay(key) => {
+                info!("BLE pairing passkey: {}", key);
+            }
+            GattConnectionEvent::PairingComplete {
+                security_level,
+                bond,
+            } => {
+                info!("BLE pairing complete: {:?}", security_level);
+                if bond.is_some() {
+                    bonds::save(stack, sd).await;
+                }
+            }
+            GattConnectionEvent::Encrypted { security_level, .. } => {
+                info!("BLE connection encrypted: {:?}", security_level);
+            }
+            GattConnectionEvent::PairingFailed(err) => {
+                warn!("BLE pairing failed: {:?}", err);
+            }
+            GattConnectionEvent::BondLost => {
+                warn!("BLE peer lost bond, re-pairing");
+            }
             GattConnectionEvent::Gatt { event } => {
                 let reply = match event {
                     GattEvent::Write(event) if event.handle() == rx_handle => {
                         process_rx_write(event, rx).await
+                    }
+                    GattEvent::NotAllowed(event) => {
+                        info!(
+                            "Disallowed GATT request to handle {:?} (authentication required)",
+                            event.handle()
+                        );
+                        event.accept()
                     }
                     _ => event.accept(),
                 };

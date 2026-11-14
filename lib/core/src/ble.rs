@@ -3,7 +3,16 @@
 //! The emulated serial service provides a bidirectional byte stream over BLE,
 //! the device API RPC protocol runs over this stream.
 
+use nutype::nutype;
 use uuid::{Uuid, uuid};
+
+/// A 6 digit Bluetooth Low Energy pairing passkey.
+#[nutype(
+    validate(less_or_equal = 999_999),
+    derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef),
+    cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
+)]
+pub struct BlePasskey(u32);
 
 /// Emulated serial GATT service UUID (Nordic UART Service).
 pub const SERIAL_SERVICE_UUID: Uuid = uuid!("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
@@ -17,6 +26,14 @@ pub const SERIAL_TX_UUID: Uuid = uuid!("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn passkey_validation_enforces_six_digits() {
+        assert!(BlePasskey::try_new(0).is_ok());
+        assert!(BlePasskey::try_new(123_456).is_ok());
+        assert!(BlePasskey::try_new(999_999).is_ok());
+        assert!(BlePasskey::try_new(1_000_000).is_err());
+    }
 
     #[test]
     fn uuid_constants_are_valid_and_unique() {
