@@ -22,14 +22,24 @@ static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
 #[inline(never)]
 pub(crate) async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
-    let Some(path) = crate::config::get().default_effect.as_ref() else {
+    let Some(path) = crate::config::load_default_effect_path(sd).await else {
         info!("No default effect configured");
         return;
     };
 
-    if activate_effect(sd, Some(path.clone())).await.is_err() {
+    if activate_effect(sd, Some(path)).await.is_err() {
         warn!("Failed to load configured default effect");
     }
+}
+
+/// Unloads the currently active effect, if any, and returns its path.
+#[inline(never)]
+pub(crate) async fn unload_active_effect() -> Option<PathString> {
+    ACTIVE_EFFECT
+        .lock()
+        .await
+        .take()
+        .map(|effect| effect.module_path)
 }
 
 /// Activates an effect given a path to either a WASM module or JSON preset.
@@ -177,7 +187,9 @@ async fn load_effect_instance(
         }
     }
 
-    match EffectInstance::load(&wasm_bytes, crate::config::get()) {
+    let load_result =
+        crate::config::with_fixtures(|fixtures| EffectInstance::load(&wasm_bytes, fixtures)).await;
+    match load_result {
         Ok(effect) => Ok(effect),
         Err(e) => {
             error!("Failed to initialize effect: {}", defmt::Debug2Format(&e));

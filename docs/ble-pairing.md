@@ -5,18 +5,15 @@ A client must authenticate using the device's configured 6 digit passkey before 
 
 ## Configuration
 
-The pairing passkey is configured via the `ble_passkey` field in `/config.json` on the SD card.
+The pairing passkey is configured via `/ble-passkey.txt` on the SD card.
 It must be an integer between `0` and `999999` (inclusive):
 
-```json
-{
-  "name": "bled-default",
-  "ble_passkey": 123456,
-  ...
-}
+```text
+123456
 ```
 
-When BLED generates a default `/config.json` on first boot, `ble_passkey` is set to `123456`.
+When BLED generates a default `/ble-passkey.txt` on first boot, the passkey is set to `123456`.
+The passkey is read from `/ble-passkey.txt` on each BLE connection, so changes take effect without rebooting the device.
 
 ### Bond Storage
 
@@ -79,4 +76,4 @@ You can now open the BLED web UI in Chrome or Edge, click **Connect BLE**, and c
 - **Re-pairing after deleting `/ble_bonds.bin` or reflashing**:
   If the bond is removed from the BLED SD card while your phone or PC still remembers the old bond, remove/"forget" the device in Android's Bluetooth settings (or run `bluetoothctl remove XX:XX:XX:XX:XX:XX` on Linux) and pair again.
 - **Connection times out on first pairing attempt**:
-  If entering the passkey takes several seconds, the initial configuration read in the web UI may time out while waiting for pairing to finish. Once pairing completes, click **Reload Config** (or reconnect) in the web UI.
+  If entering the passkey takes several seconds, the initial configuration read in the web UI may time out while waiting for pairing to finish. Once pairing completes, click **Reload Fixtures** (or reconnect) in the web UI.
