@@ -12,12 +12,57 @@ use thiserror::Error;
 pub const MAX_FIXTURE_COUNT: usize = 8;
 
 /// A collection of fixtures configured on a single device.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq, Serialize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Fixtures(Vec<Fixture, { MAX_FIXTURE_COUNT }>);
 
+impl<'de> Deserialize<'de> for Fixtures {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let mut fixtures = Self::empty();
+        Self::deserialize_in_place(deserializer, &mut fixtures)?;
+        Ok(fixtures)
+    }
+
+    fn deserialize_in_place<D>(deserializer: D, place: &mut Self) -> Result<(), D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct InPlaceVisitor<'a>(&'a mut Vec<Fixture, { MAX_FIXTURE_COUNT }>);
+
+        impl<'de> serde::de::Visitor<'de> for InPlaceVisitor<'_> {
+            type Value = ();
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                formatter.write_str("a sequence of fixtures")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                self.0.clear();
+                while let Some(fixture) = seq.next_element()? {
+                    self.0.push(fixture).map_err(|_| {
+                        serde::de::Error::invalid_length(self.0.len() + 1, &"at most 8 fixtures")
+                    })?;
+                }
+                Ok(())
+            }
+        }
+
+        deserializer.deserialize_seq(InPlaceVisitor(&mut place.0))
+    }
+}
+
 impl Fixtures {
-    pub fn new(vec_inner: Vec<Fixture, { MAX_FIXTURE_COUNT }>) -> Self {
+    pub const fn empty() -> Self {
+        Self(Vec::new())
+    }
+
+    pub const fn new(vec_inner: Vec<Fixture, { MAX_FIXTURE_COUNT }>) -> Self {
         Self(vec_inner)
     }
 

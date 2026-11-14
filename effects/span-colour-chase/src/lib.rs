@@ -19,19 +19,17 @@ wasm_effect!(
 );
 
 struct SpanColourChase {
-    fixtures: Fixtures,
     span_index: usize,
     colour_index: usize,
 }
 
 impl Effect for SpanColourChase {
-    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
+    fn new(ctx: &mut Context<'_>) -> Result<Self, ()> {
         let delay_bytes = 500u16.to_le_bytes();
         ctx.parameters_mut()[0..2].copy_from_slice(&delay_bytes);
         ctx.parameters_mut()[2] = 0x0F;
 
         Ok(Self {
-            fixtures,
             span_index: 0,
             colour_index: 0,
         })
@@ -56,16 +54,16 @@ impl Effect for SpanColourChase {
             (0, 0, 0),
         ];
 
-        let total_spans = self.fixtures.span_count();
+        let total_spans = ctx.fixtures().span_count();
         if total_spans == 0 {
             return StepResult::Unchanged;
         }
 
         let target_span = self.span_index % total_spans;
-        let Some((_, _, span)) = self.fixtures.span_at(target_span) else {
+        let Some((_, _, span)) = ctx.fixtures().span_at(target_span) else {
             return StepResult::Error;
         };
-        let Some(pixel_range) = self.fixtures.span_pixel_range::<4>(span) else {
+        let Some(pixel_range) = ctx.fixtures().span_pixel_range::<4>(span) else {
             return StepResult::Error;
         };
 

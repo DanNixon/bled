@@ -1,7 +1,9 @@
 use super::Frame;
+use bled_core::config::Fixtures;
 
 /// Buffers and state made available to an effect while it runs.
 pub struct Context<'a> {
+    fixtures: &'a Fixtures,
     frame: Frame<'a>,
     command: &'a mut [u8],
     parameters: &'a mut [u8],
@@ -9,15 +11,22 @@ pub struct Context<'a> {
 
 impl<'a> Context<'a> {
     pub(crate) fn new(
+        fixtures: &'a Fixtures,
         frame: &'a mut [u8],
         command: &'a mut [u8],
         parameters: &'a mut [u8],
     ) -> Self {
         Self {
+            fixtures,
             frame: Frame::new(frame),
             command,
             parameters,
         }
+    }
+
+    /// Read the device's fixture configuration.
+    pub fn fixtures(&self) -> &'a Fixtures {
+        self.fixtures
     }
 
     /// Read the effect's output frame.

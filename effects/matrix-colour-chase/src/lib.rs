@@ -19,7 +19,6 @@ wasm_effect!(
 );
 
 struct MatrixColourChase {
-    fixtures: Fixtures,
     colour_index: usize,
     fixture_index: usize,
     column: u32,
@@ -27,13 +26,12 @@ struct MatrixColourChase {
 }
 
 impl Effect for MatrixColourChase {
-    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
+    fn new(ctx: &mut Context<'_>) -> Result<Self, ()> {
         let delay_bytes = 100u16.to_le_bytes();
         ctx.parameters_mut()[0..2].copy_from_slice(&delay_bytes);
         ctx.parameters_mut()[2] = 0x0F;
 
         Ok(Self {
-            fixtures,
             colour_index: 0,
             fixture_index: 0,
             column: 0,
@@ -60,8 +58,8 @@ impl Effect for MatrixColourChase {
             RGB8::new(0, 0, 0),                            // Black
         ];
 
-        let matrix_fixtures: heapless::Vec<(usize, Matrix2d), MAX_FIXTURE_COUNT> = self
-            .fixtures
+        let matrix_fixtures: heapless::Vec<(usize, Matrix2d), MAX_FIXTURE_COUNT> = ctx
+            .fixtures()
             .as_slice()
             .iter()
             .enumerate()
@@ -93,8 +91,8 @@ impl Effect for MatrixColourChase {
             return StepResult::Error;
         };
 
-        let Some(global_pixel_idx) = self
-            .fixtures
+        let Some(global_pixel_idx) = ctx
+            .fixtures()
             .fixture_pixel_index::<4>(target_fixture_idx, local_pixel_idx)
         else {
             return StepResult::Error;

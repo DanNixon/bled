@@ -22,16 +22,14 @@ wasm_effect!(
     3
 );
 
-struct SpanPainter {
-    fixtures: Fixtures,
-}
+struct SpanPainter;
 
 impl Effect for SpanPainter {
-    fn new(ctx: &mut Context<'_>, fixtures: Fixtures) -> Result<Self, ()> {
+    fn new(ctx: &mut Context<'_>) -> Result<Self, ()> {
         // Set default colour to white
         ctx.parameters_mut()[0..3].fill(255);
 
-        Ok(Self { fixtures })
+        Ok(Self)
     }
 
     fn step_time(&self, _ctx: &Context<'_>) -> u32 {
@@ -53,8 +51,8 @@ impl Effect for SpanPainter {
         let green = parameters[1];
         let blue = parameters[2];
 
-        let Some(pixel_range) = self
-            .fixtures
+        let Some(pixel_range) = ctx
+            .fixtures()
             .span_pixel_range_at::<4>(fixture_index, span_index)
         else {
             return StepResult::Error;
