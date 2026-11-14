@@ -49,11 +49,14 @@ pub enum Request {
     /// Reboot the device.
     Reboot,
 
-    /// Stat the active device configuration (Postcard encoded).
-    ConfigStat,
+    /// Stat the active fixture configuration (Postcard encoded).
+    FixturesStat,
 
-    /// Read a chunk of the active device configuration (Postcard encoded).
-    ConfigRead { offset: u32, length: u32 },
+    /// Read a chunk of the active fixture configuration (Postcard encoded).
+    FixturesRead { offset: u32, length: u32 },
+
+    /// Reload the fixture configuration from the SD card.
+    FixturesReload,
 
     /// Render the staged contents of the LED buffer.
     Commit,
@@ -194,7 +197,8 @@ mod tests {
         for request in [
             Request::GetDeviceInfo,
             Request::Reboot,
-            Request::ConfigStat,
+            Request::FixturesStat,
+            Request::FixturesReload,
             Request::Commit,
             Request::LedBufferInfo,
             Request::GetActiveEffect,
@@ -210,7 +214,7 @@ mod tests {
 
     #[test]
     fn parameterised_requests_round_trip() {
-        round_trip_request(&Request::ConfigRead {
+        round_trip_request(&Request::FixturesRead {
             offset: 512,
             length: 256,
         });
@@ -265,6 +269,7 @@ mod tests {
     #[test]
     fn responses_round_trip() {
         round_trip_response(&Response::DeviceInfo(DeviceInfo::new(
+            crate::DeviceName::default(),
             String::try_from("a1b2c3d4").unwrap(),
             BootReason::WatchdogTimeout,
             42_000,

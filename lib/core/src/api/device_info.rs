@@ -1,3 +1,4 @@
+use crate::DeviceName;
 use getset::Getters;
 use heapless::String;
 use serde::{Deserialize, Serialize};
@@ -6,6 +7,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[getset(get = "pub")]
 pub struct DeviceInfo {
+    name: DeviceName,
     git_revision: String<32>,
     boot_reason: BootReason,
     uptime_ms: u64,
@@ -16,6 +18,7 @@ pub struct DeviceInfo {
 impl DeviceInfo {
     #[must_use]
     pub fn new(
+        name: DeviceName,
         git_revision: String<32>,
         boot_reason: BootReason,
         uptime_ms: u64,
@@ -23,6 +26,7 @@ impl DeviceInfo {
         channel_count: u8,
     ) -> Self {
         Self {
+            name,
             git_revision,
             boot_reason,
             uptime_ms,
@@ -47,6 +51,7 @@ mod tests {
     #[test]
     fn postcard_round_trip() {
         let value = DeviceInfo::new(
+            DeviceName::default(),
             heapless::String::try_from("a1b2c3d4").unwrap(),
             BootReason::WatchdogTimeout,
             42_000,

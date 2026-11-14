@@ -9,7 +9,21 @@ use uuid::{Uuid, uuid};
 /// A 6 digit Bluetooth Low Energy pairing passkey.
 #[nutype(
     validate(less_or_equal = 999_999),
-    derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef),
+    default = 123_456,
+    derive(
+        Debug,
+        Copy,
+        Clone,
+        PartialEq,
+        Eq,
+        Default,
+        Serialize,
+        Deserialize,
+        AsRef,
+        Deref,
+        Display,
+        FromStr,
+    ),
     cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
 )]
 pub struct BlePasskey(u32);
@@ -29,10 +43,17 @@ mod tests {
 
     #[test]
     fn passkey_validation_enforces_six_digits() {
+        use core::str::FromStr;
+
+        assert_eq!(*BlePasskey::default(), 123_456);
         assert!(BlePasskey::try_new(0).is_ok());
         assert!(BlePasskey::try_new(123_456).is_ok());
         assert!(BlePasskey::try_new(999_999).is_ok());
         assert!(BlePasskey::try_new(1_000_000).is_err());
+
+        assert_eq!(*BlePasskey::from_str("654321").unwrap(), 654_321);
+        assert!(BlePasskey::from_str("1000000").is_err());
+        assert!(BlePasskey::from_str("abc").is_err());
     }
 
     #[test]

@@ -74,7 +74,22 @@ pub struct ChannelBrightnessLimits<const CHANNEL_COUNT: usize> {
     spans: Vec<SpanBrightnessLimit, MAX_TOTAL_SPAN_COUNT>,
 }
 
+impl<const CHANNEL_COUNT: usize> Default for ChannelBrightnessLimits<CHANNEL_COUNT> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const CHANNEL_COUNT: usize> ChannelBrightnessLimits<CHANNEL_COUNT> {
+    /// Creates an empty brightness limit lookup table with no active limits.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            channel_ranges: [const { 0..0 }; CHANNEL_COUNT],
+            spans: Vec::new(),
+        }
+    }
+
     /// Builds the per-channel brightness limit cache from a fixture configuration.
     ///
     /// Returns `None` if fixture validation fails (e.g. a span references an out-of-range
