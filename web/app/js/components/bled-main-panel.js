@@ -5,6 +5,7 @@ import './bled-led-pixels.js';
 import './bled-led-commit.js';
 import './bled-led-buffer.js';
 import './bled-effect.js';
+import './bled-playlist.js';
 
 const VIEWS = {
   info: 'bled-device-info',
@@ -13,6 +14,7 @@ const VIEWS = {
   files: 'bled-file-staging',
   pixels: 'bled-led-pixels',
   effect: 'bled-effect',
+  playlist: 'bled-playlist',
 };
 
 /**
@@ -115,6 +117,9 @@ export class BledMainPanel extends HTMLElement {
           break;
         case 'effect':
           visible = [this._view(dev, 'effect')];
+          break;
+        case 'playlist':
+          visible = [this._view(dev, 'playlist')];
           break;
         case 'fixture':
         case 'span': {

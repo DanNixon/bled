@@ -15,6 +15,7 @@ use bled_core::{
         RPC_FRAME_BUF_LEN, Request, Response,
     },
     config::MAX_FIXTURES_POSTCARD_SIZE,
+    effect::MAX_PLAYLIST_POSTCARD_SIZE,
 };
 use core::time::Duration;
 use defmt::{debug, warn};
@@ -134,7 +135,12 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
         }
         Request::EffectManifestRead { offset, length } => {
             match effect::with_active_effect_manifest(|manifest| {
-                read_window(manifest.map(|(_, bytes)| bytes), offset, length)
+                read_window(
+                    manifest.map(|(_, bytes)| bytes),
+                    offset,
+                    length,
+                    ApiError::NoActiveEffect,
+                )
             })
             .await
             {
@@ -168,6 +174,21 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
                 Err(()) => Response::Error(effect_error().await),
             }
         }
+        Request::GetActivePlaylist => {
+            Response::ActivePlaylist(effect::active_playlist_info().await)
+        }
+        Request::SetActivePlaylist { path } => match effect::activate_playlist(path).await {
+            Ok(()) => Response::Ok,
+            Err(()) => Response::Error(ApiError::PlaylistFailure),
+        },
+        Request::PlaylistStat => match playlist_stat().await {
+            Ok(size) => Response::Size(size),
+            Err(error) => Response::Error(error),
+        },
+        Request::PlaylistRead { offset, length } => match playlist_read(offset, length).await {
+            Ok(data) => Response::Data(data),
+            Err(error) => Response::Error(error),
+        },
     }
 }
 
@@ -198,17 +219,70 @@ fn encode_fixtures_window(
     let mut buffer = [0u8; MAX_FIXTURES_POSTCARD_SIZE];
     let fixtures_length =
         bled_core::io::encode_postcard(fixtures, &mut buffer).map_err(|_| ApiError::Internal)?;
-    read_window(Some(&buffer[..fixtures_length]), offset, length)
+    read_window(
+        Some(&buffer[..fixtures_length]),
+        offset,
+        length,
+        ApiError::Internal,
+    )
+}
+
+/// Returns the Postcard-encoded size of the active in-memory playlist.
+async fn playlist_stat() -> Result<u64, ApiError> {
+    effect::with_active_playlist(|playlist| {
+        let playlist = playlist.ok_or(ApiError::NoActivePlaylist)?;
+        encode_playlist_len(playlist)
+    })
+    .await
+}
+
+#[inline(never)]
+fn encode_playlist_len(playlist: &bled_core::effect::EffectPlaylist) -> Result<u64, ApiError> {
+    let mut buffer = [0u8; MAX_PLAYLIST_POSTCARD_SIZE];
+    let length =
+        bled_core::io::encode_postcard(playlist, &mut buffer).map_err(|_| ApiError::Internal)?;
+    Ok(length as u64)
+}
+
+/// Reads a window of the Postcard-encoded active in-memory playlist.
+async fn playlist_read(offset: u32, length: u32) -> Result<Chunk, ApiError> {
+    effect::with_active_playlist(|playlist| {
+        let playlist = playlist.ok_or(ApiError::NoActivePlaylist)?;
+        encode_playlist_window(playlist, offset, length)
+    })
+    .await
+}
+
+#[inline(never)]
+fn encode_playlist_window(
+    playlist: &bled_core::effect::EffectPlaylist,
+    offset: u32,
+    length: u32,
+) -> Result<Chunk, ApiError> {
+    let mut buffer = [0u8; MAX_PLAYLIST_POSTCARD_SIZE];
+    let playlist_length =
+        bled_core::io::encode_postcard(playlist, &mut buffer).map_err(|_| ApiError::Internal)?;
+    read_window(
+        Some(&buffer[..playlist_length]),
+        offset,
+        length,
+        ApiError::NoActivePlaylist,
+    )
 }
 
 /// Reads a window of up to `MAX_CHUNK_SIZE` bytes from optional source bytes.
-fn read_window(bytes: Option<&[u8]>, offset: u32, length: u32) -> Result<Chunk, ApiError> {
+fn read_window(
+    bytes: Option<&[u8]>,
+    offset: u32,
+    length: u32,
+    missing_error: ApiError,
+) -> Result<Chunk, ApiError> {
     let length = length as usize;
     if length == 0 || length > MAX_CHUNK_SIZE {
         return Err(ApiError::InvalidArgument);
     }
 
-    let bytes = bytes.ok_or(ApiError::NoActiveEffect)?;
+    let bytes = bytes.ok_or(missing_error)?;
 
     let start = offset as usize;
     if start > bytes.len() {

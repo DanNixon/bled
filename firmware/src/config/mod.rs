@@ -1,14 +1,14 @@
 #[cfg(feature = "_wireless")]
 mod ble_passkey;
-mod default_effect;
 mod device_name;
 mod fixtures;
+mod playlist;
 
 #[cfg(feature = "_wireless")]
 pub(crate) use ble_passkey::load_ble_passkey;
-pub(crate) use default_effect::load_default_effect_path;
 pub(crate) use device_name::device_name;
 pub(crate) use fixtures::{reload_fixtures, with_fixtures};
+pub(crate) use playlist::{DEFAULT_PLAYLIST_PATH, load_default_playlist, load_playlist_from_path};
 
 use crate::sdcard::{ReadFileError, SdCardStorage};
 use core::{

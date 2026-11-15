@@ -9,7 +9,7 @@ const DEVICE_OPERATIONS = [
   'readBufferRange', 'writeBuffer', 'readActiveEffect', 'writeActiveEffect',
   'readEffectCommandLength', 'readEffectCommand', 'writeEffectCommand',
   'readEffectParameterLength', 'readEffectParameters', 'writeEffectParameters',
-  'readEffectManifest',
+  'readEffectManifest', 'readActivePlaylist', 'writeActivePlaylist', 'readPlaylist',
 ];
 
 const WRITE_CHUNK_SIZE = 244;
@@ -407,6 +407,24 @@ export class BleDevice extends EventTarget {
 
   async writeEffectParameters(bytes) {
     await this.rpc.effect_parameter_write(toBytes(bytes));
+  }
+
+  async readActivePlaylist() {
+    return (await this.rpc.get_active_playlist()) ?? null;
+  }
+
+  async writeActivePlaylist(path) {
+    await this.rpc.set_active_playlist(path || null);
+    this._log(path ? `Loaded playlist "${path}".` : 'Unloaded active playlist.', 'success');
+  }
+
+  async readPlaylist() {
+    const size = await this.rpc.playlist_stat();
+    const bytes = await this._readRpcChunks(
+      (offset, length) => this.rpc.playlist_read(offset, length),
+      size,
+    );
+    return bled.decode_playlist(bytes);
   }
 
   async statFixtures() {

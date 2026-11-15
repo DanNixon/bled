@@ -2,11 +2,15 @@ use super::{EffectError, EffectInstance};
 use alloc::vec::Vec;
 use bled_core::{
     PathString,
-    api::{Chunk, MAX_CHUNK_SIZE},
-    effect::{EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, abi::export::StepResult},
+    api::{ActivePlaylistInfo, Chunk, MAX_CHUNK_SIZE},
+    effect::{
+        EffectPlaylist, EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, NextPlaylistEntryAction,
+        abi::export::StepResult,
+    },
 };
 use defmt::{debug, error, info, warn};
 use embassy_futures::select::{Either, select};
+use embassy_rp::clocks::RoscRng;
 use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, mutex::Mutex, signal::Signal,
 };
@@ -21,12 +25,21 @@ struct ActiveEffect {
     instance: EffectInstance,
 }
 
+struct ActivePlaylist {
+    path: PathString,
+    playlist: EffectPlaylist,
+    position: Option<usize>,
+    entry_started_at: Instant,
+}
+
 enum ControlRequest {
     ActivateEffect(Option<PathString>),
+    ActivatePlaylist(Option<PathString>),
     ReloadFixtures,
 }
 
 static ACTIVE_EFFECT: Mutex<CriticalSectionRawMutex, Option<ActiveEffect>> = Mutex::new(None);
+static ACTIVE_PLAYLIST: Mutex<CriticalSectionRawMutex, Option<ActivePlaylist>> = Mutex::new(None);
 static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
 static CONTROL_MUTEX: Mutex<CriticalSectionRawMutex, ()> = Mutex::new(());
@@ -34,15 +47,205 @@ static CONTROL_REQUEST: Channel<CriticalSectionRawMutex, ControlRequest, 1> = Ch
 static CONTROL_COMPLETE: Signal<CriticalSectionRawMutex, Result<(), ()>> = Signal::new();
 
 #[inline(never)]
-async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
-    let Some(path) = crate::config::load_default_effect_path(sd).await else {
-        info!("No default effect configured");
+async fn load_default_playlist(sd: &crate::sdcard::SdCardStorage) {
+    let playlist = crate::config::load_default_playlist(sd).await;
+    let Ok(path) = PathString::try_from(crate::config::DEFAULT_PLAYLIST_PATH) else {
         return;
     };
+    start_playlist(sd, path, playlist).await;
+}
 
-    if activate_effect_direct(sd, Some(path)).await.is_err() {
-        warn!("Failed to load configured default effect");
+#[inline(never)]
+async fn activate_playlist_direct(
+    sd: &crate::sdcard::SdCardStorage,
+    path: Option<PathString>,
+) -> Result<(), ()> {
+    let Some(path) = path else {
+        *ACTIVE_PLAYLIST.lock().await = None;
+        *ACTIVE_EFFECT.lock().await = None;
+        return Ok(());
+    };
+
+    let playlist = crate::config::load_playlist_from_path(sd, path.as_str()).await?;
+    start_playlist(sd, path, playlist).await;
+    Ok(())
+}
+
+#[inline(never)]
+async fn start_playlist(
+    sd: &crate::sdcard::SdCardStorage,
+    path: PathString,
+    playlist: EffectPlaylist,
+) {
+    *ACTIVE_EFFECT.lock().await = None;
+
+    if playlist.is_empty() {
+        info!("Loaded empty playlist: {}", path.as_str());
+        *ACTIVE_PLAYLIST.lock().await = Some(ActivePlaylist {
+            path,
+            playlist,
+            position: None,
+            entry_started_at: Instant::now(),
+        });
+        return;
     }
+
+    info!(
+        "Loaded playlist '{}' with {} entries",
+        path.as_str(),
+        playlist.len()
+    );
+    *ACTIVE_PLAYLIST.lock().await = Some(ActivePlaylist {
+        path,
+        playlist,
+        position: None,
+        entry_started_at: Instant::now(),
+    });
+    load_playlist_entry_at(sd, 0).await;
+}
+
+/// Attempts to load the playlist entry at `target_index`.
+///
+/// If an entry fails to load, it is removed from the in-memory playlist and its `after`
+/// action is evaluated to select the next entry. If the playlist becomes empty, the
+/// playlist and active effect are unloaded.
+#[inline(never)]
+async fn load_playlist_entry_at(sd: &crate::sdcard::SdCardStorage, mut target_index: usize) {
+    loop {
+        let candidate = {
+            let mut guard = ACTIVE_PLAYLIST.lock().await;
+            let Some(active) = guard.as_mut() else {
+                return;
+            };
+            if active.playlist.is_empty() {
+                *guard = None;
+                drop(guard);
+                *ACTIVE_EFFECT.lock().await = None;
+                return;
+            }
+            let index = target_index % active.playlist.len();
+            let entry = &active.playlist[index];
+            (
+                index,
+                active.path.clone(),
+                entry.path().clone(),
+                *entry.after(),
+            )
+        };
+
+        let (index, playlist_path, entry_path, after_action) = candidate;
+
+        let resolved_res = resolve_relative_path(playlist_path.as_str(), entry_path.as_str());
+        let load_ok = match resolved_res {
+            Ok(resolved_path) => activate_effect_direct(sd, Some(resolved_path))
+                .await
+                .is_ok(),
+            Err(()) => {
+                warn!("Playlist entry path '{}' is too long", entry_path.as_str());
+                false
+            }
+        };
+
+        if load_ok {
+            let mut guard = ACTIVE_PLAYLIST.lock().await;
+            if let Some(active) = guard.as_mut() {
+                active.position = Some(index);
+                active.entry_started_at = Instant::now();
+            }
+            return;
+        }
+
+        warn!(
+            "Failed to load playlist entry {} ('{}'), removing from playlist",
+            index,
+            entry_path.as_str()
+        );
+
+        let next_index = {
+            let mut guard = ACTIVE_PLAYLIST.lock().await;
+            let Some(active) = guard.as_mut() else {
+                return;
+            };
+            if index < active.playlist.len() {
+                active.playlist.remove(index);
+            }
+            let remaining_len = active.playlist.len();
+            match after_action.resolve_index_after_removal(index, remaining_len, random_u64) {
+                Some(next) => next,
+                None => {
+                    info!("Playlist is now empty after removing failed entry, unloading playlist");
+                    *guard = None;
+                    drop(guard);
+                    *ACTIVE_EFFECT.lock().await = None;
+                    return;
+                }
+            }
+        };
+
+        target_index = next_index;
+    }
+}
+
+/// Advances the active playlist from its current position using the current entry's `after` action.
+#[inline(never)]
+async fn advance_playlist(sd: &crate::sdcard::SdCardStorage) {
+    let next_index = {
+        let guard = ACTIVE_PLAYLIST.lock().await;
+        let Some(active) = guard.as_ref() else {
+            return;
+        };
+        let Some(current_index) = active.position else {
+            return;
+        };
+        let Some(entry) = active.playlist.get(current_index) else {
+            return;
+        };
+        let action: NextPlaylistEntryAction = *entry.after();
+        match action.resolve_index(current_index, active.playlist.len(), random_u64) {
+            Some(next) => next,
+            None => return,
+        }
+    };
+
+    load_playlist_entry_at(sd, next_index).await;
+}
+
+fn random_u64() -> u64 {
+    RoscRng.next_u64()
+}
+
+/// Checks if the current playlist entry's duration has elapsed, and if so, advances to the next entry.
+async fn check_playlist_duration(sd: &crate::sdcard::SdCardStorage, now: Instant) {
+    let expired = {
+        let guard = ACTIVE_PLAYLIST.lock().await;
+        if let Some(active) = guard.as_ref()
+            && let Some(pos) = active.position
+            && let Some(entry) = active.playlist.get(pos)
+            && let Some(duration) = entry.duration()
+        {
+            let duration_ms = u64::try_from(duration.as_millis()).unwrap_or(u64::MAX);
+            now.duration_since(active.entry_started_at).as_millis() >= duration_ms
+        } else {
+            false
+        }
+    };
+
+    if expired {
+        debug!("Playlist entry duration elapsed, advancing playlist");
+        advance_playlist(sd).await;
+    }
+}
+
+/// Returns the remaining time in milliseconds for the active playlist entry, if it has a finite duration.
+async fn playlist_remaining_ms(now: Instant) -> Option<u64> {
+    let guard = ACTIVE_PLAYLIST.lock().await;
+    let active = guard.as_ref()?;
+    let pos = active.position?;
+    let entry = active.playlist.get(pos)?;
+    let duration = (*entry.duration())?;
+    let duration_ms = u64::try_from(duration.as_millis()).unwrap_or(u64::MAX);
+    let elapsed_ms = now.duration_since(active.entry_started_at).as_millis();
+    Some(duration_ms.saturating_sub(elapsed_ms))
 }
 
 /// Unloads the currently active effect, if any, and returns its path.
@@ -60,6 +263,15 @@ pub(crate) async fn activate_effect(path: Option<PathString>) -> Result<(), ()> 
     let _guard = CONTROL_MUTEX.lock().await;
     CONTROL_REQUEST
         .send(ControlRequest::ActivateEffect(path))
+        .await;
+    CONTROL_COMPLETE.wait().await
+}
+
+/// Requests the effect task to activate a playlist given a path to a JSON playlist file, or unload the current playlist.
+pub(crate) async fn activate_playlist(path: Option<PathString>) -> Result<(), ()> {
+    let _guard = CONTROL_MUTEX.lock().await;
+    CONTROL_REQUEST
+        .send(ControlRequest::ActivatePlaylist(path))
         .await;
     CONTROL_COMPLETE.wait().await
 }
@@ -136,7 +348,7 @@ async fn load_effect_preset(
         }
     };
 
-    let module_path = match resolve_preset_module_path(preset_path, preset.module().as_str()) {
+    let module_path = match resolve_relative_path(preset_path, preset.module().as_str()) {
         Ok(path) => path,
         Err(()) => {
             warn!("Effect JSON preset module path is too long");
@@ -167,17 +379,17 @@ async fn load_effect_preset(
     Ok(instance)
 }
 
-fn resolve_preset_module_path(preset_path: &str, module_path: &str) -> Result<PathString, ()> {
+fn resolve_relative_path(base_file_path: &str, target_path: &str) -> Result<PathString, ()> {
     let mut resolved = PathString::new();
-    if module_path.starts_with('/') {
-        resolved.push_str(module_path).map_err(|_| ())?;
+    if target_path.starts_with('/') {
+        resolved.push_str(target_path).map_err(|_| ())?;
     } else {
-        if let Some(parent_end) = preset_path.rfind('/') {
+        if let Some(parent_end) = base_file_path.rfind('/') {
             resolved
-                .push_str(&preset_path[..=parent_end])
+                .push_str(&base_file_path[..=parent_end])
                 .map_err(|_| ())?;
         }
-        resolved.push_str(module_path).map_err(|_| ())?;
+        resolved.push_str(target_path).map_err(|_| ())?;
     }
     Ok(resolved)
 }
@@ -235,6 +447,22 @@ pub(crate) async fn active_effect_path() -> Option<PathString> {
         .await
         .as_ref()
         .map(|effect| effect.module_path.clone())
+}
+
+pub(crate) async fn active_playlist_info() -> Option<ActivePlaylistInfo> {
+    ACTIVE_PLAYLIST.lock().await.as_ref().map(|active| {
+        ActivePlaylistInfo::new(
+            active.path.clone(),
+            active.position.and_then(|pos| u8::try_from(pos).ok()),
+        )
+    })
+}
+
+pub(crate) async fn with_active_playlist<T>(
+    operation: impl FnOnce(Option<&EffectPlaylist>) -> T,
+) -> T {
+    let active = ACTIVE_PLAYLIST.lock().await;
+    operation(active.as_ref().map(|p| &p.playlist))
 }
 
 /// Access manifest bytes only while holding the active effect lock, without copying the manifest.
@@ -308,7 +536,11 @@ async fn with_active_effect<T>(
 
 async fn handle_control_request(sd: &crate::sdcard::SdCardStorage, request: ControlRequest) {
     let result = match request {
-        ControlRequest::ActivateEffect(path) => activate_effect_direct(sd, path).await,
+        ControlRequest::ActivateEffect(path) => {
+            *ACTIVE_PLAYLIST.lock().await = None;
+            activate_effect_direct(sd, path).await
+        }
+        ControlRequest::ActivatePlaylist(path) => activate_playlist_direct(sd, path).await,
         ControlRequest::ReloadFixtures => {
             crate::config::reload_fixtures(sd).await;
             Ok(())
@@ -320,7 +552,7 @@ async fn handle_control_request(sd: &crate::sdcard::SdCardStorage, request: Cont
 #[embassy_executor::task]
 pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
     crate::config::reload_fixtures(&sd).await;
-    load_default_effect(&sd).await;
+    load_default_playlist(&sd).await;
 
     let start = Instant::now();
 
@@ -329,9 +561,12 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
             handle_control_request(&sd, request).await;
         }
 
+        check_playlist_duration(&sd, Instant::now()).await;
+
         let now = Instant::now();
         let elapsed_ms = now.duration_since(start).as_millis().min(i32::MAX as u64) as i32;
 
+        let mut step_failed = false;
         let mut active_effect = ACTIVE_EFFECT.lock().await;
 
         if let Some(effect) = active_effect.as_mut() {
@@ -355,6 +590,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                                         channel_data.len()
                                     );
                                     *active_effect = None;
+                                    step_failed = true;
                                 }
                                 Err(error) => {
                                     warn!(
@@ -362,6 +598,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                                         defmt::Debug2Format(&error)
                                     );
                                     *active_effect = None;
+                                    step_failed = true;
                                 }
                             }
                         }
@@ -372,6 +609,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                                 channel_data.len()
                             );
                             *active_effect = None;
+                            step_failed = true;
                         }
                         Err(error) => {
                             warn!(
@@ -379,6 +617,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                                 defmt::Debug2Format(&error)
                             );
                             *active_effect = None;
+                            step_failed = true;
                         }
                     }
                 }
@@ -388,6 +627,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                 Ok(StepResult::Error) => {
                     warn!("Active effect reported an error while stepping");
                     *active_effect = None;
+                    step_failed = true;
                 }
                 Err(error) => {
                     warn!(
@@ -395,12 +635,13 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                         defmt::Debug2Format(&error)
                     );
                     *active_effect = None;
+                    step_failed = true;
                 }
             }
         }
 
         const DEFAULT_STEP_TIME: u64 = 100;
-        let delay_ms = match active_effect.as_mut() {
+        let mut delay_ms = match active_effect.as_mut() {
             Some(effect) => match effect.instance.step_time() {
                 Ok(time_to_next) => time_to_next as u64,
                 Err(error) => {
@@ -409,14 +650,24 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
                         defmt::Debug2Format(&error)
                     );
                     *active_effect = None;
+                    step_failed = true;
                     DEFAULT_STEP_TIME
                 }
             },
             None => DEFAULT_STEP_TIME,
         };
-        debug!("Next step in: {}ms", delay_ms);
 
         drop(active_effect);
+
+        if step_failed {
+            advance_playlist(&sd).await;
+            continue;
+        }
+
+        if let Some(remaining_ms) = playlist_remaining_ms(Instant::now()).await {
+            delay_ms = delay_ms.min(remaining_ms);
+        }
+        debug!("Next step in: {}ms", delay_ms);
 
         if let Either::First(request) =
             select(CONTROL_REQUEST.receive(), Timer::after_millis(delay_ms)).await
