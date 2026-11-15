@@ -58,17 +58,12 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             crate::status::reset();
             Response::Ok
         }
-        Request::FixturesStat => match fixtures_bytes().await {
-            Ok((_, length)) => Response::Size(length as u64),
+        Request::FixturesStat => match fixtures_stat().await {
+            Ok(size) => Response::Size(size),
             Err(error) => Response::Error(error),
         },
-        Request::FixturesRead { offset, length } => match fixtures_bytes().await {
-            Ok((bytes, fixtures_length)) => {
-                match read_window(Some(&bytes[..fixtures_length]), offset, length) {
-                    Ok(data) => Response::Data(data),
-                    Err(error) => Response::Error(error),
-                }
-            }
+        Request::FixturesRead { offset, length } => match fixtures_read(offset, length).await {
+            Ok(data) => Response::Data(data),
             Err(error) => Response::Error(error),
         },
         Request::FixturesReload => {
@@ -188,15 +183,34 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
     }
 }
 
-/// Encodes the active fixture configuration as Postcard.
-async fn fixtures_bytes() -> Result<([u8; MAX_FIXTURES_POSTCARD_SIZE], usize), ApiError> {
+/// Returns the Postcard-encoded size of the active fixture configuration.
+async fn fixtures_stat() -> Result<u64, ApiError> {
+    crate::config::with_fixtures(encode_fixtures_len).await
+}
+
+#[inline(never)]
+fn encode_fixtures_len(fixtures: &bled_core::config::Fixtures) -> Result<u64, ApiError> {
     let mut buffer = [0u8; MAX_FIXTURES_POSTCARD_SIZE];
-    let length = crate::config::with_fixtures(|fixtures| {
-        bled_core::io::encode_postcard(fixtures, &mut buffer)
-    })
-    .await
-    .map_err(|_| ApiError::Internal)?;
-    Ok((buffer, length))
+    let length =
+        bled_core::io::encode_postcard(fixtures, &mut buffer).map_err(|_| ApiError::Internal)?;
+    Ok(length as u64)
+}
+
+/// Reads a window of the Postcard-encoded active fixture configuration.
+async fn fixtures_read(offset: u32, length: u32) -> Result<Chunk, ApiError> {
+    crate::config::with_fixtures(|fixtures| encode_fixtures_window(fixtures, offset, length)).await
+}
+
+#[inline(never)]
+fn encode_fixtures_window(
+    fixtures: &bled_core::config::Fixtures,
+    offset: u32,
+    length: u32,
+) -> Result<Chunk, ApiError> {
+    let mut buffer = [0u8; MAX_FIXTURES_POSTCARD_SIZE];
+    let fixtures_length =
+        bled_core::io::encode_postcard(fixtures, &mut buffer).map_err(|_| ApiError::Internal)?;
+    read_window(Some(&buffer[..fixtures_length]), offset, length)
 }
 
 /// Reads a window of up to `MAX_CHUNK_SIZE` bytes from optional source bytes.
