@@ -2,6 +2,7 @@ use super::{EffectError, EffectInstance};
 use alloc::vec::Vec;
 use bled_core::{
     PathString,
+    api::{Chunk, MAX_CHUNK_SIZE},
     effect::{EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, abi::export::StepResult},
 };
 use defmt::{debug, error, info, warn};
@@ -224,8 +225,17 @@ pub(crate) async fn effect_command_size() -> Result<usize, ()> {
     with_active_effect(|effect| effect.command_size()).await
 }
 
-pub(crate) async fn read_effect_command(buf: &mut [u8]) -> Result<usize, ()> {
-    with_active_effect(|effect| effect.read_command_data(buf)).await
+pub(crate) async fn read_effect_command() -> Result<Chunk, ()> {
+    with_active_effect(|effect| {
+        let mut chunk = Chunk::new();
+        chunk
+            .resize(MAX_CHUNK_SIZE, 0)
+            .map_err(|_| EffectError::InvalidBuffer)?;
+        let length = effect.read_command_data(&mut chunk)?;
+        chunk.truncate(length);
+        Ok(chunk)
+    })
+    .await
 }
 
 pub(crate) async fn write_effect_command(buf: &[u8]) -> Result<(), ()> {
@@ -236,8 +246,17 @@ pub(crate) async fn effect_parameter_size() -> Result<usize, ()> {
     with_active_effect(|effect| effect.parameter_size()).await
 }
 
-pub(crate) async fn read_effect_parameters(buf: &mut [u8]) -> Result<usize, ()> {
-    with_active_effect(|effect| effect.read_parameter_data(buf)).await
+pub(crate) async fn read_effect_parameters() -> Result<Chunk, ()> {
+    with_active_effect(|effect| {
+        let mut chunk = Chunk::new();
+        chunk
+            .resize(MAX_CHUNK_SIZE, 0)
+            .map_err(|_| EffectError::InvalidBuffer)?;
+        let length = effect.read_parameter_data(&mut chunk)?;
+        chunk.truncate(length);
+        Ok(chunk)
+    })
+    .await
 }
 
 pub(crate) async fn write_effect_parameters(buf: &[u8]) -> Result<(), ()> {
