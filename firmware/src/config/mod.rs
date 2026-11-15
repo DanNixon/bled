@@ -26,7 +26,15 @@ pub(crate) async fn init(sd: &SdCardStorage) {
 #[inline(never)]
 async fn load<T: ConfigFile<N>, const N: usize>(sd: &SdCardStorage) -> T {
     let mut bytes = [0u8; N];
-    match sd.read_file(T::PATH, &mut bytes).await {
+    load_with_buf(sd, &mut bytes).await
+}
+
+#[inline(never)]
+async fn load_with_buf<T: ConfigFile<N>, const N: usize>(
+    sd: &SdCardStorage,
+    bytes: &mut [u8; N],
+) -> T {
+    match sd.read_file(T::PATH, bytes).await {
         Ok(len) => match T::decode(&bytes[..len]) {
             Ok(value) => return value,
             Err(()) => {
@@ -53,7 +61,7 @@ async fn load<T: ConfigFile<N>, const N: usize>(sd: &SdCardStorage) -> T {
     }
 
     let default = T::default_value();
-    if let Ok(len) = default.encode(&mut bytes) {
+    if let Ok(len) = default.encode(bytes) {
         let _ = sd.write_file(T::PATH, &bytes[..len]).await;
     }
     default

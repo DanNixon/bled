@@ -11,10 +11,15 @@ use defmt::{info, warn};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 
 static FIXTURES: Mutex<CriticalSectionRawMutex, Fixtures> = Mutex::new(Fixtures::empty());
+static FIXTURES_BUF: Mutex<CriticalSectionRawMutex, [u8; MAX_FIXTURES_JSON_SIZE]> =
+    Mutex::new([0u8; MAX_FIXTURES_JSON_SIZE]);
 
 #[inline(never)]
 pub(crate) async fn reload_fixtures(sd: &SdCardStorage) {
-    let fixtures: Fixtures = super::load(sd).await;
+    let fixtures: Fixtures = {
+        let mut buf = FIXTURES_BUF.lock().await;
+        super::load_with_buf(sd, &mut buf).await
+    };
     info!("Reloaded fixtures: {}", fixtures);
     let active_effect = crate::effect::unload_active_effect().await;
     crate::leds::reconfigure(&fixtures).await;
