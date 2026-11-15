@@ -1,8 +1,10 @@
+#[cfg(feature = "_wireless")]
 mod ble_passkey;
 mod default_effect;
 mod device_name;
 mod fixtures;
 
+#[cfg(feature = "_wireless")]
 pub(crate) use ble_passkey::load_ble_passkey;
 pub(crate) use default_effect::load_default_effect_path;
 pub(crate) use device_name::device_name;
@@ -19,7 +21,6 @@ use exfat_slim::blocking::error::ExFatError;
 #[inline(never)]
 pub(crate) async fn init(sd: &SdCardStorage) {
     device_name::init(sd).await;
-    let _ = load_ble_passkey(sd).await;
 }
 
 #[inline(never)]

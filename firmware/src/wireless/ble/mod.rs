@@ -20,6 +20,7 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
     info!("Our BT address = {:?}", address);
 
     let device_name = crate::config::device_name().as_str();
+    let passkey = *crate::config::load_ble_passkey(&sd).await;
 
     let mut resources: HostResources<
         DefaultPacketPool,
@@ -31,6 +32,7 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
         .set_io_capabilities(IoCapabilities::DisplayOnly)
+        .set_passkey(Some(passkey))
         .build();
 
     bonds::load(&stack, &sd).await;
@@ -58,9 +60,6 @@ pub(crate) async fn task(controller: BtController, address: Address, sd: SdCardS
         loop {
             match advertise::advertise(device_name, &mut peripheral).await {
                 Ok(conn) => {
-                    let passkey = *crate::config::load_ble_passkey(&sd).await;
-                    stack.set_passkey(Some(passkey));
-
                     let conn = conn.with_attribute_server(&server).unwrap();
                     if let Err(e) = conn.raw().set_bondable(true) {
                         warn!("Failed to mark BLE connection as bondable: {:?}", e);
