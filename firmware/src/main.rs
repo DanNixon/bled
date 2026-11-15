@@ -101,8 +101,6 @@ async fn main(spawner: Spawner) {
 
         info!("{}", device_info());
 
-        effect::load_default_effect(&sd).await;
-
         let (sender, receiver, control) = usb::cdc_acm::init(&mut usb_builder);
         spawner.spawn(unwrap!(usb::cdc_acm::task(
             sender,
@@ -114,12 +112,12 @@ async fn main(spawner: Spawner) {
         spawner.spawn(unwrap!(usb::task(usb_builder)));
 
         #[cfg(feature = "_wireless")]
-        spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd)));
+        spawner.spawn(unwrap!(wireless::ble::task(bt, bt_address, sd.clone())));
 
         spawner.spawn(unwrap!(leds::task(r.led)));
         leds::draw().await;
 
-        spawner.spawn(unwrap!(effect::task()));
+        spawner.spawn(unwrap!(effect::task(sd)));
 
         spawner.spawn(unwrap!(status::task(status_led, p.WATCHDOG)));
     }
