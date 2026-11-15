@@ -13,7 +13,6 @@ It must be an integer between `0` and `999999` (inclusive):
 ```
 
 When BLED generates a default `/ble-passkey.txt` on first boot, the passkey is set to `123456`.
-The passkey is read from `/ble-passkey.txt` on each BLE connection, so changes take effect without rebooting the device.
 
 ### Bond Storage
 
