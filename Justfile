@@ -72,3 +72,45 @@ fmt: fmt-nix
 
 fmt-nix:
     alejandra -q .
+
+size-report:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just build >&2
+    fmt_num() {
+        echo "$1" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'
+    }
+    echo "### Firmware"
+    echo ""
+    echo "| Flavour | \`text\` | \`data\` | \`bss\` |"
+    echo "| :--- | ---: | ---: | ---: |"
+    for elf in firmware/target/thumbv8m.main-none-eabihf/release/bled-*; do
+        [ -f "$elf" ] || continue
+        case "$elf" in
+            *.uf2|*.d) continue ;;
+        esac
+        flavour="${elf##*bled-}"
+        read -r text data bss _ < <(size "$elf" | tail -n 1)
+        printf "| \`%s\` | %s | %s | %s |\n" \
+            "$flavour" \
+            "$(fmt_num "$text")" \
+            "$(fmt_num "$data")" \
+            "$(fmt_num "$bss")"
+    done
+    echo ""
+    echo "### Effect WASM Modules"
+    echo ""
+    echo "| Effect | Size (bytes) | Size |"
+    echo "| :--- | ---: | ---: |"
+    for cargo_toml in effects/*/Cargo.toml; do
+        [ -f "$cargo_toml" ] || continue
+        dir=$(dirname "$cargo_toml")
+        effect=$(basename "$dir")
+        name=$(echo "$effect" | tr '-' '_')
+        wasm="$dir/target/wasm32-unknown-unknown/release/$name.wasm"
+        if [ -f "$wasm" ]; then
+            bytes=$(stat -c "%s" "$wasm")
+            human=$(awk -v b="$bytes" 'BEGIN { printf "%.1f KiB", b / 1024 }')
+            printf "| \`%s\` | %s | %s |\n" "$effect" "$(fmt_num "$bytes")" "$human"
+        fi
+    done
