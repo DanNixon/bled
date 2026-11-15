@@ -146,16 +146,10 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             Ok(size) => Response::Size(size as u64),
             Err(()) => Response::Error(effect_error().await),
         },
-        Request::EffectCommandRead => {
-            let mut buffer = [0u8; MAX_CHUNK_SIZE];
-            match effect::read_effect_command(&mut buffer).await {
-                Ok(length) => match Chunk::try_from(&buffer[..length]) {
-                    Ok(data) => Response::Data(data),
-                    Err(_) => Response::Error(ApiError::Internal),
-                },
-                Err(()) => Response::Error(effect_error().await),
-            }
-        }
+        Request::EffectCommandRead => match effect::read_effect_command().await {
+            Ok(data) => Response::Data(data),
+            Err(()) => Response::Error(effect_error().await),
+        },
         Request::EffectCommandWrite { data } => match effect::write_effect_command(&data).await {
             Ok(()) => Response::Ok,
             Err(()) => Response::Error(effect_error().await),
@@ -164,16 +158,10 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             Ok(size) => Response::Size(size as u64),
             Err(()) => Response::Error(effect_error().await),
         },
-        Request::EffectParameterRead => {
-            let mut buffer = [0u8; MAX_CHUNK_SIZE];
-            match effect::read_effect_parameters(&mut buffer).await {
-                Ok(length) => match Chunk::try_from(&buffer[..length]) {
-                    Ok(data) => Response::Data(data),
-                    Err(_) => Response::Error(ApiError::Internal),
-                },
-                Err(()) => Response::Error(effect_error().await),
-            }
-        }
+        Request::EffectParameterRead => match effect::read_effect_parameters().await {
+            Ok(data) => Response::Data(data),
+            Err(()) => Response::Error(effect_error().await),
+        },
         Request::EffectParameterWrite { data } => {
             match effect::write_effect_parameters(&data).await {
                 Ok(()) => Response::Ok,

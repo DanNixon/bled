@@ -198,13 +198,13 @@ impl SdCardStorage {
             .await?;
 
         const CHUNK_SIZE: usize = 512;
-        let zeros = [0u8; CHUNK_SIZE];
+        static ZEROS: [u8; CHUNK_SIZE] = [0u8; CHUNK_SIZE];
         let mut remaining = size as usize;
 
         let write_result: Result<(), FsError> = async {
             while remaining != 0 {
                 let chunk_len = remaining.min(CHUNK_SIZE);
-                self.write_open_file(&mut file, &zeros[..chunk_len]).await?;
+                self.write_open_file(&mut file, &ZEROS[..chunk_len]).await?;
                 remaining -= chunk_len;
                 embassy_futures::yield_now().await;
             }
