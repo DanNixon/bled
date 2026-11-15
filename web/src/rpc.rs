@@ -360,6 +360,41 @@ impl RpcClient {
             .await?,
         )
     }
+
+    pub async fn get_active_playlist(&mut self) -> Result<JsValue, JsError> {
+        match self
+            .call(Request::GetActivePlaylist, RPC_RESPONSE_TIMEOUT)
+            .await?
+        {
+            Response::ActivePlaylist(info) => to_js(&info),
+            response => unexpected_response(response),
+        }
+    }
+
+    pub async fn set_active_playlist(&mut self, path: Option<String>) -> Result<(), JsError> {
+        let path = path.as_deref().map(path_string).transpose()?;
+        expect_ok(
+            self.call(Request::SetActivePlaylist { path }, RPC_LOAD_TIMEOUT)
+                .await?,
+        )
+    }
+
+    pub async fn playlist_stat(&mut self) -> Result<f64, JsError> {
+        size(
+            self.call(Request::PlaylistStat, RPC_RESPONSE_TIMEOUT)
+                .await?,
+        )
+    }
+
+    pub async fn playlist_read(&mut self, offset: u32, length: u32) -> Result<Uint8Array, JsError> {
+        data(
+            self.call(
+                Request::PlaylistRead { offset, length },
+                RPC_RESPONSE_TIMEOUT,
+            )
+            .await?,
+        )
+    }
 }
 
 impl RpcClient {

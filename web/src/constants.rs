@@ -53,6 +53,21 @@ pub fn max_fixtures_postcard_size() -> usize {
 }
 
 #[wasm_bindgen]
+pub fn max_playlist_entries() -> usize {
+    bled_core::effect::MAX_PLAYLIST_ENTRIES
+}
+
+#[wasm_bindgen]
+pub fn max_playlist_json_size() -> usize {
+    bled_core::effect::MAX_PLAYLIST_JSON_SIZE
+}
+
+#[wasm_bindgen]
+pub fn max_playlist_postcard_size() -> usize {
+    bled_core::effect::MAX_PLAYLIST_POSTCARD_SIZE
+}
+
+#[wasm_bindgen]
 pub fn git_revision() -> String {
     git_version::git_version!().to_string()
 }

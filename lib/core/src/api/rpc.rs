@@ -10,7 +10,7 @@
 //!
 //! [`teeny-rpc`]: https://docs.rs/teeny-rpc
 
-use super::{DeviceInfo, DirEntry, LedBufferInformation};
+use super::{ActivePlaylistInfo, DeviceInfo, DirEntry, LedBufferInformation};
 use crate::PathString;
 use core::time::Duration;
 use heapless::Vec;
@@ -125,6 +125,18 @@ pub enum Request {
 
     /// Write the parameter buffer of the active effect.
     EffectParameterWrite { data: Chunk },
+
+    /// Fetch information about the active playlist.
+    GetActivePlaylist,
+
+    /// Load and start a playlist from a file, or unload the active playlist if no path is given.
+    SetActivePlaylist { path: Option<PathString> },
+
+    /// Stat the active in-memory playlist (Postcard encoded).
+    PlaylistStat,
+
+    /// Read a chunk of the active in-memory playlist (Postcard encoded).
+    PlaylistRead { offset: u32, length: u32 },
 }
 
 /// RPC response.
@@ -139,6 +151,7 @@ pub enum Response {
     DirEntry(Option<DirEntry>),
     LedBufferInfo(LedBufferInformation),
     ActiveEffect(Option<PathString>),
+    ActivePlaylist(Option<ActivePlaylistInfo>),
     Error(ApiError),
 }
 
@@ -160,6 +173,12 @@ pub enum ApiError {
 
     /// The active effect failed to handle a request.
     EffectFailure,
+
+    /// No playlist is active.
+    NoActivePlaylist,
+
+    /// Loading or activating a playlist failed.
+    PlaylistFailure,
 
     /// A storage error occurred.
     Storage,
@@ -207,6 +226,8 @@ mod tests {
             Request::EffectCommandRead,
             Request::EffectParameterStat,
             Request::EffectParameterRead,
+            Request::GetActivePlaylist,
+            Request::PlaylistStat,
         ] {
             round_trip_request(&request);
         }
@@ -264,6 +285,14 @@ mod tests {
         round_trip_request(&Request::EffectParameterWrite {
             data: chunk(&[9; 16]),
         });
+        round_trip_request(&Request::SetActivePlaylist {
+            path: Some("/playlist.json".try_into().unwrap()),
+        });
+        round_trip_request(&Request::SetActivePlaylist { path: None });
+        round_trip_request(&Request::PlaylistRead {
+            offset: 0,
+            length: 512,
+        });
     }
 
     #[test]
@@ -291,12 +320,19 @@ mod tests {
             "/effects/demo.json".try_into().unwrap(),
         )));
         round_trip_response(&Response::ActiveEffect(None));
+        round_trip_response(&Response::ActivePlaylist(Some(ActivePlaylistInfo::new(
+            "/playlist.json".try_into().unwrap(),
+            Some(2),
+        ))));
+        round_trip_response(&Response::ActivePlaylist(None));
         for error in [
             ApiError::NotFound,
             ApiError::InvalidArgument,
             ApiError::OutOfBounds,
             ApiError::NoActiveEffect,
             ApiError::EffectFailure,
+            ApiError::NoActivePlaylist,
+            ApiError::PlaylistFailure,
             ApiError::Storage,
             ApiError::Internal,
         ] {

@@ -20,6 +20,23 @@ pub fn decode_fixtures(data: &[u8]) -> Result<JsValue, JsError> {
         .map_err(|e| JsError::new(&format!("failed to serialize Fixtures: {e}")))
 }
 
+/// Pure Rust decoding of `EffectPlaylist` from Postcard or JSON.
+pub fn internal_decode_playlist(data: &[u8]) -> Result<bled_core::effect::EffectPlaylist, String> {
+    match bled_core::io::decode_postcard(data) {
+        Ok(p) => Ok(p),
+        Err(_) => bled_core::io::decode_json(data)
+            .map_err(|e| format!("failed to decode EffectPlaylist: {e}")),
+    }
+}
+
+/// Decodes the Postcard payload returned by the playlist RPC into a JS object.
+#[wasm_bindgen]
+pub fn decode_playlist(data: &[u8]) -> Result<JsValue, JsError> {
+    let playlist = internal_decode_playlist(data).map_err(|e| JsError::new(&e))?;
+    serde_wasm_bindgen::to_value(&playlist)
+        .map_err(|e| JsError::new(&format!("failed to serialize EffectPlaylist: {e}")))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,5 +106,42 @@ mod tests {
 
         let decoded = internal_decode_fixtures(&buffer[..len]).unwrap();
         assert_eq!(decoded, fixtures);
+    }
+
+    #[test]
+    fn test_playlist_decoding() {
+        use bled_core::effect::{EffectPlaylist, EffectPlaylistEntry, NextPlaylistEntryAction};
+        use core::time::Duration;
+
+        let json = r#"[
+            { "path": "/effects/a.wasm", "duration": 15000 },
+            { "path": "/effects/b.json", "after": "random" }
+        ]"#;
+
+        let decoded_json = internal_decode_playlist(json.as_bytes()).unwrap();
+        assert_eq!(decoded_json.len(), 2);
+        assert_eq!(decoded_json[0].path().as_str(), "/effects/a.wasm");
+        assert_eq!(
+            *decoded_json[0].duration(),
+            Some(Duration::from_millis(15000))
+        );
+        assert_eq!(*decoded_json[0].after(), NextPlaylistEntryAction::Shift(1));
+        assert_eq!(decoded_json[1].path().as_str(), "/effects/b.json");
+        assert_eq!(*decoded_json[1].duration(), None);
+        assert_eq!(*decoded_json[1].after(), NextPlaylistEntryAction::Random);
+
+        let playlist = EffectPlaylist::new(
+            [EffectPlaylistEntry::new(
+                "/effects/demo.wasm".try_into().unwrap(),
+                Some(Duration::from_millis(5000)),
+                NextPlaylistEntryAction::Shift(1),
+            )]
+            .into(),
+        );
+        let mut buffer = [0u8; 512];
+        let len = bled_core::io::encode_postcard(&playlist, &mut buffer).unwrap();
+
+        let decoded_postcard = internal_decode_playlist(&buffer[..len]).unwrap();
+        assert_eq!(decoded_postcard, playlist);
     }
 }

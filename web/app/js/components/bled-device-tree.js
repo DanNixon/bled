@@ -91,6 +91,12 @@ export class BledDeviceTree extends HTMLElement {
         depth: 1,
         icon: '✨',
       }));
+      children.push(this._node({
+        label: 'Playlist',
+        selection: { deviceId: id, kind: 'playlist' },
+        depth: 1,
+        icon: '☰',
+      }));
 
       for (const fix of fixtures) {
         const fixtureKey = `${deviceKey}:f:${fix.index}`;
