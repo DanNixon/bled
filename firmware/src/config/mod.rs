@@ -20,7 +20,6 @@ use exfat_slim::blocking::error::ExFatError;
 pub(crate) async fn init(sd: &SdCardStorage) {
     device_name::init(sd).await;
     let _ = load_ble_passkey(sd).await;
-    reload_fixtures(sd).await;
 }
 
 #[inline(never)]

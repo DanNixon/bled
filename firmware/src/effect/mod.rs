@@ -6,7 +6,8 @@ mod runtime;
 
 use instance::*;
 pub(crate) use runtime::{
-    activate_effect, active_effect_path, effect_command_size, effect_parameter_size,
-    load_default_effect, read_effect_command, read_effect_parameters, task, unload_active_effect,
-    with_active_effect_manifest, write_effect_command, write_effect_parameters,
+    activate_effect, activate_effect_direct, active_effect_path, effect_command_size,
+    effect_parameter_size, read_effect_command, read_effect_parameters, reload_fixtures, task,
+    unload_active_effect, with_active_effect_manifest, write_effect_command,
+    write_effect_parameters,
 };

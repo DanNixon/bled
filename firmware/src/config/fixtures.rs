@@ -25,7 +25,7 @@ pub(crate) async fn reload_fixtures(sd: &SdCardStorage) {
     crate::leds::reconfigure(&fixtures).await;
     *FIXTURES.lock().await = fixtures;
     if let Some(path) = active_effect
-        && crate::effect::activate_effect(sd, Some(path))
+        && crate::effect::activate_effect_direct(sd, Some(path))
             .await
             .is_err()
     {

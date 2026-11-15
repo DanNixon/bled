@@ -67,7 +67,7 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             Err(error) => Response::Error(error),
         },
         Request::FixturesReload => {
-            crate::config::reload_fixtures(sd).await;
+            effect::reload_fixtures().await;
             Response::Ok
         }
         Request::Commit => {
@@ -116,7 +116,7 @@ async fn handle_request(sd: &SdCardStorage, request: Request) -> Response {
             Err(error) => Response::Error(error),
         },
         Request::GetActiveEffect => Response::ActiveEffect(effect::active_effect_path().await),
-        Request::SetActiveEffect { path } => match effect::activate_effect(sd, path).await {
+        Request::SetActiveEffect { path } => match effect::activate_effect(path).await {
             Ok(()) => Response::Ok,
             Err(()) => Response::Error(ApiError::EffectFailure),
         },

@@ -6,7 +6,10 @@ use bled_core::{
     effect::{EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, abi::export::StepResult},
 };
 use defmt::{debug, error, info, warn};
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
+use embassy_futures::select::{Either, select};
+use embassy_sync::{
+    blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, mutex::Mutex, signal::Signal,
+};
 use embassy_time::{Instant, Timer};
 use portable_atomic::{AtomicU32, Ordering};
 
@@ -18,17 +21,26 @@ struct ActiveEffect {
     instance: EffectInstance,
 }
 
+enum ControlRequest {
+    ActivateEffect(Option<PathString>),
+    ReloadFixtures,
+}
+
 static ACTIVE_EFFECT: Mutex<CriticalSectionRawMutex, Option<ActiveEffect>> = Mutex::new(None);
 static NEXT_INSTANCE_ID: AtomicU32 = AtomicU32::new(0);
 
+static CONTROL_MUTEX: Mutex<CriticalSectionRawMutex, ()> = Mutex::new(());
+static CONTROL_REQUEST: Channel<CriticalSectionRawMutex, ControlRequest, 1> = Channel::new();
+static CONTROL_COMPLETE: Signal<CriticalSectionRawMutex, Result<(), ()>> = Signal::new();
+
 #[inline(never)]
-pub(crate) async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
+async fn load_default_effect(sd: &crate::sdcard::SdCardStorage) {
     let Some(path) = crate::config::load_default_effect_path(sd).await else {
         info!("No default effect configured");
         return;
     };
 
-    if activate_effect(sd, Some(path)).await.is_err() {
+    if activate_effect_direct(sd, Some(path)).await.is_err() {
         warn!("Failed to load configured default effect");
     }
 }
@@ -43,9 +55,25 @@ pub(crate) async fn unload_active_effect() -> Option<PathString> {
         .map(|effect| effect.module_path)
 }
 
+/// Requests the effect task to activate an effect given a path to either a WASM module or JSON preset.
+pub(crate) async fn activate_effect(path: Option<PathString>) -> Result<(), ()> {
+    let _guard = CONTROL_MUTEX.lock().await;
+    CONTROL_REQUEST
+        .send(ControlRequest::ActivateEffect(path))
+        .await;
+    CONTROL_COMPLETE.wait().await
+}
+
+/// Requests the effect task to reload the fixture configuration and active effect from the SD card.
+pub(crate) async fn reload_fixtures() {
+    let _guard = CONTROL_MUTEX.lock().await;
+    CONTROL_REQUEST.send(ControlRequest::ReloadFixtures).await;
+    let _ = CONTROL_COMPLETE.wait().await;
+}
+
 /// Activates an effect given a path to either a WASM module or JSON preset.
 #[inline(never)]
-pub(crate) async fn activate_effect(
+pub(crate) async fn activate_effect_direct(
     sd: &crate::sdcard::SdCardStorage,
     path: Option<PathString>,
 ) -> Result<(), ()> {
@@ -278,11 +306,29 @@ async fn with_active_effect<T>(
     })
 }
 
+async fn handle_control_request(sd: &crate::sdcard::SdCardStorage, request: ControlRequest) {
+    let result = match request {
+        ControlRequest::ActivateEffect(path) => activate_effect_direct(sd, path).await,
+        ControlRequest::ReloadFixtures => {
+            crate::config::reload_fixtures(sd).await;
+            Ok(())
+        }
+    };
+    CONTROL_COMPLETE.signal(result);
+}
+
 #[embassy_executor::task]
-pub(crate) async fn task() -> ! {
+pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
+    crate::config::reload_fixtures(&sd).await;
+    load_default_effect(&sd).await;
+
     let start = Instant::now();
 
     loop {
+        while let Ok(request) = CONTROL_REQUEST.try_receive() {
+            handle_control_request(&sd, request).await;
+        }
+
         let now = Instant::now();
         let elapsed_ms = now.duration_since(start).as_millis().min(i32::MAX as u64) as i32;
 
@@ -372,6 +418,10 @@ pub(crate) async fn task() -> ! {
 
         drop(active_effect);
 
-        Timer::after_millis(delay_ms).await;
+        if let Either::First(request) =
+            select(CONTROL_REQUEST.receive(), Timer::after_millis(delay_ms)).await
+        {
+            handle_control_request(&sd, request).await;
+        }
     }
 }
