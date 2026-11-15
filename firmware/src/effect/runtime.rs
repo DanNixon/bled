@@ -87,21 +87,23 @@ async fn load_effect_preset(
     sd: &crate::sdcard::SdCardStorage,
     preset_path: &str,
 ) -> Result<EffectInstance, ()> {
-    let mut buf = [0; MAX_EFFECT_PRESET_JSON_SIZE];
-    let len = match sd.read_file(preset_path, &mut buf).await {
-        Ok(len) => len,
-        Err(e) => {
-            warn!("Failed to read effect JSON preset: {}", e);
-            return Err(());
-        }
-    };
-    let preset_bytes = &buf[..len];
+    let preset = {
+        let mut buf = [0; MAX_EFFECT_PRESET_JSON_SIZE];
+        let len = match sd.read_file(preset_path, &mut buf).await {
+            Ok(len) => len,
+            Err(e) => {
+                warn!("Failed to read effect JSON preset: {}", e);
+                return Err(());
+            }
+        };
+        let preset_bytes = &buf[..len];
 
-    let preset = match bled_core::io::decode_json::<EffectPreset>(preset_bytes) {
-        Ok(preset) => preset,
-        Err(e) => {
-            warn!("Failed to parse effect JSON preset: {}", e);
-            return Err(());
+        match bled_core::io::decode_json::<EffectPreset>(preset_bytes) {
+            Ok(preset) => preset,
+            Err(e) => {
+                warn!("Failed to parse effect JSON preset: {}", e);
+                return Err(());
+            }
         }
     };
 
