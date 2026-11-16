@@ -182,7 +182,7 @@ async fn remove_failed_playlist_entry(index: usize) -> Option<usize> {
     let removed = active.playlist.remove(index);
     let after_action = *removed.after();
     let remaining_len = active.playlist.len();
-    match after_action.resolve_index_after_removal(index, remaining_len, random_u64) {
+    match after_action.resolve_index_after_removal(index, remaining_len, RoscRng.next_u64()) {
         Some(next) => Some(next),
         None => {
             info!("Playlist is now empty after removing failed entry, unloading playlist");
@@ -228,17 +228,13 @@ async fn advance_playlist(sd: &crate::sdcard::SdCardStorage) {
             return;
         };
         let action: NextPlaylistEntryAction = *entry.after();
-        match action.resolve_index(current_index, active.playlist.len(), random_u64) {
+        match action.resolve_index(current_index, active.playlist.len(), RoscRng.next_u64()) {
             Some(next) => next,
             None => return,
         }
     };
 
     load_playlist_entry_at(sd, next_index).await;
-}
-
-fn random_u64() -> u64 {
-    RoscRng.next_u64()
 }
 
 /// Checks if the current playlist entry's duration has elapsed, and if so, advances to the next entry.
