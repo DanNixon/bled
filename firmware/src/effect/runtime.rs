@@ -125,15 +125,10 @@ async fn load_playlist_entry_at(sd: &crate::sdcard::SdCardStorage, mut target_in
             }
             let index = target_index % active.playlist.len();
             let entry = &active.playlist[index];
-            (
-                index,
-                active.path.clone(),
-                entry.path().clone(),
-                *entry.after(),
-            )
+            (index, active.path.clone(), entry.path().clone())
         };
 
-        let (index, playlist_path, entry_path, after_action) = candidate;
+        let (index, playlist_path, entry_path) = candidate;
 
         let resolved_res = resolve_relative_path(playlist_path.as_str(), entry_path.as_str());
         let load_ok = match resolved_res {
@@ -161,28 +156,55 @@ async fn load_playlist_entry_at(sd: &crate::sdcard::SdCardStorage, mut target_in
             entry_path.as_str()
         );
 
-        let next_index = {
-            let mut guard = ACTIVE_PLAYLIST.lock().await;
-            let Some(active) = guard.as_mut() else {
-                return;
-            };
-            if index < active.playlist.len() {
-                active.playlist.remove(index);
-            }
-            let remaining_len = active.playlist.len();
-            match after_action.resolve_index_after_removal(index, remaining_len, random_u64) {
-                Some(next) => next,
-                None => {
-                    info!("Playlist is now empty after removing failed entry, unloading playlist");
-                    *guard = None;
-                    drop(guard);
-                    *ACTIVE_EFFECT.lock().await = None;
-                    return;
-                }
-            }
+        let Some(next_index) = remove_failed_playlist_entry(index).await else {
+            return;
         };
 
         target_index = next_index;
+    }
+}
+
+/// Removes the entry at `index` from the active playlist and resolves the next entry index.
+///
+/// If the playlist becomes empty, the active playlist and active effect are unloaded and
+/// `None` is returned.
+async fn remove_failed_playlist_entry(index: usize) -> Option<usize> {
+    let mut guard = ACTIVE_PLAYLIST.lock().await;
+    let active = guard.as_mut()?;
+    if index >= active.playlist.len() {
+        return None;
+    }
+    let removed = active.playlist.remove(index);
+    let after_action = *removed.after();
+    let remaining_len = active.playlist.len();
+    match after_action.resolve_index_after_removal(index, remaining_len, random_u64) {
+        Some(next) => Some(next),
+        None => {
+            info!("Playlist is now empty after removing failed entry, unloading playlist");
+            *guard = None;
+            drop(guard);
+            *ACTIVE_EFFECT.lock().await = None;
+            None
+        }
+    }
+}
+
+/// Removes the currently active playlist entry after a runtime failure and advances to the next entry.
+#[inline(never)]
+async fn handle_playlist_entry_failure(sd: &crate::sdcard::SdCardStorage) {
+    let current_index = {
+        let guard = ACTIVE_PLAYLIST.lock().await;
+        guard.as_ref().and_then(|active| active.position)
+    };
+    let Some(index) = current_index else {
+        return;
+    };
+    warn!(
+        "Active playlist entry {} failed, removing from playlist",
+        index
+    );
+    if let Some(next_index) = remove_failed_playlist_entry(index).await {
+        load_playlist_entry_at(sd, next_index).await;
     }
 }
 
@@ -660,7 +682,7 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
         drop(active_effect);
 
         if step_failed {
-            advance_playlist(&sd).await;
+            handle_playlist_entry_failure(&sd).await;
             continue;
         }
 
