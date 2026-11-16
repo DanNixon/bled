@@ -60,11 +60,10 @@ async fn load_with_buf<T: ConfigFile<N>, const N: usize>(
         }
     }
 
-    let default = T::default_value();
-    if let Ok(len) = default.encode(bytes) {
+    if let Ok(len) = T::default_value().encode(bytes) {
         let _ = sd.write_file(T::PATH, &bytes[..len]).await;
     }
-    default
+    T::default_value()
 }
 
 trait ConfigFile<const MAX_SIZE: usize>: Sized {

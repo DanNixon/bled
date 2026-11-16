@@ -1,8 +1,7 @@
 use crate::PathString;
-use core::time::Duration;
+use core::{ops::Deref, time::Duration};
 use getset::Getters;
 use heapless::Vec;
-use nutype::nutype;
 use serde::{Deserialize, Serialize};
 
 /// Maximum number of entries in an effect playlist.
@@ -15,25 +14,38 @@ pub const MAX_PLAYLIST_JSON_SIZE: usize = 1024 * 4;
 pub const MAX_PLAYLIST_POSTCARD_SIZE: usize = 1024 * 2;
 
 /// A playlist of multiple effects
-#[nutype(
-    default = Vec::new(),
-    derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize, AsRef, Deref),
-    cfg_attr(feature = "defmt", derive_unchecked(defmt::Format))
-)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct EffectPlaylist(Vec<EffectPlaylistEntry, MAX_PLAYLIST_ENTRIES>);
 
 impl EffectPlaylist {
     #[must_use]
+    pub const fn new(entries: Vec<EffectPlaylistEntry, MAX_PLAYLIST_ENTRIES>) -> Self {
+        Self(entries)
+    }
+
+    #[must_use]
     pub fn as_slice(&self) -> &[EffectPlaylistEntry] {
-        self.as_ref().as_slice()
+        self.0.as_slice()
     }
 
     /// Removes the entry at `index` from the playlist.
     pub fn remove(&mut self, index: usize) -> EffectPlaylistEntry {
-        let mut entries = core::mem::take(self).into_inner();
-        let removed = entries.remove(index);
-        *self = Self::new(entries);
-        removed
+        self.0.remove(index)
+    }
+}
+
+impl Deref for EffectPlaylist {
+    type Target = [EffectPlaylistEntry];
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_slice()
+    }
+}
+
+impl AsRef<[EffectPlaylistEntry]> for EffectPlaylist {
+    fn as_ref(&self) -> &[EffectPlaylistEntry] {
+        self.0.as_slice()
     }
 }
 
