@@ -30,6 +30,7 @@ pub(crate) async fn reload_fixtures(sd: &SdCardStorage) {
             .is_err()
     {
         warn!("Failed to reload active effect after fixture reload");
+        crate::effect::handle_playlist_entry_failure(sd).await;
     }
 }
 
