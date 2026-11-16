@@ -7,6 +7,7 @@ use bled_core::{
         EffectPlaylist, EffectPreset, MAX_EFFECT_PRESET_JSON_SIZE, NextPlaylistEntryAction,
         abi::export::StepResult,
     },
+    util::{has_extension, resolve_relative_path},
 };
 use defmt::{debug, error, info, warn};
 use embassy_futures::select::{Either, select};
@@ -140,7 +141,7 @@ async fn load_playlist_entry_at(sd: &crate::sdcard::SdCardStorage, mut target_in
             Ok(resolved_path) => activate_effect_direct(sd, Some(resolved_path))
                 .await
                 .is_ok(),
-            Err(()) => {
+            Err(_) => {
                 warn!("Playlist entry path '{}' is too long", entry_path.as_str());
                 false
             }
@@ -341,11 +342,6 @@ pub(crate) async fn activate_effect_direct(
     Ok(())
 }
 
-fn has_extension(path: &str, ext: &str) -> bool {
-    path.rsplit_once('.')
-        .is_some_and(|(_, suffix)| suffix.eq_ignore_ascii_case(ext))
-}
-
 #[inline(never)]
 async fn load_effect_preset(
     sd: &crate::sdcard::SdCardStorage,
@@ -373,7 +369,7 @@ async fn load_effect_preset(
 
     let module_path = match resolve_relative_path(preset_path, preset.module().as_str()) {
         Ok(path) => path,
-        Err(()) => {
+        Err(_) => {
             warn!("Effect JSON preset module path is too long");
             return Err(());
         }
@@ -400,21 +396,6 @@ async fn load_effect_preset(
     }
 
     Ok(instance)
-}
-
-fn resolve_relative_path(base_file_path: &str, target_path: &str) -> Result<PathString, ()> {
-    let mut resolved = PathString::new();
-    if target_path.starts_with('/') {
-        resolved.push_str(target_path).map_err(|_| ())?;
-    } else {
-        if let Some(parent_end) = base_file_path.rfind('/') {
-            resolved
-                .push_str(&base_file_path[..=parent_end])
-                .map_err(|_| ())?;
-        }
-        resolved.push_str(target_path).map_err(|_| ())?;
-    }
-    Ok(resolved)
 }
 
 #[inline(never)]
