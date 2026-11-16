@@ -538,10 +538,108 @@ async fn with_active_effect<T>(
     })
 }
 
+const DEFAULT_STEP_TIME: u64 = 100;
+
+/// Steps the active effect, renders changed pixels to LEDs, and returns the delay in
+/// milliseconds until the next step.
+///
+/// If the active effect fails at any point, it is unloaded and `Err(())` is returned.
+async fn step_active_effect(elapsed_ms: i32) -> Result<u64, ()> {
+    let mut active_effect = ACTIVE_EFFECT.lock().await;
+    let Some(effect) = active_effect.as_mut() else {
+        return Ok(DEFAULT_STEP_TIME);
+    };
+
+    debug!("Stepping effect");
+    match effect.instance.step(elapsed_ms) {
+        Ok(StepResult::Changed) => {
+            debug!("Pixels changed after step, rendering");
+
+            let mut channel_data = crate::leds::data().await;
+            match effect.instance.frame_size() {
+                Ok(guest_buffer_len) if guest_buffer_len == channel_data.len() => {
+                    match effect.instance.read_frame_data(channel_data.inner_mut()) {
+                        Ok(read_len) if read_len == channel_data.len() => {
+                            drop(channel_data);
+                            crate::leds::draw().await;
+                        }
+                        Ok(read_len) => {
+                            warn!(
+                                "Effect returned an incomplete frame: guest={} host={}",
+                                read_len,
+                                channel_data.len()
+                            );
+                            *active_effect = None;
+                            return Err(());
+                        }
+                        Err(error) => {
+                            warn!(
+                                "Failed to read effect frame: {}",
+                                defmt::Debug2Format(&error)
+                            );
+                            *active_effect = None;
+                            return Err(());
+                        }
+                    }
+                }
+                Ok(guest_buffer_len) => {
+                    warn!(
+                        "Invalid effect frame length: guest={} host={}",
+                        guest_buffer_len,
+                        channel_data.len()
+                    );
+                    *active_effect = None;
+                    return Err(());
+                }
+                Err(error) => {
+                    warn!(
+                        "Failed to read effect frame length: {}",
+                        defmt::Debug2Format(&error)
+                    );
+                    *active_effect = None;
+                    return Err(());
+                }
+            }
+        }
+        Ok(StepResult::Unchanged) => {
+            debug!("Pixels unchanged after step");
+        }
+        Ok(StepResult::Error) => {
+            warn!("Active effect reported an error while stepping");
+            *active_effect = None;
+            return Err(());
+        }
+        Err(error) => {
+            warn!(
+                "Active effect failed while stepping: {}",
+                defmt::Debug2Format(&error)
+            );
+            *active_effect = None;
+            return Err(());
+        }
+    }
+
+    match effect.instance.step_time() {
+        Ok(time_to_next) => Ok(time_to_next as u64),
+        Err(error) => {
+            warn!(
+                "Active effect failed while reading its step time: {}",
+                defmt::Debug2Format(&error)
+            );
+            *active_effect = None;
+            Err(())
+        }
+    }
+}
+
+async fn unload_active_playlist() {
+    *ACTIVE_PLAYLIST.lock().await = None;
+}
+
 async fn handle_control_request(sd: &crate::sdcard::SdCardStorage, request: ControlRequest) {
     let result = match request {
         ControlRequest::ActivateEffect(path) => {
-            *ACTIVE_PLAYLIST.lock().await = None;
+            unload_active_playlist().await;
             activate_effect_direct(sd, path).await
         }
         ControlRequest::ActivatePlaylist(path) => activate_playlist_direct(sd, path).await,
@@ -570,103 +668,10 @@ pub(crate) async fn task(sd: crate::sdcard::SdCardStorage) -> ! {
         let now = Instant::now();
         let elapsed_ms = now.duration_since(start).as_millis().min(i32::MAX as u64) as i32;
 
-        let mut step_failed = false;
-        let mut active_effect = ACTIVE_EFFECT.lock().await;
-
-        if let Some(effect) = active_effect.as_mut() {
-            debug!("Stepping effect");
-            match effect.instance.step(elapsed_ms) {
-                Ok(StepResult::Changed) => {
-                    debug!("Pixels changed after step, rendering");
-
-                    let mut channel_data = crate::leds::data().await;
-                    match effect.instance.frame_size() {
-                        Ok(guest_buffer_len) if guest_buffer_len == channel_data.len() => {
-                            match effect.instance.read_frame_data(channel_data.inner_mut()) {
-                                Ok(read_len) if read_len == channel_data.len() => {
-                                    drop(channel_data);
-                                    crate::leds::draw().await;
-                                }
-                                Ok(read_len) => {
-                                    warn!(
-                                        "Effect returned an incomplete frame: guest={} host={}",
-                                        read_len,
-                                        channel_data.len()
-                                    );
-                                    *active_effect = None;
-                                    step_failed = true;
-                                }
-                                Err(error) => {
-                                    warn!(
-                                        "Failed to read effect frame: {}",
-                                        defmt::Debug2Format(&error)
-                                    );
-                                    *active_effect = None;
-                                    step_failed = true;
-                                }
-                            }
-                        }
-                        Ok(guest_buffer_len) => {
-                            warn!(
-                                "Invalid effect frame length: guest={} host={}",
-                                guest_buffer_len,
-                                channel_data.len()
-                            );
-                            *active_effect = None;
-                            step_failed = true;
-                        }
-                        Err(error) => {
-                            warn!(
-                                "Failed to read effect frame length: {}",
-                                defmt::Debug2Format(&error)
-                            );
-                            *active_effect = None;
-                            step_failed = true;
-                        }
-                    }
-                }
-                Ok(StepResult::Unchanged) => {
-                    debug!("Pixels unchanged after step");
-                }
-                Ok(StepResult::Error) => {
-                    warn!("Active effect reported an error while stepping");
-                    *active_effect = None;
-                    step_failed = true;
-                }
-                Err(error) => {
-                    warn!(
-                        "Active effect failed while stepping: {}",
-                        defmt::Debug2Format(&error)
-                    );
-                    *active_effect = None;
-                    step_failed = true;
-                }
-            }
-        }
-
-        const DEFAULT_STEP_TIME: u64 = 100;
-        let mut delay_ms = match active_effect.as_mut() {
-            Some(effect) => match effect.instance.step_time() {
-                Ok(time_to_next) => time_to_next as u64,
-                Err(error) => {
-                    warn!(
-                        "Active effect failed while reading its step time: {}",
-                        defmt::Debug2Format(&error)
-                    );
-                    *active_effect = None;
-                    step_failed = true;
-                    DEFAULT_STEP_TIME
-                }
-            },
-            None => DEFAULT_STEP_TIME,
-        };
-
-        drop(active_effect);
-
-        if step_failed {
+        let Ok(mut delay_ms) = step_active_effect(elapsed_ms).await else {
             handle_playlist_entry_failure(&sd).await;
             continue;
-        }
+        };
 
         if let Some(remaining_ms) = playlist_remaining_ms(Instant::now()).await {
             delay_ms = delay_ms.min(remaining_ms);
