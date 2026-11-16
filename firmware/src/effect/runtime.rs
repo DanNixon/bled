@@ -48,11 +48,18 @@ static CONTROL_COMPLETE: Signal<CriticalSectionRawMutex, Result<(), ()>> = Signa
 
 #[inline(never)]
 async fn load_default_playlist(sd: &crate::sdcard::SdCardStorage) {
-    let playlist = crate::config::load_default_playlist(sd).await;
     let Ok(path) = PathString::try_from(crate::config::DEFAULT_PLAYLIST_PATH) else {
         return;
     };
-    start_playlist(sd, path, playlist).await;
+    *ACTIVE_EFFECT.lock().await = None;
+    let has_entries = {
+        let mut guard = ACTIVE_PLAYLIST.lock().await;
+        let playlist = crate::config::load_default_playlist(sd).await;
+        set_active_playlist(&mut guard, path, playlist)
+    };
+    if has_entries {
+        load_playlist_entry_at(sd, 0).await;
+    }
 }
 
 #[inline(never)]
@@ -66,42 +73,40 @@ async fn activate_playlist_direct(
         return Ok(());
     };
 
-    let playlist = crate::config::load_playlist_from_path(sd, path.as_str()).await?;
-    start_playlist(sd, path, playlist).await;
+    let has_entries = {
+        let mut guard = ACTIVE_PLAYLIST.lock().await;
+        let playlist = crate::config::load_playlist_from_path(sd, path.as_str()).await?;
+        set_active_playlist(&mut guard, path, playlist)
+    };
+    *ACTIVE_EFFECT.lock().await = None;
+    if has_entries {
+        load_playlist_entry_at(sd, 0).await;
+    }
     Ok(())
 }
 
-#[inline(never)]
-async fn start_playlist(
-    sd: &crate::sdcard::SdCardStorage,
+fn set_active_playlist(
+    active_playlist: &mut Option<ActivePlaylist>,
     path: PathString,
     playlist: EffectPlaylist,
-) {
-    *ACTIVE_EFFECT.lock().await = None;
-
-    if playlist.is_empty() {
+) -> bool {
+    let has_entries = !playlist.is_empty();
+    if has_entries {
+        info!(
+            "Loaded playlist '{}' with {} entries",
+            path.as_str(),
+            playlist.len()
+        );
+    } else {
         info!("Loaded empty playlist: {}", path.as_str());
-        *ACTIVE_PLAYLIST.lock().await = Some(ActivePlaylist {
-            path,
-            playlist,
-            position: None,
-            entry_started_at: Instant::now(),
-        });
-        return;
     }
-
-    info!(
-        "Loaded playlist '{}' with {} entries",
-        path.as_str(),
-        playlist.len()
-    );
-    *ACTIVE_PLAYLIST.lock().await = Some(ActivePlaylist {
+    *active_playlist = Some(ActivePlaylist {
         path,
         playlist,
         position: None,
         entry_started_at: Instant::now(),
     });
-    load_playlist_entry_at(sd, 0).await;
+    has_entries
 }
 
 /// Attempts to load the playlist entry at `target_index`.
