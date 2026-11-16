@@ -191,7 +191,7 @@ async fn remove_failed_playlist_entry(index: usize) -> Option<usize> {
 
 /// Removes the currently active playlist entry after a runtime failure and advances to the next entry.
 #[inline(never)]
-async fn handle_playlist_entry_failure(sd: &crate::sdcard::SdCardStorage) {
+pub(crate) async fn handle_playlist_entry_failure(sd: &crate::sdcard::SdCardStorage) {
     let current_index = {
         let guard = ACTIVE_PLAYLIST.lock().await;
         guard.as_ref().and_then(|active| active.position)
