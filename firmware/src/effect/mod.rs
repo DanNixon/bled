@@ -3,6 +3,7 @@
 
 mod active;
 mod instance;
+mod playlist;
 mod runtime;
 
 pub(crate) use active::{
@@ -11,7 +12,7 @@ pub(crate) use active::{
     write_effect_command, write_effect_parameters,
 };
 use instance::*;
-pub(crate) use runtime::{
-    activate_effect, activate_playlist, active_playlist_info, handle_playlist_entry_failure,
-    reload_fixtures, task, with_active_playlist,
+pub(crate) use playlist::{
+    active_playlist_info, handle_playlist_entry_failure, with_active_playlist,
 };
+pub(crate) use runtime::{activate_effect, activate_playlist, reload_fixtures, task};
