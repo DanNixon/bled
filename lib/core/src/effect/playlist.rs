@@ -98,12 +98,7 @@ impl NextPlaylistEntryAction {
     ///
     /// Returns `None` if `len == 0`.
     #[must_use]
-    pub fn resolve_index(
-        &self,
-        current_index: usize,
-        len: usize,
-        random_u64: impl FnOnce() -> u64,
-    ) -> Option<usize> {
+    pub fn resolve_index(&self, current_index: usize, len: usize, random: u64) -> Option<usize> {
         if len == 0 {
             return None;
         }
@@ -114,7 +109,7 @@ impl NextPlaylistEntryAction {
                 let next = (current_i + offset as isize).rem_euclid(len_i);
                 Some(next as usize)
             }
-            Self::Random => Some((random_u64() % (len as u64)) as usize),
+            Self::Random => Some((random % (len as u64)) as usize),
         }
     }
 
@@ -132,7 +127,7 @@ impl NextPlaylistEntryAction {
         &self,
         removed_index: usize,
         remaining_len: usize,
-        random_u64: impl FnOnce() -> u64,
+        random: u64,
     ) -> Option<usize> {
         if remaining_len == 0 {
             return None;
@@ -149,7 +144,7 @@ impl NextPlaylistEntryAction {
                 let next = (base_i + adjusted_offset).rem_euclid(len_i);
                 Some(next as usize)
             }
-            Self::Random => Some((random_u64() % (remaining_len as u64)) as usize),
+            Self::Random => Some((random % (remaining_len as u64)) as usize),
         }
     }
 }
@@ -268,17 +263,17 @@ mod tests {
     #[test]
     fn shift_wraps_around() {
         let shift_next = NextPlaylistEntryAction::Shift(1);
-        assert_eq!(shift_next.resolve_index(0, 3, || 0), Some(1));
-        assert_eq!(shift_next.resolve_index(2, 3, || 0), Some(0));
+        assert_eq!(shift_next.resolve_index(0, 3, 0), Some(1));
+        assert_eq!(shift_next.resolve_index(2, 3, 0), Some(0));
 
         let shift_prev = NextPlaylistEntryAction::Shift(-1);
-        assert_eq!(shift_prev.resolve_index(0, 3, || 0), Some(2));
-        assert_eq!(shift_prev.resolve_index(2, 3, || 0), Some(1));
+        assert_eq!(shift_prev.resolve_index(0, 3, 0), Some(2));
+        assert_eq!(shift_prev.resolve_index(2, 3, 0), Some(1));
 
         let shift_stay = NextPlaylistEntryAction::Shift(0);
-        assert_eq!(shift_stay.resolve_index(1, 3, || 0), Some(1));
+        assert_eq!(shift_stay.resolve_index(1, 3, 0), Some(1));
 
-        assert_eq!(shift_next.resolve_index(0, 0, || 0), None);
+        assert_eq!(shift_next.resolve_index(0, 0, 0), None);
     }
 
     #[test]
@@ -286,29 +281,29 @@ mod tests {
         // Playlist [A, B, C] (len 3). Remove A at index 0 -> [B, C] (len 2).
         // Shift(1) should advance to B (now at index 0).
         let shift_next = NextPlaylistEntryAction::Shift(1);
-        assert_eq!(shift_next.resolve_index_after_removal(0, 2, || 0), Some(0));
+        assert_eq!(shift_next.resolve_index_after_removal(0, 2, 0), Some(0));
 
         // Remove C at index 2 -> [A, B] (len 2).
         // Shift(1) should wrap around to A (index 0).
-        assert_eq!(shift_next.resolve_index_after_removal(2, 2, || 0), Some(0));
+        assert_eq!(shift_next.resolve_index_after_removal(2, 2, 0), Some(0));
 
         // Remove B at index 1 -> [A, C] (len 2).
         // Shift(-1) should move back to A (index 0).
         let shift_prev = NextPlaylistEntryAction::Shift(-1);
-        assert_eq!(shift_prev.resolve_index_after_removal(1, 2, || 0), Some(0));
+        assert_eq!(shift_prev.resolve_index_after_removal(1, 2, 0), Some(0));
 
         // Remove A at index 0 -> [B, C] (len 2).
         // Shift(-1) should wrap around to C (index 1).
-        assert_eq!(shift_prev.resolve_index_after_removal(0, 2, || 0), Some(1));
+        assert_eq!(shift_prev.resolve_index_after_removal(0, 2, 0), Some(1));
 
-        assert_eq!(shift_next.resolve_index_after_removal(0, 0, || 0), None);
+        assert_eq!(shift_next.resolve_index_after_removal(0, 0, 0), None);
     }
 
     #[test]
     fn random_selects_within_bounds() {
         let random = NextPlaylistEntryAction::Random;
-        assert_eq!(random.resolve_index(0, 4, || 7), Some(3));
-        assert_eq!(random.resolve_index_after_removal(0, 4, || 6), Some(2));
-        assert_eq!(random.resolve_index(0, 0, || 7), None);
+        assert_eq!(random.resolve_index(0, 4, 7), Some(3));
+        assert_eq!(random.resolve_index_after_removal(0, 4, 6), Some(2));
+        assert_eq!(random.resolve_index(0, 0, 7), None);
     }
 }
