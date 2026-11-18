@@ -212,6 +212,7 @@ dependencies = [
  "num_enum",
  "nutype",
  "postcard",
+ "rand",
  "rgb",
  "serde",
  "serde-json-core",

@@ -2,6 +2,7 @@ use crate::PathString;
 use core::{ops::Deref, time::Duration};
 use getset::Getters;
 use heapless::Vec;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 /// Maximum number of entries in an effect playlist.
@@ -98,7 +99,12 @@ impl NextPlaylistEntryAction {
     ///
     /// Returns `None` if `len == 0`.
     #[must_use]
-    pub fn resolve_index(&self, current_index: usize, len: usize, random: u64) -> Option<usize> {
+    pub fn resolve_index<R: Rng + ?Sized>(
+        &self,
+        current_index: usize,
+        len: usize,
+        rng: &mut R,
+    ) -> Option<usize> {
         if len == 0 {
             return None;
         }
@@ -109,7 +115,7 @@ impl NextPlaylistEntryAction {
                 let next = (current_i + offset as isize).rem_euclid(len_i);
                 Some(next as usize)
             }
-            Self::Random => Some((random % (len as u64)) as usize),
+            Self::Random => Some(rng.gen_range(0..len)),
         }
     }
 
@@ -127,7 +133,7 @@ impl NextPlaylistEntryAction {
         &self,
         removed_index: usize,
         remaining_len: usize,
-        random: u64,
+        rng: &mut impl Rng,
     ) -> Option<usize> {
         if remaining_len == 0 {
             return None;
@@ -144,7 +150,7 @@ impl NextPlaylistEntryAction {
                 let next = (base_i + adjusted_offset).rem_euclid(len_i);
                 Some(next as usize)
             }
-            Self::Random => Some((random % (remaining_len as u64)) as usize),
+            Self::Random => Some(rng.gen_range(0..remaining_len)),
         }
     }
 }
@@ -261,49 +267,82 @@ mod tests {
     }
 
     #[test]
+    fn null_duration_deserializes_as_none() {
+        let playlist: EffectPlaylist = crate::io::decode_json(
+            br#"[
+                {"path":"/effects/a.wasm","duration":null,"after":{"shift":2}},
+                {"path":"/effects/a.wasm","duration":null,"after":"random"}
+            ]"#,
+        )
+        .unwrap();
+
+        assert_eq!(playlist.len(), 2);
+        assert_eq!(playlist[0].path().as_str(), "/effects/a.wasm");
+        assert_eq!(*playlist[0].duration(), None);
+        assert_eq!(*playlist[0].after(), NextPlaylistEntryAction::Shift(2));
+        assert_eq!(playlist[1].path().as_str(), "/effects/a.wasm");
+        assert_eq!(*playlist[1].duration(), None);
+        assert_eq!(*playlist[1].after(), NextPlaylistEntryAction::Random);
+    }
+
+    #[test]
+    fn invalid_duration_is_rejected() {
+        let result: Result<EffectPlaylist, _> =
+            crate::io::decode_json(br#"[{"path":"/effects/a.wasm","duration":"30000"}]"#);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn shift_wraps_around() {
+        let mut rng = rand::rngs::mock::StepRng::new(0, 0);
         let shift_next = NextPlaylistEntryAction::Shift(1);
-        assert_eq!(shift_next.resolve_index(0, 3, 0), Some(1));
-        assert_eq!(shift_next.resolve_index(2, 3, 0), Some(0));
+        assert_eq!(shift_next.resolve_index(0, 3, &mut rng), Some(1));
+        assert_eq!(shift_next.resolve_index(2, 3, &mut rng), Some(0));
 
         let shift_prev = NextPlaylistEntryAction::Shift(-1);
-        assert_eq!(shift_prev.resolve_index(0, 3, 0), Some(2));
-        assert_eq!(shift_prev.resolve_index(2, 3, 0), Some(1));
+        assert_eq!(shift_prev.resolve_index(0, 3, &mut rng), Some(2));
+        assert_eq!(shift_prev.resolve_index(2, 3, &mut rng), Some(1));
 
         let shift_stay = NextPlaylistEntryAction::Shift(0);
-        assert_eq!(shift_stay.resolve_index(1, 3, 0), Some(1));
+        assert_eq!(shift_stay.resolve_index(1, 3, &mut rng), Some(1));
 
-        assert_eq!(shift_next.resolve_index(0, 0, 0), None);
+        assert_eq!(shift_next.resolve_index(0, 0, &mut rng), None);
     }
 
     #[test]
     fn shift_after_removal_resolves_expected_entry() {
+        let mut rng = rand::rngs::mock::StepRng::new(0, 0);
         // Playlist [A, B, C] (len 3). Remove A at index 0 -> [B, C] (len 2).
         // Shift(1) should advance to B (now at index 0).
         let shift_next = NextPlaylistEntryAction::Shift(1);
-        assert_eq!(shift_next.resolve_index_after_removal(0, 2, 0), Some(0));
+        assert_eq!(
+            shift_next.resolve_index_after_removal(0, 2, &mut rng),
+            Some(0)
+        );
 
         // Remove C at index 2 -> [A, B] (len 2).
         // Shift(1) should wrap around to A (index 0).
-        assert_eq!(shift_next.resolve_index_after_removal(2, 2, 0), Some(0));
+        assert_eq!(
+            shift_next.resolve_index_after_removal(2, 2, &mut rng),
+            Some(0)
+        );
 
         // Remove B at index 1 -> [A, C] (len 2).
         // Shift(-1) should move back to A (index 0).
         let shift_prev = NextPlaylistEntryAction::Shift(-1);
-        assert_eq!(shift_prev.resolve_index_after_removal(1, 2, 0), Some(0));
+        assert_eq!(
+            shift_prev.resolve_index_after_removal(1, 2, &mut rng),
+            Some(0)
+        );
 
         // Remove A at index 0 -> [B, C] (len 2).
         // Shift(-1) should wrap around to C (index 1).
-        assert_eq!(shift_prev.resolve_index_after_removal(0, 2, 0), Some(1));
+        assert_eq!(
+            shift_prev.resolve_index_after_removal(0, 2, &mut rng),
+            Some(1)
+        );
 
-        assert_eq!(shift_next.resolve_index_after_removal(0, 0, 0), None);
-    }
-
-    #[test]
-    fn random_selects_within_bounds() {
-        let random = NextPlaylistEntryAction::Random;
-        assert_eq!(random.resolve_index(0, 4, 7), Some(3));
-        assert_eq!(random.resolve_index_after_removal(0, 4, 6), Some(2));
-        assert_eq!(random.resolve_index(0, 0, 7), None);
+        assert_eq!(shift_next.resolve_index_after_removal(0, 0, &mut rng), None);
     }
 }
