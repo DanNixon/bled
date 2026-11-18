@@ -159,7 +159,8 @@ async fn remove_failed_playlist_entry(index: usize) -> Option<usize> {
     let removed = active.playlist.remove(index);
     let after_action = *removed.after();
     let remaining_len = active.playlist.len();
-    match after_action.resolve_index_after_removal(index, remaining_len, RoscRng.next_u64()) {
+    let mut rng = RoscRng;
+    match after_action.resolve_index_after_removal(index, remaining_len, &mut rng) {
         Some(next) => Some(next),
         None => {
             info!("Playlist is now empty after removing failed entry, unloading playlist");
@@ -205,7 +206,8 @@ async fn advance_playlist(sd: &crate::sdcard::SdCardStorage) {
             return;
         };
         let action: NextPlaylistEntryAction = *entry.after();
-        match action.resolve_index(current_index, active.playlist.len(), RoscRng.next_u64()) {
+        let mut rng = RoscRng;
+        match action.resolve_index(current_index, active.playlist.len(), &mut rng) {
             Some(next) => next,
             None => return,
         }
