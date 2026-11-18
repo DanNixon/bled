@@ -6,3 +6,4 @@ pub mod file_staging;
 pub mod header;
 pub mod led_pixels;
 pub mod main_panel;
+pub mod playlist;

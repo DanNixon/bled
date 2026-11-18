@@ -20,11 +20,13 @@ pub fn EffectPanel(dev: ConnectedDevice) -> impl IntoView {
     Effect::watch(
         {
             let dev = dev.clone();
-            move || (
-                dev.active_effect_path.get(),
-                dev.effect_command_bytes.get(),
-                dev.effect_param_bytes.get(),
-            )
+            move || {
+                (
+                    dev.active_effect_path.get(),
+                    dev.effect_command_bytes.get(),
+                    dev.effect_param_bytes.get(),
+                )
+            }
         },
         move |(path, cmd_bytes, param_bytes), _, _| {
             path_sig.set(path.clone());

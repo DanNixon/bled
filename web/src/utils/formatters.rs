@@ -106,7 +106,9 @@ pub fn render_hex_dump(bytes: &[u8], max_bytes: usize) -> String {
         ));
     }
     if truncated > 0 {
-        out.push_str(&format!("... ({truncated} more bytes truncated in preview)"));
+        out.push_str(&format!(
+            "... ({truncated} more bytes truncated in preview)"
+        ));
     }
     out
 }

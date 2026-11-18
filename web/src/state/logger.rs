@@ -42,7 +42,8 @@ pub fn log(msg: impl Into<String>, level: LogLevel) {
     let msg_str = msg.into();
     let now = Local::now().format("%H:%M:%S%.3f").to_string();
 
-    let log_sig = GLOBAL_LOG_SIGNAL.with(|cell| *cell.borrow())
+    let log_sig = GLOBAL_LOG_SIGNAL
+        .with(|cell| *cell.borrow())
         .or_else(|| use_context::<ActivityLogSignal>().map(|ActivityLogSignal(s)| s));
 
     if let Some(sig) = log_sig {
@@ -58,7 +59,8 @@ pub fn log(msg: impl Into<String>, level: LogLevel) {
         });
     }
 
-    let toast_ctx = GLOBAL_TOASTER_CTX.with(|cell| cell.borrow().clone())
+    let toast_ctx = GLOBAL_TOASTER_CTX
+        .with(|cell| cell.borrow().clone())
         .or_else(use_context::<ToasterContext>);
 
     if let Some(toast_ctx) = toast_ctx {

@@ -9,16 +9,26 @@ use wasm_bindgen_futures::spawn_local;
 #[component]
 pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
     let d1 = dev.clone();
+    let d2 = dev.clone();
     let d3 = dev.clone();
     let d_cfg = dev.clone();
     let d_info = dev.clone();
+    let d_name = dev.clone();
+    let d_reboot_name = dev.clone();
 
     let on_refresh = move |_| {
         let dev = d1.clone();
         spawn_local(async move {
             dev.refresh_info().await;
-            dev.load_config().await;
+            dev.load_config(false).await;
             dev.refresh_led_buf_info().await;
+        });
+    };
+
+    let on_reload_fixtures = move |_| {
+        let dev = d2.clone();
+        spawn_local(async move {
+            dev.load_config(true).await;
         });
     };
 
@@ -42,22 +52,19 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
         });
     });
 
-    let reboot_msg = format!(
-        "Are you sure you want to reboot \"{}\"?",
-        dev.display_name()
-    );
-    let dev_name = dev.display_name();
-
     view! {
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-base font-semibold text-white">"Device"</span>
-                    <span class="text-xs text-gray-400 font-mono">{format!("({dev_name})")}</span>
+                    <span class="text-xs text-gray-400 font-mono">{move || format!("({})", d_name.display_name())}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <Button appearance=ButtonAppearance::Secondary on_click=on_refresh>
                         "Refresh Info"
+                    </Button>
+                    <Button appearance=ButtonAppearance::Secondary on_click=on_reload_fixtures>
+                        "Reload Fixtures"
                     </Button>
                     <DialogButton
                         appearance=Signal::derive(|| ButtonAppearance::Danger)
@@ -70,7 +77,7 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
                         button_children=DialogButtonChildren::builder().children(Box::new(|| view! { "Reboot Device" }.into_any())).build()
                     >
                         <p class="text-sm text-gray-300">
-                            {reboot_msg}
+                            {move || format!("Are you sure you want to reboot \"{}\"?", d_reboot_name.display_name())}
                         </p>
                     </DialogButton>
                 </div>
@@ -80,7 +87,7 @@ pub fn DeviceInfoPanel(dev: ConnectedDevice) -> impl IntoView {
                 if let Some(err) = d_cfg.config_error.get() {
                     view! {
                         <WarnAlert border=true>
-                            {format!("Could not read active config: {err}. No fixtures are available until it can be read.")}
+                            {format!("Could not read active fixtures: {err}. No fixtures are available until they can be read.")}
                         </WarnAlert>
                     }.into_any()
                 } else {

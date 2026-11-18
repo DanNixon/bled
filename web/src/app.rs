@@ -12,7 +12,6 @@ fn ToastContextBridge() -> impl IntoView {
     if let Some(ctx) = leptos::context::use_context::<leptodon::toast::ToasterContext>() {
         crate::state::set_global_toaster_context(ctx);
     }
-    ()
 }
 
 #[component]

@@ -1,7 +1,10 @@
 use super::config::{NormalizedConfig, normalize_config};
 use super::logger::{LogLevel, log};
 use crate::transport::RpcClient;
-use bled_core::{api::DeviceInfo, effect::EffectManifest};
+use bled_core::{
+    api::{ActivePlaylistInfo, DeviceInfo},
+    effect::{EffectManifest, EffectPlaylist},
+};
 use futures::lock::Mutex;
 use leptos::prelude::*;
 use send_wrapper::SendWrapper;
@@ -26,6 +29,8 @@ pub struct ConnectedDevice {
     pub effect_param_bytes: RwSignal<Vec<u8>>,
     pub effect_command_len: RwSignal<Option<u64>>,
     pub effect_param_len: RwSignal<Option<u64>>,
+    pub active_playlist_info: RwSignal<Option<ActivePlaylistInfo>>,
+    pub active_playlist: RwSignal<Option<EffectPlaylist>>,
     pub led_buf_capacity: RwSignal<Option<u32>>,
     pub led_buf_size: RwSignal<Option<u32>>,
 }
@@ -67,12 +72,20 @@ impl ConnectedDevice {
             effect_param_bytes: RwSignal::new(Vec::new()),
             effect_command_len: RwSignal::new(None),
             effect_param_len: RwSignal::new(None),
+            active_playlist_info: RwSignal::new(None),
+            active_playlist: RwSignal::new(None),
             led_buf_capacity: RwSignal::new(None),
             led_buf_size: RwSignal::new(None),
         }
     }
 
     pub fn display_name(&self) -> String {
+        if let Some(info) = self.device_info.get() {
+            let name = info.name().as_str();
+            if !name.is_empty() {
+                return name.to_string();
+            }
+        }
         if let Some(cfg) = self.config.get()
             && !cfg.name.is_empty()
         {
@@ -81,19 +94,47 @@ impl ConnectedDevice {
         self.name.clone()
     }
 
-    pub async fn load_config(&self) {
+    pub async fn load_config(&self, reload_on_device: bool) {
         let mut rpc = self.rpc.lock().await;
+        if reload_on_device {
+            log(
+                format!("[{}] Reloading fixtures on device...", self.name),
+                LogLevel::Info,
+            );
+            if let Err(e) = rpc.fixtures_reload().await {
+                self.config.set(None);
+                self.config_error.set(Some(e.clone()));
+                log(
+                    format!("[{}] Could not reload fixtures: {e}", self.name),
+                    LogLevel::Error,
+                );
+                return;
+            }
+            log(
+                format!("[{}] Successfully reloaded fixtures on device.", self.name),
+                LogLevel::Success,
+            );
+        }
         log(
-            format!("[{}] Reading configuration...", self.name),
+            format!("[{}] Reading active fixtures...", self.name),
             LogLevel::Info,
         );
-        match rpc.read_config::<fn(u8)>(None).await {
-            Ok(cfg) => {
-                let norm = normalize_config(&cfg);
+        match rpc.read_fixtures::<fn(u8)>(None).await {
+            Ok(fixtures) => {
+                let resolved_name = self
+                    .device_info
+                    .get_untracked()
+                    .map(|i| i.name().to_string())
+                    .unwrap_or_else(|| self.name.clone());
+                let norm = normalize_config(&fixtures, &resolved_name);
+                let fixture_count = norm.fixtures.len();
                 self.config.set(Some(norm));
                 self.config_error.set(None);
                 log(
-                    format!("[{}] Loaded config \"{}\"", self.name, cfg.name().as_str()),
+                    format!(
+                        "[{}] Loaded {fixture_count} fixture(s) for \"{resolved_name}\"",
+                        self.name
+                    ),
                     LogLevel::Success,
                 );
             }
@@ -101,7 +142,7 @@ impl ConnectedDevice {
                 self.config.set(None);
                 self.config_error.set(Some(e.clone()));
                 log(
-                    format!("[{}] Could not read config: {e}", self.name),
+                    format!("[{}] Could not read active fixtures: {e}", self.name),
                     LogLevel::Error,
                 );
             }
@@ -115,8 +156,9 @@ impl ConnectedDevice {
                 self.device_info.set(Some(info.clone()));
                 log(
                     format!(
-                        "[{}] Device Info: rev={}, boot={:?}, uptime={} ms",
+                        "[{}] Device Info: name={}, rev={}, boot={:?}, uptime={} ms",
                         self.name,
+                        info.name().as_str(),
                         info.git_revision().as_str(),
                         info.boot_reason(),
                         info.uptime_ms()
@@ -201,6 +243,35 @@ impl ConnectedDevice {
             Err(e) => {
                 log(
                     format!("[{}] Failed to read active effect: {e}", self.name),
+                    LogLevel::Error,
+                );
+            }
+        }
+    }
+
+    pub async fn refresh_playlist(&self) {
+        let mut rpc = self.rpc.lock().await;
+        match rpc.get_active_playlist().await {
+            Ok(Some(info)) => {
+                self.active_playlist_info.set(Some(info));
+                match rpc.read_playlist().await {
+                    Ok(playlist) => self.active_playlist.set(Some(playlist)),
+                    Err(e) => {
+                        self.active_playlist.set(None);
+                        log(
+                            format!("[{}] Failed to read active playlist: {e}", self.name),
+                            LogLevel::Error,
+                        );
+                    }
+                }
+            }
+            Ok(None) => {
+                self.active_playlist_info.set(None);
+                self.active_playlist.set(None);
+            }
+            Err(e) => {
+                log(
+                    format!("[{}] Could not refresh playlist state: {e}", self.name),
                     LogLevel::Error,
                 );
             }

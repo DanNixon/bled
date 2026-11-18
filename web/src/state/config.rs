@@ -1,4 +1,4 @@
-use bled_core::config::{DeviceConfig, PixelLayout};
+use bled_core::config::{BrightnessLimit, Fixtures, PixelLayout};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NormalizedSpan {
@@ -9,6 +9,7 @@ pub struct NormalizedSpan {
     pub length: usize,
     pub byte_offset: usize,
     pub byte_length: usize,
+    pub brightness_limit: BrightnessLimit,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,9 +40,9 @@ pub struct NormalizedConfig {
     pub channels: Vec<NormalizedChannel>,
 }
 
-pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
+pub fn normalize_config(raw: &Fixtures, name: &str) -> NormalizedConfig {
     let mut max_channel: isize = -1;
-    for fixture in raw.fixtures().as_slice() {
+    for fixture in raw.as_slice() {
         for span in fixture.spans() {
             let ch = usize::from(*span.channel().as_ref()) as isize;
             max_channel = max_channel.max(ch);
@@ -51,7 +52,7 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
     let channel_count = (max_channel + 1).max(4) as usize;
     let mut channel_lengths = vec![0usize; channel_count];
 
-    for fixture in raw.fixtures().as_slice() {
+    for fixture in raw.as_slice() {
         for span in fixture.spans() {
             let channel = usize::from(*span.channel().as_ref());
             let end = (*span.start() + *span.length()) as usize;
@@ -69,7 +70,7 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
     }
 
     let mut fixtures = Vec::new();
-    for (fixture_index, fixture) in raw.fixtures().as_slice().iter().enumerate() {
+    for (fixture_index, fixture) in raw.as_slice().iter().enumerate() {
         let layout_name = match fixture.layout() {
             PixelLayout::LinearArray(_) => "Linear Array".into(),
             PixelLayout::CircularArray(_) => "Circular Array".into(),
@@ -91,6 +92,7 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
                 length,
                 byte_offset,
                 byte_length: length * 3,
+                brightness_limit: *span.brightness_limit(),
             });
         }
 
@@ -118,7 +120,7 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
         .collect();
 
     NormalizedConfig {
-        name: raw.name().to_string(),
+        name: name.to_string(),
         fixtures,
         channel_lengths,
         channel_offsets,
@@ -130,18 +132,34 @@ pub fn normalize_config(raw: &DeviceConfig) -> NormalizedConfig {
 mod tests {
     use super::*;
     use bled_core::{
-        ChannelNumber,
-        config::{CircularArray, Fixture, Fixtures, LinearArray, Matrix2d, PixelSpan},
+        ChannelNumber, RGB8,
+        config::{
+            BrightnessLimitMode, CircularArray, Fixture, Fixtures, LinearArray, Matrix2d, PixelSpan,
+        },
     };
 
     #[test]
     fn test_normalize_config() {
+        let custom_limit =
+            BrightnessLimit::new(BrightnessLimitMode::Rescale, RGB8::new(64, 128, 255));
         let fixture1 = Fixture::new(
             "fix-linear".try_into().unwrap(),
             PixelLayout::LinearArray(LinearArray::default()),
             [
-                PixelSpan::new("a".try_into().unwrap(), ChannelNumber::new(0), 0, 4),
-                PixelSpan::new("b".try_into().unwrap(), ChannelNumber::new(1), 2, 5),
+                PixelSpan::new(
+                    "a".try_into().unwrap(),
+                    ChannelNumber::new(0),
+                    0,
+                    4,
+                    BrightnessLimit::default(),
+                ),
+                PixelSpan::new(
+                    "b".try_into().unwrap(),
+                    ChannelNumber::new(1),
+                    2,
+                    5,
+                    custom_limit,
+                ),
             ]
             .try_into()
             .unwrap(),
@@ -154,6 +172,7 @@ mod tests {
                 ChannelNumber::new(2),
                 0,
                 8,
+                BrightnessLimit::default(),
             )]
             .try_into()
             .unwrap(),
@@ -166,18 +185,15 @@ mod tests {
                 ChannelNumber::new(3),
                 0,
                 16,
+                BrightnessLimit::default(),
             )]
             .try_into()
             .unwrap(),
         );
 
-        let config = DeviceConfig {
-            name: "test-device".try_into().unwrap(),
-            fixtures: Fixtures::new([fixture1, fixture2, fixture3].into()),
-            default_effect: None,
-        };
+        let fixtures = Fixtures::new([fixture1, fixture2, fixture3].into());
 
-        let norm = normalize_config(&config);
+        let norm = normalize_config(&fixtures, "test-device");
         assert_eq!(norm.name, "test-device");
         assert_eq!(norm.fixtures.len(), 3);
         assert_eq!(norm.fixtures[0].layout_name, "Linear Array");
@@ -190,6 +206,11 @@ mod tests {
         assert_eq!(norm.channel_offsets[0], 0);
         assert_eq!(norm.channel_offsets[1], 12);
         assert_eq!(norm.fixtures[0].spans[0].byte_offset, 0);
+        assert_eq!(
+            norm.fixtures[0].spans[0].brightness_limit,
+            BrightnessLimit::default()
+        );
         assert_eq!(norm.fixtures[0].spans[1].byte_offset, 12 + 6);
+        assert_eq!(norm.fixtures[0].spans[1].brightness_limit, custom_limit);
     }
 }

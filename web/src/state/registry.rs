@@ -17,6 +17,9 @@ pub enum TreeSelection {
     Effect {
         device_id: String,
     },
+    Playlist {
+        device_id: String,
+    },
     Fixture {
         device_id: String,
         fixture_idx: usize,
@@ -38,6 +41,7 @@ impl TreeSelection {
             Self::Device { device_id }
             | Self::SdCard { device_id }
             | Self::Effect { device_id }
+            | Self::Playlist { device_id }
             | Self::Fixture { device_id, .. }
             | Self::Span { device_id, .. }
             | Self::Channel { device_id, .. } => device_id,
@@ -126,7 +130,7 @@ impl DeviceRegistry {
                 );
                 spawn_local(async move {
                     dev_clone.refresh_info().await;
-                    dev_clone.load_config().await;
+                    dev_clone.load_config(false).await;
                     dev_clone.refresh_led_buf_info().await;
                 });
             }

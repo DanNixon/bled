@@ -40,12 +40,14 @@ pub fn DeviceTree() -> impl IntoView {
                                 let dev_id_clone2 = dev_id.clone();
                                 let dev_id_clone3 = dev_id.clone();
                                 let dev_id_clone4 = dev_id.clone();
+                                let dev_id_clone5 = dev_id.clone();
                                 let dev_key = format!("d:{dev_id}");
                                 let is_dev_collapsed = collapsed.contains(&dev_key);
 
                                 let is_dev_selected = matches!(&current_sel, Some(TreeSelection::Device { device_id }) if device_id == &dev_id);
                                 let is_sd_selected = matches!(&current_sel, Some(TreeSelection::SdCard { device_id }) if device_id == &dev_id);
                                 let is_fx_selected = matches!(&current_sel, Some(TreeSelection::Effect { device_id }) if device_id == &dev_id);
+                                let is_pl_selected = matches!(&current_sel, Some(TreeSelection::Playlist { device_id }) if device_id == &dev_id);
 
                                 let cfg_opt = dev.config.get();
                                 let dev_name = dev.display_name();
@@ -118,6 +120,21 @@ pub fn DeviceTree() -> impl IntoView {
                                                             }
                                                         >
                                                             <span>"✨"</span>"Effects"
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button
+                                                            type="button"
+                                                            class=class_list![
+                                                                "w-full text-left flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors",
+                                                                ("bg-oa-blue/20 text-oa-blue font-semibold", move || is_pl_selected),
+                                                                ("hover:bg-gray-800 text-gray-400 hover:text-gray-200", move || !is_pl_selected)
+                                                            ]
+                                                            on:click=move |_| {
+                                                                registry.selection.set(Some(TreeSelection::Playlist { device_id: dev_id_clone5.clone() }));
+                                                            }
+                                                        >
+                                                            <span>"☰"</span>"Playlist"
                                                         </button>
                                                     </li>
 

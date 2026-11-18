@@ -1,4 +1,5 @@
 use crate::state::{ConnectedDevice, SpanPixelsRequest};
+use bled_core::config::BrightnessLimitMode;
 use leptodon::button::{Button, ButtonAppearance};
 use leptodon::checkbox::Checkbox;
 use leptodon::input::{NumberInput, TextInput};
@@ -179,8 +180,11 @@ pub fn LedPixels(
         });
     };
 
+    let d_target = dev.clone();
+    let d_limit = dev.clone();
+
     let target_desc = move || {
-        let cfg = dev.config.get();
+        let cfg = d_target.config.get();
         if let Some(cfg) = cfg {
             if let (Some(f_idx), Some(s_idx)) = (fixture_idx, span_idx) {
                 if let Some(span) = cfg.fixtures.get(f_idx).and_then(|f| f.spans.get(s_idx)) {
@@ -208,11 +212,38 @@ pub fn LedPixels(
         "LED Pixels".into()
     };
 
+    let brightness_limit_desc = move || {
+        let cfg = d_limit.config.get()?;
+        let (f_idx, s_idx) = (fixture_idx?, span_idx?);
+        let span = cfg.fixtures.get(f_idx)?.spans.get(s_idx)?;
+        let mode_label = match span.brightness_limit.mode() {
+            BrightnessLimitMode::Clamp => "Clamp",
+            BrightnessLimitMode::Rescale => "Rescale",
+        };
+        let limit = span.brightness_limit.limit();
+        Some(format!(
+            "{mode_label} (R: {}, G: {}, B: {})",
+            limit.r, limit.g, limit.b
+        ))
+    };
+
     view! {
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm space-y-4">
-            <div class="border-b border-gray-800 pb-3">
-                <h3 class="text-base font-semibold text-white">"LED Pixels"</h3>
-                <p class="text-xs text-oa-blue font-mono mt-0.5">{target_desc}</p>
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-3">
+                <div>
+                    <h3 class="text-base font-semibold text-white">"LED Pixels"</h3>
+                    <p class="text-xs text-oa-blue font-mono mt-0.5">{target_desc}</p>
+                </div>
+                {move || {
+                    brightness_limit_desc().map(|desc| {
+                        view! {
+                            <div class="bg-gray-800/60 rounded-lg px-3 py-1.5 border border-gray-750">
+                                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block">"Brightness Limit"</span>
+                                <span class="text-xs font-mono text-gray-200">{desc}</span>
+                            </div>
+                        }
+                    })
+                }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

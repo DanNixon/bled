@@ -1,12 +1,12 @@
 use bled_core::{
     PathString,
     api::{
-        Chunk, DeviceInfo, DirEntry, LedBufferInformation, MAX_CHUNK_SIZE, RPC_ACK_TIMEOUT,
-        RPC_CHANNEL_ID, RPC_FRAME_BUF_LEN, RPC_LOAD_TIMEOUT, RPC_RESPONSE_TIMEOUT, Request,
-        Response,
+        ActivePlaylistInfo, Chunk, DeviceInfo, DirEntry, LedBufferInformation, MAX_CHUNK_SIZE,
+        RPC_ACK_TIMEOUT, RPC_CHANNEL_ID, RPC_FRAME_BUF_LEN, RPC_LOAD_TIMEOUT, RPC_RESPONSE_TIMEOUT,
+        Request, Response,
     },
-    config::DeviceConfig,
-    effect::EffectManifest,
+    config::Fixtures,
+    effect::{EffectManifest, EffectPlaylist},
 };
 use core::time::Duration;
 use heapless::Vec as HeaplessVec;
@@ -184,16 +184,22 @@ impl RpcClient {
         }
     }
 
-    pub async fn config_stat(&mut self) -> Result<u64, String> {
-        match self.call(Request::ConfigStat, RPC_RESPONSE_TIMEOUT).await? {
+    pub async fn fixtures_stat(&mut self) -> Result<u64, String> {
+        match self
+            .call(Request::FixturesStat, RPC_RESPONSE_TIMEOUT)
+            .await?
+        {
             Response::Size(size) => Ok(size),
             res => Err(format!("Unexpected response: {res:?}")),
         }
     }
 
-    pub async fn config_read(&mut self, offset: u32, length: u32) -> Result<Chunk, String> {
+    pub async fn fixtures_read(&mut self, offset: u32, length: u32) -> Result<Chunk, String> {
         match self
-            .call(Request::ConfigRead { offset, length }, RPC_RESPONSE_TIMEOUT)
+            .call(
+                Request::FixturesRead { offset, length },
+                RPC_RESPONSE_TIMEOUT,
+            )
             .await?
         {
             Response::Data(chunk) => Ok(chunk),
@@ -201,21 +207,25 @@ impl RpcClient {
         }
     }
 
-    pub async fn read_config<F>(
-        &mut self,
-        mut on_progress: Option<F>,
-    ) -> Result<DeviceConfig, String>
+    pub async fn fixtures_reload(&mut self) -> Result<(), String> {
+        match self.call(Request::FixturesReload, RPC_LOAD_TIMEOUT).await? {
+            Response::Ok => Ok(()),
+            res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn read_fixtures<F>(&mut self, mut on_progress: Option<F>) -> Result<Fixtures, String>
     where
         F: FnMut(u8),
     {
-        let size = self.config_stat().await?;
+        let size = self.fixtures_stat().await?;
         let mut bytes = Vec::new();
         let mut offset = 0u32;
         let total = size as u32;
 
         while offset < total {
             let wanted = (MAX_CHUNK_SIZE as u32).min(total - offset);
-            let chunk = self.config_read(offset, wanted).await?;
+            let chunk = self.fixtures_read(offset, wanted).await?;
             if chunk.is_empty() {
                 break;
             }
@@ -230,10 +240,10 @@ impl RpcClient {
         }
 
         // Try postcard decode first, then JSON
-        match bled_core::io::decode_postcard::<DeviceConfig>(&bytes) {
+        match bled_core::io::decode_postcard::<Fixtures>(&bytes) {
             Ok(c) => Ok(c),
-            Err(_) => bled_core::io::decode_json::<DeviceConfig>(&bytes)
-                .map_err(|e| format!("Failed to decode DeviceConfig: {e}")),
+            Err(_) => bled_core::io::decode_json::<Fixtures>(&bytes)
+                .map_err(|e| format!("Failed to decode Fixtures: {e}")),
         }
     }
 
@@ -644,6 +654,77 @@ impl RpcClient {
         {
             Response::Ok => Ok(()),
             res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn get_active_playlist(&mut self) -> Result<Option<ActivePlaylistInfo>, String> {
+        match self
+            .call(Request::GetActivePlaylist, RPC_RESPONSE_TIMEOUT)
+            .await?
+        {
+            Response::ActivePlaylist(info) => Ok(info),
+            res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn set_active_playlist(&mut self, path: Option<&str>) -> Result<(), String> {
+        let p = match path {
+            Some(s) if !s.is_empty() => Some(s.try_into().map_err(|_| "Path too long")?),
+            _ => None,
+        };
+        match self
+            .call(Request::SetActivePlaylist { path: p }, RPC_LOAD_TIMEOUT)
+            .await?
+        {
+            Response::Ok => Ok(()),
+            res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn playlist_stat(&mut self) -> Result<u64, String> {
+        match self
+            .call(Request::PlaylistStat, RPC_RESPONSE_TIMEOUT)
+            .await?
+        {
+            Response::Size(size) => Ok(size),
+            res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn playlist_read(&mut self, offset: u32, length: u32) -> Result<Chunk, String> {
+        match self
+            .call(
+                Request::PlaylistRead { offset, length },
+                RPC_RESPONSE_TIMEOUT,
+            )
+            .await?
+        {
+            Response::Data(chunk) => Ok(chunk),
+            res => Err(format!("Unexpected response: {res:?}")),
+        }
+    }
+
+    pub async fn read_playlist(&mut self) -> Result<EffectPlaylist, String> {
+        let size = self.playlist_stat().await?;
+        let mut bytes = Vec::new();
+        let mut offset = 0u32;
+        let total = size as u32;
+
+        while offset < total {
+            let wanted = (MAX_CHUNK_SIZE as u32).min(total - offset);
+            let chunk = self.playlist_read(offset, wanted).await?;
+            if chunk.is_empty() {
+                break;
+            }
+            let len = chunk.len() as u32;
+            bytes.extend_from_slice(chunk.as_slice());
+            offset += len;
+        }
+
+        match bled_core::io::decode_postcard::<EffectPlaylist>(&bytes) {
+            Ok(p) => Ok(p),
+            Err(_) => bled_core::io::decode_json::<EffectPlaylist>(&bytes)
+                .map_err(|e| format!("Failed to decode EffectPlaylist: {e}")),
         }
     }
 }

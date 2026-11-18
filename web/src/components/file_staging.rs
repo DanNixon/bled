@@ -210,7 +210,7 @@ where
 
 #[component]
 pub fn FileStaging(dev: ConnectedDevice) -> impl IntoView {
-    let remote_path_sig = RwSignal::new("/config.json".to_string());
+    let remote_path_sig = RwSignal::new("/fixtures.json".to_string());
     let progress_sig = RwSignal::new(None::<u8>);
     let editor_text_sig = RwSignal::new(String::new());
     let copied_sig = RwSignal::new(false);

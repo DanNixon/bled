@@ -2,6 +2,7 @@ use super::device_info::DeviceInfoPanel;
 use super::effect::EffectPanel;
 use super::file_staging::FileStaging;
 use super::led_pixels::LedPixels;
+use super::playlist::PlaylistPanel;
 use crate::state::{DeviceRegistry, TreeSelection};
 use leptos::context::use_context;
 use leptos::prelude::*;
@@ -32,6 +33,11 @@ pub fn MainPanel() -> impl IntoView {
                     (Some(TreeSelection::Effect { .. }), Some(dev)) => {
                         view! {
                             <EffectPanel dev=dev />
+                        }.into_any()
+                    }
+                    (Some(TreeSelection::Playlist { .. }), Some(dev)) => {
+                        view! {
+                            <PlaylistPanel dev=dev />
                         }.into_any()
                     }
                     (Some(TreeSelection::Fixture { fixture_idx, .. }), Some(dev)) => {
