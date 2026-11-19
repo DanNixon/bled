@@ -1,6 +1,6 @@
 use embassy_rp::{
     Peri, dma,
-    peripherals::{self, DMA_CH0, DMA_CH1, DMA_CH2, DMA_CH3, DMA_CH4, DMA_CH5, PIO0, PIO1},
+    peripherals::{self, DMA_CH0, DMA_CH1, DMA_CH2, DMA_CH3, DMA_CH4, DMA_CH5, PIO1},
     pio,
 };
 
