@@ -27,7 +27,6 @@ assign_resources::assign_resources! {
         mosi: PIN_7,
         miso: PIN_4,
         cs: PIN_5,
-        detect: PIN_27, // TODO: make SD driver optionally require a detect pin
     },
     bms: BmsResources {
        i2c: I2C0,
