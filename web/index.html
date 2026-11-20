@@ -1,13 +1,33 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BLED</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BLED (iced PoC)</title>
   <link data-trunk rel="copy-file" href="js/transport.js" />
-  <link data-trunk rel="css" href="style/output.css" />
   <link data-trunk rel="rust" data-wasm-opt="z" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #0b0f19;
+      overscroll-behavior: none;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    canvas {
+      display: block;
+      width: 100vw !important;
+      height: 100dvh !important;
+      outline: none;
+      touch-action: none;
+    }
+  </style>
 </head>
-<body class="bg-gray-950 text-gray-100">
+<body>
 </body>
 </html>

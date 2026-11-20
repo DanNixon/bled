@@ -1,7 +1,6 @@
 default: check
 
 build:
-    @tailwindcss -i style/main.css -o style/output.css --minify
     @trunk build --release
 
 test:
