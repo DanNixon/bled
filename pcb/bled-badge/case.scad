@@ -15,7 +15,7 @@
 /* [Render / Export Selection] */
 
 // Which part or view to generate: "assembly", "exploded", "print_plate", "front", "back"
-part = "assembly"; // [assembly, exploded, print_plate, front, back]
+part = "front"; // [assembly, exploded, print_plate, front, back]
 
 // Show imported `./fab/bled-badge.stl` and component envelopes in assembly views
 show_pcb = true;
@@ -56,13 +56,13 @@ pcb_length = 130.5;
 pcb_width = 35.0;
 
 // Badge PCB nominal thickness in Z (mm)
-pcb_thickness = 1.6;
+pcb_thickness = 1.0;
 
 // Radial XY clearance around the PCB edges inside the case pocket (mm)
-pcb_xy_clearance = 0.25;
+pcb_xy_clearance = 0.4;
 
 // Extra Z clearance in the PCB pocket (mm)
-pcb_z_clearance = 0.05;
+pcb_z_clearance = 0.1;
 
 // Width of the clamping ledge supporting the PCB along the top and bottom edges (mm)
 pcb_ledge_y = 2.4;
@@ -430,13 +430,15 @@ module case_back() {
                 translate([button_cols_x[i], button_row_y + 3.0, z_back_outer - 0.01])
                     linear_extrude(height = label_depth + 0.01)
                         mirror([1, 0, 0])
-                            text(top_labels[i], size = 1.6, halign = "center", valign = "center", font = "Liberation Sans:style=Bold");
+                            rotate([0, 0, 90])
+                                text(top_labels[i], size = 1.6, halign = "left", valign = "center", font = "Liberation Sans:style=Bold");
 
                 // Bottom row labels (-Y)
                 translate([button_cols_x[i], -button_row_y - 3.0, z_back_outer - 0.01])
                     linear_extrude(height = label_depth + 0.01)
                         mirror([1, 0, 0])
-                            text(bottom_labels[i], size = 1.8, halign = "center", valign = "center", font = "Liberation Sans:style=Bold");
+                            rotate([0, 0, 90])
+                                text(bottom_labels[i], size = 1.8, halign = "right", valign = "center", font = "Liberation Sans:style=Bold");
             }
         }
     }
