@@ -7,6 +7,7 @@ pub mod effect;
 pub mod io;
 pub mod pixel_buffer;
 mod types;
+pub mod usb;
 pub mod util;
 
 pub use types::*;
