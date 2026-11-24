@@ -40,3 +40,7 @@ fp-info-cache
 
 # Local project settings
 *.kicad_prl
+
+# Exported 3D models
+*.step
+*.stl

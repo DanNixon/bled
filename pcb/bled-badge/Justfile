@@ -7,3 +7,17 @@ fab:
         --schematic ./bled-badge.kicad_sch \
         ./bled-badge.kicad_pcb \
         ./fab
+
+step:
+    kicad-cli pcb export step \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-badge.step \
+        ./bled-badge.kicad_pcb
+
+stl:
+    kicad-cli pcb export stl \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-badge.stl \
+        ./bled-badge.kicad_pcb
