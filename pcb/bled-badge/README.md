@@ -27,10 +27,10 @@ Don't increase the intensity much above the default values: they quickly become 
     "name": "badge",
     "layout": {
       "matrix2d": {
-        "width": 12,
-        "height": 50,
+        "width": 50,
+        "height": 12,
         "origin": "TopLeft",
-        "layout": "ColumnMajor",
+        "layout": "RowMajor",
         "wiring_order": "Serpentine"
       }
     },

@@ -428,4 +428,27 @@ mod tests {
         );
         assert_eq!(matrix.pixel_index(Point::new(0, 0)), None);
     }
+
+    #[test]
+    fn bled_badge_pcb_matrix() {
+        let matrix: Matrix2d = crate::io::decode_json(
+            br#"{
+               "width": 50,
+               "height": 12,
+               "origin": "TopLeft",
+               "layout": "RowMajor",
+               "wiring_order": "Serpentine"
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(matrix.pixel_index(Point::new(0, 0)), Some(0));
+        assert_eq!(matrix.pixel_index(Point::new(8, 0)), Some(8));
+        assert_eq!(matrix.pixel_index(Point::new(16, 0)), Some(16));
+        assert_eq!(matrix.pixel_index(Point::new(25, 0)), Some(25));
+        assert_eq!(matrix.pixel_index(Point::new(49, 0)), Some(49));
+        assert_eq!(matrix.pixel_index(Point::new(0, 1)), Some(99));
+        assert_eq!(matrix.pixel_index(Point::new(49, 1)), Some(50));
+        assert_eq!(matrix.pixel_index(Point::new(49, 11)), Some(550));
+    }
 }
