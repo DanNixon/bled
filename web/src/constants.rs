@@ -18,6 +18,16 @@ pub fn serial_tx_uuid() -> String {
 }
 
 #[wasm_bindgen]
+pub fn usb_vid() -> u16 {
+    bled_core::usb::USB_VID
+}
+
+#[wasm_bindgen]
+pub fn usb_pid() -> u16 {
+    bled_core::usb::USB_PID
+}
+
+#[wasm_bindgen]
 pub fn max_chunk_size() -> usize {
     bled_core::api::MAX_CHUNK_SIZE
 }

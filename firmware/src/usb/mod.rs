@@ -1,6 +1,7 @@
 pub(super) mod cdc_acm;
 pub(super) mod msc;
 
+use bled_core::usb::{USB_PID, USB_VID};
 use embassy_rp::{
     Peri, bind_interrupts,
     peripherals::USB,
@@ -16,7 +17,7 @@ bind_interrupts!(struct Irqs {
 pub(super) fn init(usb: Peri<'static, USB>) -> Builder<'static, Driver<'static, USB>> {
     let driver = Driver::new(usb, Irqs);
 
-    let mut config = embassy_usb::Config::new(0xc0de, 0xcafe);
+    let mut config = embassy_usb::Config::new(USB_VID, USB_PID);
     config.manufacturer = Some("Dan Nixon");
     config.product = Some("BLED");
     config.serial_number = Some(embassy_rp::uid::uid_hex());

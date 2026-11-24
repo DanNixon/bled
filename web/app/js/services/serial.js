@@ -20,7 +20,7 @@ export class SerialDevice extends BleDevice {
       throw new Error('Web Serial requires a supported browser in a secure context (HTTPS or localhost).');
     }
     return navigator.serial.requestPort({
-      filters: [{ usbVendorId: 0xc0de, usbProductId: 0xcafe }],
+      filters: [{ usbVendorId: bled.usb_vid(), usbProductId: bled.usb_pid() }],
     });
   }
 
