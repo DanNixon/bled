@@ -8,3 +8,17 @@ fab:
         --schematic ./bled-stamp.kicad_sch \
         ./bled-stamp.kicad_pcb \
         ./fab
+
+step:
+    kicad-cli pcb export step \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-stamp.step \
+        ./bled-stamp.kicad_pcb
+
+stl:
+    kicad-cli pcb export stl \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-stamp.stl \
+        ./bled-stamp.kicad_pcb

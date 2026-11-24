@@ -7,3 +7,17 @@ fab:
         --schematic ./bled-pico-w-backpack.kicad_sch \
         ./bled-pico-w-backpack.kicad_pcb \
         ./fab
+
+step:
+    kicad-cli pcb export step \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-pico-w-backpack.step \
+        ./bled-pico-w-backpack.kicad_pcb
+
+stl:
+    kicad-cli pcb export stl \
+        --force \
+        --grid-origin \
+        --output ./fab/bled-pico-w-backpack.stl \
+        ./bled-pico-w-backpack.kicad_pcb

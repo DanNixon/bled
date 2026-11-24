@@ -24,6 +24,7 @@
 
         # PCB tools
         kikit
+        kicad # (needed for 3D models)
       ];
 
       LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";

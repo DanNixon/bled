@@ -19,7 +19,7 @@ check: check-nix-fmt check-typos check-effects
     @just run-sub web check
 
 
-build: build-effects
+build: pcbs-fab pcbs-models build-effects
     @just run-sub firmware build
     @just run-sub web build
 
@@ -115,7 +115,12 @@ size-report:
         fi
     done
 
-fab-pcbs:
+pcbs-fab:
     @just run-sub pcb/bled-badge fab
     @just run-sub pcb/bled-pico-w-backpack fab
     @just run-sub pcb/bled-stamp fab
+
+pcbs-models:
+    @just run-sub pcb/bled-badge step stl
+    @just run-sub pcb/bled-pico-w-backpack step stl
+    @just run-sub pcb/bled-stamp step stl
