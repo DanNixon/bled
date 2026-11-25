@@ -26,6 +26,20 @@ jobs:
       - name: Build
         run: nix develop --command just build
 
+      - name: Upload firmware binaries
+        uses: actions/upload-artifact@v7
+        with:
+          name: firmware
+          path: firmware/target/thumbv8m.main-none-eabihf/release/*.uf2
+          if-no-files-found: error
+
+      - name: Upload effect binaries
+        uses: actions/upload-artifact@v7
+        with:
+          name: effects
+          path: effects/dist/
+          if-no-files-found: error
+
       - name: Generate size report
         if: github.event_name == 'pull_request'
         run: nix develop --command just size-report > size-report.md
