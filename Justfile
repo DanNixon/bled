@@ -19,7 +19,7 @@ check: check-nix-fmt check-typos check-effects
     @just run-sub web check
 
 
-build: pcbs-fab pcbs-models build-effects
+build: pcbs-fab pcbs-models dist-effects
     @just run-sub firmware build
     @just run-sub web build
 
