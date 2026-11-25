@@ -15,7 +15,7 @@
 /* [Render / Export Selection] */
 
 // Which part or view to generate: "assembly", "exploded", "print_plate", "front", "back"
-part = "front"; // [assembly, exploded, print_plate, front, back]
+part = "print_plate"; // [assembly, exploded, print_plate, front, back]
 
 // Show imported `./fab/bled-badge.stl` and component envelopes in assembly views
 show_pcb = true;
@@ -29,11 +29,11 @@ exploded_distance = 18.0;
 /* [Front Diffuser & LED Cavity] */
 
 // Thickness of the thin front LED diffuser layer (mm). Set to 1-2 print layers (e.g. 0.2 - 0.4).
-diffuser_thickness = 0.4;
+diffuser_thickness = 0.2;
 
 // Depth of the open cavity between the PCB front face and the diffuser (mm).
 // XL-1615RGBC-2812B-S LEDs are ~0.8 mm tall; 1.2 mm leaves a 0.4 mm air gap.
-led_cavity_depth = 1.2;
+led_cavity_depth = 0.8;
 
 // Width (X) of the open LED diffuser window (mm). 50 cols * 2.5 mm pitch = 125.0 mm.
 led_window_length = 125.2;
@@ -143,13 +143,13 @@ usbc_cutout_w = 9.6;
 usbc_cutout_h = 4.0;
 
 // Width (Y) of external USB-C cable overmould recess (mm)
-usbc_overmould_w = 13.5;
+usbc_overmould_w = 14;
 
 // Height (Z) of external USB-C cable overmould recess (mm)
-usbc_overmould_h = 7.2;
+usbc_overmould_h = 8.0;
 
 // Remaining wall thickness between the USB-C cable overmould recess and the PCB pocket (mm)
-usbc_wall_thickness = 1.2;
+usbc_wall_thickness = 1.0;
 
 /* [Button Access Holes (Back Face)] */
 
@@ -263,6 +263,8 @@ module x_slot_prism(x_start, x_end, width_y, height_z, corner_r) {
 // Front Half Module (Diffuser + LED Window + PCB Pocket + Heat-Set Bosses)
 // ============================================================================
 module case_front() {
+    cavity_x_min = -pcb_length / 2 - pcb_xy_clearance;
+
     difference() {
         union() {
             // Main front shell body from z_split (0.0) to z_front_outer
@@ -301,7 +303,19 @@ module case_front() {
             linear_extrude(height = (z_pcb_front - z_split) + 0.1)
                 square([pocket_length, pocket_width], center = true);
 
-        // 4. Blind holes for the 4 corner heat-set inserts (entering from -Z boss face)
+        // 4. USB-C cable overmould recess, which extends above the split plane into this half
+        if (enable_usbc_cutout) {
+            translate([0, usbc_center_y, usbc_center_z])
+                x_slot_prism(
+                    -case_length / 2 - 1.0,
+                    cavity_x_min - usbc_wall_thickness,
+                    usbc_overmould_w,
+                    usbc_overmould_h,
+                    2.0
+                );
+        }
+
+        // 5. Blind holes for the 4 corner heat-set inserts (entering from -Z boss face)
         for (pos = screw_positions) {
             translate([pos[0], pos[1], z_split - boss_protrusion - 0.1]) {
                 cylinder(d = insert_hole_d, h = insert_depth + 0.1);
