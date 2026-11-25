@@ -16,6 +16,13 @@ The web UI is likely to undergo significant changes, the current version is a mo
 
 Documentation can be found in [`docs/README.md`](docs/README.md).
 
+## Downloads
+
+Pre-built artifacts from the latest [`main` CI build](https://github.com/dannixon/bled/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush):
+
+- [Firmware (`.uf2` images)](https://nightly.link/dannixon/bled/workflows/ci/main/firmware.zip)
+- [Effects (WebAssembly modules and presets)](https://nightly.link/dannixon/bled/workflows/ci/main/effects.zip)
+
 ## Building effects
 
 [`bled-effect`](lib/effect/README.md) is a helper library for building BLED effects in Rust and compiling them to WebAssembly. The [`effects`](effects) directory contains example effect crates.
