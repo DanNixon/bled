@@ -53,7 +53,7 @@ cap_relief_width = 1.8;
 pcb_length = 130.5;
 
 // Badge PCB nominal width in Y (mm)
-pcb_width = 35.0;
+pcb_width = 34.5;
 
 // Badge PCB nominal thickness in Z (mm)
 pcb_thickness = 1.0;
