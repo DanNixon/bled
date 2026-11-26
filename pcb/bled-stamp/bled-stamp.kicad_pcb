@@ -22351,6 +22351,51 @@
 		(layer "Edge.Cuts")
 		(uuid "924b06d8-13a3-4f7c-9725-5b8083d422a3")
 	)
+	(gr_text "2026-11-25"
+		(at 90.75 99.5 90)
+		(layer "F.SilkS")
+		(uuid "2b5131d9-703b-4c9c-898c-2ceea0dc6cd8")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.1)
+			)
+			(justify left)
+		)
+	)
+	(gr_text "D"
+		(at 110.5 90.5 90)
+		(layer "F.SilkS" knockout)
+		(uuid "931b57c8-5237-40d3-beb1-7e616e0b1a1b")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.1)
+			)
+		)
+	)
+	(gr_text "G"
+		(at 110.5 92.5 90)
+		(layer "F.SilkS" knockout)
+		(uuid "d0a0deaf-f39e-4802-a04b-5cdd98540b42")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.1)
+			)
+		)
+	)
+	(gr_text "C"
+		(at 110.5 94.5 90)
+		(layer "F.SilkS" knockout)
+		(uuid "60f02ef3-6f3d-4d68-905f-6bc062723c08")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.1)
+			)
+		)
+	)
 	(gr_text "BAT-"
 		(at 77.5 70 0)
 		(layer "F.SilkS" knockout)
@@ -22491,8 +22536,8 @@
 			(justify right bottom)
 		)
 	)
-	(gr_text "2026-11-25\ngithub.com/DanNixon/bled"
-		(at 108.5 110.75 90)
+	(gr_text "github.com/\nDanNixon/bled"
+		(at 108.75 110.5 90)
 		(layer "F.SilkS")
 		(uuid "f5faaf32-1e7e-45ca-92a1-6c119ea04d3e")
 		(effects
@@ -22504,7 +22549,7 @@
 		)
 	)
 	(gr_text "Stamp"
-		(at 89.75 99.5 90)
+		(at 89 99.5 90)
 		(layer "F.SilkS")
 		(uuid "af40db4a-12d9-47db-89ae-cc1ce258ee00")
 		(effects
