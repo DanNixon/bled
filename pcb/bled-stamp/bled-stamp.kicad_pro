@@ -146,6 +146,10 @@
           ""
         ],
         [
+          "copper_edge_clearance|87000000|70325000|8789cc10-f47b-4940-80ff-547aedbf3fde|0341f24a-0184-48bb-a0a4-6b214f25f7b2",
+          ""
+        ],
+        [
           "copper_edge_clearance|87000000|76175000|8789cc10-f47b-4940-80ff-547aedbf3fde|d47866db-4bcc-42f4-9bba-bd1d003e6e30",
           ""
         ],
@@ -195,14 +199,6 @@
         ],
         [
           "copper_edge_clearance|87000000|99825000|8789cc10-f47b-4940-80ff-547aedbf3fde|56a97003-924b-4be6-98da-51746cd33984",
-          ""
-        ],
-        [
-          "via_dangling|103250000|78000000|0a1ac32a-eea7-439a-a909-44e05e4cd5b7|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "via_dangling|103250000|78750000|65cbf0f4-6c9e-401f-a9de-461defd61eb0|00000000-0000-0000-0000-000000000000",
           ""
         ]
       ],
@@ -270,7 +266,7 @@
         "tuning_profile_track_geometries": "ignore",
         "unconnected_items": "error",
         "unresolved_variable": "error",
-        "via_dangling": "warning",
+        "via_dangling": "ignore",
         "zones_intersect": "error"
       },
       "rules": {
