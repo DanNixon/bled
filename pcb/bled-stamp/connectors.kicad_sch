@@ -257,164 +257,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector_Generic:Conn_01x02"
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0 2.54 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Conn_01x02"
-				(at 0 -5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "connector"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "Connector*:*_1x??_*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Conn_01x02_1_1"
-				(rectangle
-					(start -1.27 1.27)
-					(end 1.27 -3.81)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(rectangle
-					(start -1.27 0.127)
-					(end 0 -0.127)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start -1.27 -2.413)
-					(end 0 -2.667)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at -5.08 0 0)
-					(length 3.81)
-					(name "Pin_1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -5.08 -2.54 0)
-					(length 3.81)
-					(name "Pin_2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Connector_Generic:Conn_01x03"
 			(pin_names
 				(offset 1.016)
@@ -2722,16 +2564,6 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 140.97) (xy 241.3 143.51)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "04f5d49a-b621-4864-8a97-c8bd2d5fe83d")
-	)
-	(wire
-		(pts
 			(xy 120.65 129.54) (xy 123.19 129.54)
 		)
 		(stroke
@@ -2739,16 +2571,6 @@
 			(type default)
 		)
 		(uuid "0e2e97d3-5935-4255-8273-0d79abbe2bb0")
-	)
-	(wire
-		(pts
-			(xy 241.3 135.89) (xy 241.3 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0f3b24a2-05a7-4b5c-bf66-f70dca0948cc")
 	)
 	(wire
 		(pts
@@ -2809,16 +2631,6 @@
 			(type default)
 		)
 		(uuid "22a894fa-d487-45de-a146-040ce606e1c5")
-	)
-	(wire
-		(pts
-			(xy 241.3 138.43) (xy 248.92 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2449c5b2-08ce-430d-9cd2-edf1aa811362")
 	)
 	(wire
 		(pts
@@ -3162,16 +2974,6 @@
 	)
 	(wire
 		(pts
-			(xy 241.3 140.97) (xy 248.92 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e3de9982-1d67-4f64-944a-3294188d22e2")
-	)
-	(wire
-		(pts
 			(xy 80.01 137.16) (xy 82.55 137.16)
 		)
 		(stroke
@@ -3336,7 +3138,7 @@
 	)
 	(global_label "5V_IN_EXT"
 		(shape input)
-		(at 241.3 50.8 180)
+		(at 241.3 38.1 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3346,7 +3148,7 @@
 		)
 		(uuid "389e48df-133e-4349-82a0-eba4806290fa")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 228.8201 50.8 0)
+			(at 228.8201 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4014,7 +3816,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 198.12 38.1 180)
+		(at 198.12 25.4 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4025,7 +3827,7 @@
 		(fields_autoplaced yes)
 		(uuid "021b091d-7788-4990-b456-b36a3e9720b5")
 		(property "Reference" "J2"
-			(at 198.12 31.75 0)
+			(at 198.12 19.05 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4035,7 +3837,7 @@
 			)
 		)
 		(property "Value" "Conn_01x01"
-			(at 198.12 34.29 0)
+			(at 198.12 21.59 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4045,7 +3847,7 @@
 			)
 		)
 		(property "Footprint" "bled:Castellation_Square_1pin"
-			(at 198.12 38.1 0)
+			(at 198.12 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4056,7 +3858,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 198.12 38.1 0)
+			(at 198.12 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4067,7 +3869,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 198.12 38.1 0)
+			(at 198.12 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4169,86 +3971,8 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+BATT")
-		(at 241.3 135.89 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0885c4fe-683d-42d8-9c95-33571415c487")
-		(property "Reference" "#PWR083"
-			(at 241.3 139.7 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+BATT"
-			(at 241.3 130.81 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 241.3 135.89 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 241.3 135.89 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+BATT\""
-			(at 241.3 135.89 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "1a84b5d3-b5a1-4486-b4fe-869ce1e1ee3d")
-		)
-		(instances
-			(project "bled-stamp"
-				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
-					(reference "#PWR083")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
-		(at 203.2 38.1 90)
+		(at 203.2 25.4 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4259,7 +3983,7 @@
 		(fields_autoplaced yes)
 		(uuid "0aa5e28d-7345-472f-a18e-eaef08691c15")
 		(property "Reference" "#PWR098"
-			(at 209.55 38.1 0)
+			(at 209.55 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4270,7 +3994,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 207.01 38.0999 90)
+			(at 207.01 25.3999 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4281,7 +4005,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 203.2 38.1 0)
+			(at 203.2 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4292,7 +4016,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 203.2 38.1 0)
+			(at 203.2 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4303,7 +4027,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 203.2 38.1 0)
+			(at 203.2 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4411,84 +4135,6 @@
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
 					(reference "R20")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 241.3 143.51 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "2567423b-79fb-4753-9a7e-2804d09ad1f2")
-		(property "Reference" "#PWR084"
-			(at 241.3 149.86 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 241.3 148.59 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 241.3 143.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 241.3 143.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 241.3 143.51 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f230d49e-864b-47c3-b94a-2bf61c3c1308")
-		)
-		(instances
-			(project "bled-stamp"
-				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
-					(reference "#PWR084")
 					(unit 1)
 				)
 			)
@@ -5131,8 +4777,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector_Generic:Conn_01x01")
-		(at 246.38 38.1 0)
+		(lib_id "power:GND")
+		(at 203.2 50.8 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5141,31 +4787,31 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "560b3f80-0e03-4b0f-9087-806d6d37589a")
-		(property "Reference" "J3"
-			(at 248.92 36.8299 0)
+		(uuid "50eee054-e11b-4084-9b4d-1cd60c0ee65f")
+		(property "Reference" "#PWR0104"
+			(at 209.55 50.8 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Value" "Conn_01x01"
-			(at 248.92 39.3699 0)
+		(property "Value" "GND"
+			(at 207.01 50.7999 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Footprint" "bled:Castellation_Square_1pin"
-			(at 246.38 38.1 0)
+		(property "Footprint" ""
+			(at 203.2 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5176,7 +4822,86 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 246.38 38.1 0)
+			(at 203.2 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 203.2 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e047a606-2678-4a58-baa3-10b7f981c492")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "#PWR0104")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x01")
+		(at 246.38 25.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "560b3f80-0e03-4b0f-9087-806d6d37589a")
+		(property "Reference" "J3"
+			(at 248.92 24.1299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_01x01"
+			(at 248.92 26.6699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "bled:Castellation_Square_1pin"
+			(at 246.38 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 246.38 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5187,7 +4912,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 246.38 38.1 0)
+			(at 246.38 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5211,7 +4936,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x01")
-		(at 198.12 50.8 180)
+		(at 198.12 38.1 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5222,7 +4947,7 @@
 		(fields_autoplaced yes)
 		(uuid "5b54ef69-c4ca-4e07-a8ac-a31fb7cfd91b")
 		(property "Reference" "J6"
-			(at 198.12 44.45 0)
+			(at 198.12 31.75 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5232,7 +4957,7 @@
 			)
 		)
 		(property "Value" "Conn_01x01"
-			(at 198.12 46.99 0)
+			(at 198.12 34.29 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5242,7 +4967,7 @@
 			)
 		)
 		(property "Footprint" "bled:Castellation_Square_1pin"
-			(at 198.12 50.8 0)
+			(at 198.12 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5253,7 +4978,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 198.12 50.8 0)
+			(at 198.12 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5264,7 +4989,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 198.12 50.8 0)
+			(at 198.12 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5736,88 +5461,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector_Generic:Conn_01x02")
-		(at 254 138.43 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "8a649db9-1c2f-4808-ba02-c09e14c34b15")
-		(property "Reference" "J4"
-			(at 256.54 138.4299 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "Conn_01x02"
-			(at 256.54 140.9699 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 254 138.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 254 138.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 254 138.43 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "c825a39c-e3d5-4726-8b14-b44255703899")
-		)
-		(pin "2"
-			(uuid "cc784f59-7a97-42d7-8b58-04159d8188a9")
-		)
-		(instances
-			(project "bled-stamp"
-				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
-					(reference "J4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:VBUS")
 		(at 63.5 50.8 0)
 		(unit 1)
@@ -5897,7 +5540,7 @@
 	)
 	(symbol
 		(lib_id "power:+BATT")
-		(at 203.2 50.8 270)
+		(at 203.2 38.1 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5908,7 +5551,7 @@
 		(fields_autoplaced yes)
 		(uuid "a4f8c422-7862-4f08-8395-09f807a1ff1e")
 		(property "Reference" "#PWR080"
-			(at 199.39 50.8 0)
+			(at 199.39 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5919,7 +5562,7 @@
 			)
 		)
 		(property "Value" "+BATT"
-			(at 207.01 50.7999 90)
+			(at 207.01 38.0999 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5930,7 +5573,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 203.2 50.8 0)
+			(at 203.2 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5941,7 +5584,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 203.2 50.8 0)
+			(at 203.2 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5952,7 +5595,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+BATT\""
-			(at 203.2 50.8 0)
+			(at 203.2 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5975,8 +5618,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector_Generic:Conn_01x01")
-		(at 246.38 50.8 0)
+		(lib_id "power:+BATT")
+		(at 241.3 135.89 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5985,9 +5628,20 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b0ba870f-37d2-450f-a039-be3cb22cf87d")
-		(property "Reference" "J7"
-			(at 248.92 49.5299 0)
+		(uuid "aa4a053f-5e43-4614-be31-cbf1d6a0ffd0")
+		(property "Reference" "#PWR083"
+			(at 245.11 135.89 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+BATT"
+			(at 237.49 135.8899 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5997,19 +5651,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Conn_01x01"
-			(at 248.92 52.0699 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "bled:Castellation_Square_1pin"
-			(at 246.38 50.8 0)
+		(property "Footprint" ""
+			(at 241.3 135.89 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6020,7 +5663,86 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 246.38 50.8 0)
+			(at 241.3 135.89 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+BATT\""
+			(at 241.3 135.89 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b6df97d3-b663-49b1-a233-338d1a1afdf6")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "#PWR083")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x01")
+		(at 246.38 38.1 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "b0ba870f-37d2-450f-a039-be3cb22cf87d")
+		(property "Reference" "J7"
+			(at 248.92 36.8299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Conn_01x01"
+			(at 248.92 39.3699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "bled:Castellation_Square_1pin"
+			(at 246.38 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 246.38 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6031,7 +5753,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 246.38 50.8 0)
+			(at 246.38 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6216,6 +5938,85 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 241.3 143.51 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c5bb62cc-4c9f-4bf1-bbc4-222eff2a10b6")
+		(property "Reference" "#PWR0105"
+			(at 234.95 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 237.49 143.5099 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 241.3 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 241.3 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 241.3 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c9380835-96ca-4f4f-b8b2-b80c49cad7e4")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "#PWR0105")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector_Generic:Conn_01x10")
 		(at 198.12 91.44 0)
 		(mirror y)
@@ -6394,6 +6195,83 @@
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
 					(reference "#PWR0100")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x01")
+		(at 198.12 50.8 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e4675eb2-e82c-4cd5-90a2-80fcf9b57fbb")
+		(property "Reference" "J12"
+			(at 198.12 44.45 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x01"
+			(at 198.12 46.99 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "bled:Castellation_Square_1pin"
+			(at 198.12 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 198.12 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 198.12 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ee4d6ec1-e8bd-46bf-a91a-820431693215")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "J12")
 					(unit 1)
 				)
 			)
@@ -6617,7 +6495,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 241.3 38.1 270)
+		(at 241.3 25.4 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6628,7 +6506,7 @@
 		(fields_autoplaced yes)
 		(uuid "e8211499-5224-402e-8912-d51c7a66c92d")
 		(property "Reference" "#PWR097"
-			(at 234.95 38.1 0)
+			(at 234.95 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6639,7 +6517,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 237.49 38.0999 90)
+			(at 237.49 25.3999 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6650,7 +6528,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 241.3 38.1 0)
+			(at 241.3 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6661,7 +6539,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 241.3 38.1 0)
+			(at 241.3 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6672,7 +6550,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 241.3 38.1 0)
+			(at 241.3 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6689,6 +6567,164 @@
 			(project "bled-stamp"
 				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
 					(reference "#PWR097")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 241.3 143.51 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e8e9a29c-44f5-42e5-a341-3c0ae35af4ec")
+		(property "Reference" "TP5"
+			(at 246.38 142.2399 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 246.38 144.7799 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 241.3 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 241.3 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 241.3 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "92c91516-2b12-4905-97c9-ace0ac211e00")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "TP5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 241.3 135.89 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "eafc0937-5693-4aeb-b3a0-cb1391e2046a")
+		(property "Reference" "TP4"
+			(at 246.38 134.6199 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 246.38 137.1599 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_2.0x2.0mm"
+			(at 241.3 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 241.3 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 241.3 135.89 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a14aa493-6900-4cbd-ae2a-bb7423987861")
+		)
+		(instances
+			(project "bled-stamp"
+				(path "/3e025044-e694-4110-8cfc-0d811f19f9a3/7b6f5ceb-be75-45e9-b65a-cf5f3d7d1397"
+					(reference "TP4")
 					(unit 1)
 				)
 			)
