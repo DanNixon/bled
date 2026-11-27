@@ -880,9 +880,6 @@
 		(embedded_fonts no)
 	)
 	(symbol "BLED_Stamp"
-		(pin_numbers
-			(hide yes)
-		)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -943,8 +940,8 @@
 		)
 		(symbol "BLED_Stamp_0_1"
 			(rectangle
-				(start -12.7 19.05)
-				(end 12.7 -19.05)
+				(start -12.7 25.4)
+				(end 12.7 -25.4)
 				(stroke
 					(width 0)
 					(type default)
@@ -956,7 +953,7 @@
 		)
 		(symbol "BLED_Stamp_1_1"
 			(pin power_out line
-				(at 0 -21.59 90)
+				(at -10.16 -27.94 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -974,7 +971,7 @@
 				)
 			)
 			(pin power_in line
-				(at -3.81 21.59 270)
+				(at -15.24 12.7 0)
 				(length 2.54)
 				(name "BATT+"
 					(effects
@@ -984,6 +981,24 @@
 					)
 				)
 				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at -15.24 10.16 0)
+				(length 2.54)
+				(name "BATT-"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1001,7 +1016,7 @@
 						)
 					)
 				)
-				(number "3"
+				(number "4"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1019,7 +1034,7 @@
 						)
 					)
 				)
-				(number "4"
+				(number "5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1037,24 +1052,6 @@
 						)
 					)
 				)
-				(number "5"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 1.27 21.59 270)
-				(length 2.54)
-				(name "5V"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
 				(number "6"
 					(effects
 						(font
@@ -1064,7 +1061,7 @@
 				)
 			)
 			(pin power_out line
-				(at 1.27 21.59 270)
+				(at -2.54 27.94 270)
 				(length 2.54)
 				(name "5V"
 					(effects
@@ -1082,7 +1079,7 @@
 				)
 			)
 			(pin power_out line
-				(at 1.27 21.59 270)
+				(at 0 27.94 270)
 				(length 2.54)
 				(name "5V"
 					(effects
@@ -1092,6 +1089,24 @@
 					)
 				)
 				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 2.54 27.94 270)
+				(length 2.54)
+				(name "5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "9"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1109,7 +1124,7 @@
 						)
 					)
 				)
-				(number "9"
+				(number "10"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1127,7 +1142,7 @@
 						)
 					)
 				)
-				(number "10"
+				(number "11"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1145,7 +1160,7 @@
 						)
 					)
 				)
-				(number "11"
+				(number "12"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1163,24 +1178,6 @@
 						)
 					)
 				)
-				(number "12"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 0 -21.59 90)
-				(length 2.54)
-				(name "GND"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
 				(number "13"
 					(effects
 						(font
@@ -1190,7 +1187,7 @@
 				)
 			)
 			(pin power_out line
-				(at 0 -21.59 90)
+				(at -5.08 -27.94 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -1208,7 +1205,7 @@
 				)
 			)
 			(pin power_out line
-				(at 0 -21.59 90)
+				(at -2.54 -27.94 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -1226,7 +1223,7 @@
 				)
 			)
 			(pin power_out line
-				(at 0 -21.59 90)
+				(at 0 -27.94 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -1243,10 +1240,10 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at -1.27 21.59 270)
+			(pin power_out line
+				(at 5.08 -27.94 90)
 				(length 2.54)
-				(name "5V_IN"
+				(name "GND"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1261,10 +1258,10 @@
 					)
 				)
 			)
-			(pin input line
-				(at -15.24 12.7 0)
+			(pin power_in line
+				(at -8.89 27.94 270)
 				(length 2.54)
-				(name "BTN_A"
+				(name "5V_IN"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1280,9 +1277,9 @@
 				)
 			)
 			(pin input line
-				(at -15.24 10.16 0)
+				(at 15.24 12.7 180)
 				(length 2.54)
-				(name "BTN_B"
+				(name "BTN_A"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1298,9 +1295,9 @@
 				)
 			)
 			(pin input line
-				(at -15.24 7.62 0)
+				(at 15.24 10.16 180)
 				(length 2.54)
-				(name "BTN_C"
+				(name "BTN_B"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1315,10 +1312,10 @@
 					)
 				)
 			)
-			(pin power_out line
-				(at 3.81 21.59 270)
+			(pin input line
+				(at 15.24 7.62 180)
 				(length 2.54)
-				(name "3.3V"
+				(name "BTN_C"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1333,10 +1330,10 @@
 					)
 				)
 			)
-			(pin bidirectional line
-				(at 15.24 8.89 180)
+			(pin power_out line
+				(at 7.62 27.94 270)
 				(length 2.54)
-				(name "IO_27"
+				(name "3.3V"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1352,9 +1349,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 6.35 180)
+				(at 15.24 2.54 180)
 				(length 2.54)
-				(name "IO_26"
+				(name "IO_27"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1370,9 +1367,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 3.81 180)
+				(at 15.24 0 180)
 				(length 2.54)
-				(name "IO_21"
+				(name "IO_26"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1388,9 +1385,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 1.27 180)
+				(at 15.24 -2.54 180)
 				(length 2.54)
-				(name "IO_20"
+				(name "IO_21"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1406,9 +1403,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -1.27 180)
+				(at 15.24 -5.08 180)
 				(length 2.54)
-				(name "IO_19"
+				(name "IO_20"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1424,9 +1421,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -3.81 180)
+				(at 15.24 -7.62 180)
 				(length 2.54)
-				(name "IO_18"
+				(name "IO_19"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1442,9 +1439,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -6.35 180)
+				(at 15.24 -10.16 180)
 				(length 2.54)
-				(name "IO_17"
+				(name "IO_18"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1460,9 +1457,9 @@
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -8.89 180)
+				(at 15.24 -12.7 180)
 				(length 2.54)
-				(name "IO_16"
+				(name "IO_17"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1477,8 +1474,26 @@
 					)
 				)
 			)
+			(pin bidirectional line
+				(at 15.24 -15.24 180)
+				(length 2.54)
+				(name "IO_16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "30"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
 			(pin power_out line
-				(at 0 -21.59 90)
+				(at 10.16 -27.94 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -1487,7 +1502,7 @@
 						)
 					)
 				)
-				(number "30"
+				(number "31"
 					(effects
 						(font
 							(size 1.27 1.27)
