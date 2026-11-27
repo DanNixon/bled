@@ -3855,44 +3855,8 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 20.32 -6.35 180)
-				(length 7.62)
-				(name "VBUS"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "B1-A12"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_out line
-				(at 20.32 -3.81 180)
-				(length 7.62)
-				(name "GND"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "B4-A9"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
 			(pin bidirectional line
-				(at 20.32 -1.27 180)
+				(at 20.32 1.27 180)
 				(length 7.62)
 				(name "CC2"
 					(effects
@@ -3910,7 +3874,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 20.32 1.27 180)
+				(at 20.32 -1.27 180)
 				(length 7.62)
 				(name "DP2"
 					(effects
@@ -3928,7 +3892,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 20.32 3.81 180)
+				(at 20.32 -3.81 180)
 				(length 7.62)
 				(name "DN2"
 					(effects
@@ -3946,7 +3910,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 20.32 6.35 180)
+				(at 20.32 -6.35 180)
 				(length 7.62)
 				(name "SBU2"
 					(effects
@@ -3956,6 +3920,116 @@
 					)
 				)
 				(number "B8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "TYPEC-304-ACP16_1_1"
+			(pin power_out line
+				(at -3.81 -16.51 90)
+				(length 7.62)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at -1.27 -16.51 90)
+				(length 7.62)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 1.27 -16.51 90)
+				(length 7.62)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 3.81 -16.51 90)
+				(length 7.62)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 20.32 6.35 180)
+				(length 7.62)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B1-A12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 20.32 3.81 180)
+				(length 7.62)
+				(name "VBUS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "B4-A9"
 					(effects
 						(font
 							(size 1.27 1.27)
