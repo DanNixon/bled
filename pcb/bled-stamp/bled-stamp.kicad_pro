@@ -52,15 +52,15 @@
         "zones": {
           "border_display_style": 2,
           "border_hatch_pitch": 0.5,
-          "corner_radius": 0.25,
-          "corner_smoothing": 2,
+          "corner_radius": 0.0,
+          "corner_smoothing": 0,
           "fill_mode": 0,
           "hatch_gap": 1.5,
           "hatch_orientation": 0.0,
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.0,
+          "min_clearance": 0.15,
           "min_island_area": 10.0,
           "min_thickness": 0.15,
           "pad_connection": 2,
@@ -842,7 +842,7 @@
         "uuid": "3e025044-e694-4110-8cfc-0d811f19f9a3"
       }
     ],
-    "used_designators": "#PWR1-105,A1,C1-54,D1-12,J1-12,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
+    "used_designators": "#PWR1-106,A1,C1-54,D1-12,J1-12,JP1-2,L1-5,R1-32,RN1,SW1-7,TP1-20,U1-6,X1",
     "variants": []
   },
   "sheets": [
