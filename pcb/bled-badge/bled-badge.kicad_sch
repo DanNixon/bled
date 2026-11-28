@@ -2178,7 +2178,7 @@
 		(uuid "36faaad8-0a72-4646-a4c0-6deedfdcc7bc")
 	)
 	(label "CH3_OUT"
-		(at 243.84 120.65 0)
+		(at 243.84 44.45 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2218,7 +2218,7 @@
 		(uuid "82f78bfc-64cd-4865-ae54-cb4219dfdb7a")
 	)
 	(label "CH0_OUT"
-		(at 243.84 44.45 0)
+		(at 243.84 120.65 0)
 		(effects
 			(font
 				(size 1.27 1.27)
